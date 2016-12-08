@@ -73,13 +73,19 @@ The user should be able to refer to the original API documentation provided the 
 
 	`mongoc_client_t *client = mongoc_client_new(uri)`  
 	vs.  
-	`local client = mongo.Cient(uri)`  
+	`local client = mongo.Client(uri)`  
 
 - 'under_score_notation' is converted to 'camelCaseNotation' in method names:
 
 	`mongoc_database_t *database = mongoc_client_get_database(client, name)`  
 	vs.  
 	`local database = client:getDatabase(name)`  
+
+- Calls with options are favoured more than their older counterparts and are mapped without '_with_opts' suffix:
+
+	`mongoc_collection_find_with_opts(collection, filter, opts)`  
+	vs.
+	`collection:find(filter, opts)`  
 
 - Bitwise flags become tables and are generally moved to the end of the argument list:
 

@@ -37,7 +37,7 @@ static int _gc(lua_State *L) {
 }
 
 static const struct luaL_Reg funcs[] = {
-	{ "_getCollection", _getCollection },
+	{ "getCollection", _getCollection },
 	{ "__gc", _gc },
 	{ 0, 0 }
 };
