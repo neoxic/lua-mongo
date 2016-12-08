@@ -71,18 +71,18 @@ The user should be able to refer to the original API documentation provided the 
 
 - Constructor names begin with a capital letter:
 
-	`mongoc_client_t *client = mongoc_client_new(uri)`
-	vs.
-	`local client = mongo.Cient(uri)`
+	`mongoc_client_t *client = mongoc_client_new(uri)`  
+	vs.  
+	`local client = mongo.Cient(uri)`  
 
 - 'under_score_notation' is converted to 'camelCaseNotation' in method names:
 
-	`mongoc_database_t *database = mongoc_client_get_database(client, name)`
-	vs.
-	`local database = client:getDatabase(name)`
+	`mongoc_database_t *database = mongoc_client_get_database(client, name)`  
+	vs.  
+	`local database = client:getDatabase(name)`  
 
 - Bitwise flags become tables and are generally moved to the end of the argument list:
 
-	`mongoc_collection_update(collection, MONGOC_UPDATE_UPSERT | MONGOC_UPDATE_MULTI_UPDATE, selector, update, ...)`
-	vs.
-	`collection:update(selector, update, { upsert = true, multiUpdate = true })`
+	`mongoc_collection_update(collection, MONGOC_UPDATE_UPSERT | MONGOC_UPDATE_MULTI_UPDATE, selector, update, ...)`  
+	vs.  
+	`collection:update(selector, update, { upsert = true, multiUpdate = true })`  
