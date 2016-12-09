@@ -4,7 +4,9 @@ local function testCollection(collection)
 	assert(mongo.type(collection) == 'mongo.Collection')
 	collection:drop()
 
-	assert(collection:save { _id = 123 })
+	assert(collection:insert { _id = 123 })
+	test.failure(insert, collection, { _id = 123 }) -- Duplicate key
+
 	assert(collection:save { _id = 456 })
 	assert(collection:save { _id = 789 })
 
@@ -32,7 +34,7 @@ local function testCollection(collection)
 	assert(v1._id == 789)
 	assert(v2._id == 456)
 	assert(not f(c)) -- No more items
-	test.failure(f, c) -- Exception is thrown
+	test.failure(f, c) -- Cursor exhausted
 	collectgarbage()
 
 	assert(collection:update({ _id = 123 }, { a = 'a' }))

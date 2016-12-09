@@ -83,9 +83,8 @@ static bool isInteger(lua_State *L, int idx, lua_Integer *val) {
 
 static bool isArray(lua_State *L, int idx) {
 	lua_Integer kval, n = 0;
-	int kidx = lua_gettop(L) + 1;
 	for (lua_pushnil(L); lua_next(L, idx); lua_pop(L, 1)) {
-		if (lua_type(L, kidx) != LUA_TNUMBER || !isInteger(L, kidx, &kval) || kval != ++n) {
+		if (lua_type(L, -2) != LUA_TNUMBER || !isInteger(L, -2, &kval) || kval != ++n) {
 			lua_pop(L, 2);
 			return false;
 		}

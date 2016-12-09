@@ -1,5 +1,5 @@
 # MongoDB Driver for Lua
----
+------------------------
 
 _lua-mongo_ provides raw access to the MongoDB C Driver (http://mongoc.org) in Lua.
 
@@ -23,7 +23,7 @@ For LuaJIT:
 
 	cmake -D USE_LUA_VERSION=jit .
 
-To build in a separate directory, replace '.' with a path to the source.
+To build in a separate directory, replace `.` with a path to the source.
 
 
 ## Usage example
@@ -75,19 +75,25 @@ The user should be able to refer to the original API documentation provided the 
 	vs.  
 	`local client = mongo.Client(uri)`  
 
-- 'under_score_notation' is converted to 'camelCaseNotation' in method names:
+- Both `underscore_notation` and `CAPITALIZED_NOTATION` are converted to `camelCaseNotation`:
 
 	`mongoc_database_t *database = mongoc_client_get_database(client, name)`  
 	vs.  
 	`local database = client:getDatabase(name)`  
 
-- Calls with options are favoured more than their older counterparts and are mapped without '_with_opts' suffix:
+- Operations with options are preferred to their older counterparts and are mapped without `*_with_opts` suffix:
 
 	`mongoc_collection_find_with_opts(collection, filter, opts)`  
-	vs.
+	vs.  
 	`collection:find(filter, opts)`  
 
-- Bitwise flags become tables and are generally moved to the end of the argument list:
+- Flags are moved to the end of the argument list:
+
+	`mongoc_collection_count_with_opts(collection, flags, query, skip, limit, opts, ...)`  
+	vs.  
+	`collection:count(query, skip, limit, opts, flags)`  
+
+- Bitwise flags are recognized as tables with string keys:
 
 	`mongoc_collection_update(collection, MONGOC_UPDATE_UPSERT | MONGOC_UPDATE_MULTI_UPDATE, selector, update, ...)`  
 	vs.  

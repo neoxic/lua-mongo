@@ -62,6 +62,17 @@ static int _find(lua_State *L) {
 	return 1;
 }
 
+static int _insert(lua_State *L) {
+	bson_error_t error;
+	return checkStatus(L, mongoc_collection_insert(
+		checkCollection(L, 1), /* collection */
+		MONGOC_INSERT_NONE, /* flags */
+		castBSON(L, 2), /* document */
+		0, /* write_concern */
+		&error
+	), error.message);
+}
+
 static int _remove(lua_State *L) {
 	bson_error_t error;
 	return checkStatus(L, mongoc_collection_remove(
@@ -105,6 +116,7 @@ static const struct luaL_Reg funcs[] = {
 	{ "count", _count },
 	{ "drop", _drop },
 	{ "find", _find },
+	{ "insert", _insert },
 	{ "remove", _remove },
 	{ "save", _save },
 	{ "update", _update },

@@ -50,10 +50,10 @@ int newObjectID(lua_State *L) {
 	size_t len;
 	const char *str = lua_tolstring(L, 1, &len);
 	if (str) {
-		if (!bson_oid_is_valid(str, len)) return luaL_argerror(L, 1, "invalid value");
+		luaL_argcheck(L, bson_oid_is_valid(str, len), 1, "invalid value");
 		bson_oid_init_from_string(lua_newuserdata(L, sizeof(bson_oid_t)), str);
 	} else {
-		if (!lua_isnoneornil(L, 1)) return luaL_argerror(L, 1, "nil or string expected");
+		luaL_argcheck(L, lua_isnoneornil(L, 1), 1, "nil or string expected");
 		bson_oid_init(lua_newuserdata(L, sizeof(bson_oid_t)), 0);
 	}
 	setType(L, TYPE_OBJECTID, funcs);
