@@ -218,7 +218,7 @@ static bool appendValue(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson
 				bson_append_oid(bson, key, klen, oid);
 				break;
 			}
-			return error(L, nerr, "invalid object type");
+			return error(L, nerr, "invalid object");
 		}
 		default:
 			return error(L, nerr, "invalid value type '%s'", luaL_typename(L, idx));

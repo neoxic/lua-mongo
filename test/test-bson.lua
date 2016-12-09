@@ -80,11 +80,13 @@ end
 
 failedBSON { a = newBSONType(0x99) } -- Invalid type code
 failedBSON { a = newBSONType(0x05) } -- Invalid binary data
+test.failure(mongo.type, newBSONType()) -- Invalid object for 'mongo.type'
 
 -- ObjectID
 
 local oid1 = mongo.ObjectID('000000000000000000000000')
 local oid2 = mongo.ObjectID('000000000000000000000000')
+assert(mongo.type(oid1) == 'mongo.ObjectID')
 assert(oid1 == oid2) -- Compare as binary
 assert(tostring(oid1) == tostring(oid2)) -- Compare as strings
 assert(oid1:hash() == oid2:hash()) -- Compare hashes

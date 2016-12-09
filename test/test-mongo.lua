@@ -1,7 +1,7 @@
 local test = require 'test'
 
 local function testCollection(collection)
-	assert(collection)
+	assert(mongo.type(collection) == 'mongo.Collection')
 	collection:drop()
 
 	assert(collection:save { _id = 123 })
@@ -14,6 +14,7 @@ local function testCollection(collection)
 
 	-- cursor:next()
 	local cursor = collection:find {} -- Find all
+	assert(mongo.type(cursor) == 'mongo.Cursor')
 	assert(cursor:next()) -- #1
 	assert(cursor:next()) -- #2
 	assert(cursor:next()) -- #3
@@ -48,14 +49,16 @@ local function testCollection(collection)
 end
 
 local function testDatabase(database)
-	assert(database)
+	assert(mongo.type(database) == 'mongo.Database')
+
+	testCollection(database:getCollection(test.cname))
 
 	database = nil
 	collectgarbage()
 end
 
 local function testClient(client)
-	assert(client)
+	assert(mongo.type(client) == 'mongo.Client')
 
 	testDatabase(client:getDatabase(test.dbname))
 	testCollection(client:getCollection(test.dbname, test.cname))

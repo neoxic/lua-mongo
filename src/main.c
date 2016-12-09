@@ -28,7 +28,13 @@
 #define EXPORT __attribute__((visibility("default")))
 #endif
 
+static int _type(lua_State *L) {
+	luaL_argcheck(L, luaL_getmetafield(L, 1, "__name"), 1, "invalid object");
+	return 1;
+}
+
 static const struct luaL_Reg funcs[] = {
+	{ "type", _type },
 	{ "Binary", newBinary },
 	{ "BSON", newBSON },
 	{ "Client", newClient },
