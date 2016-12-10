@@ -28,7 +28,14 @@ function test.equal(v1, v2)
 	assert(equal(v1, v2), 'values differ!')
 end
 
+function test.error(e, ...)
+	local s, m = ...
+	assert(not s, 'call succeeded!')
+	assert(e == m, 'error messages differ!')
+end
+
 function test.failure(f, ...)
+	assert(type(f) == 'function', 'not a function!')
 	assert(not pcall(f, ...), 'call succeeded!')
 end
 

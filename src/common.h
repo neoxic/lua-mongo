@@ -46,9 +46,7 @@
 #define TYPE_REGEX "mongo.Regex"
 #define TYPE_TIMESTAMP "mongo.Timestamp"
 
-extern char GLOBAL_MAXKEY;
-extern char GLOBAL_MINKEY;
-extern char GLOBAL_NULL;
+extern char GLOBAL_MAXKEY, GLOBAL_MINKEY, GLOBAL_NULL;
 
 int newBinary(lua_State *L);
 int newBSON(lua_State *L);
@@ -83,6 +81,11 @@ mongoc_client_t *checkClient(lua_State *L, int idx);
 mongoc_collection_t *checkCollection(lua_State *L, int idx);
 mongoc_cursor_t *checkCursor(lua_State *L, int idx);
 mongoc_database_t *checkDatabase(lua_State *L, int idx);
+
+int checkInsertFlags(lua_State *L, int idx);
+int checkQueryFlags(lua_State *L, int idx);
+int checkRemoveFlags(lua_State *L, int idx);
+int checkUpdateFlags(lua_State *L, int idx);
 
 /* Utilities */
 

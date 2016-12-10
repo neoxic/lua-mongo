@@ -39,7 +39,7 @@ static int _eq(lua_State *L) {
 	return 1;
 }
 
-static const struct luaL_Reg funcs[] = {
+static const luaL_Reg funcs[] = {
 	{ "hash", _hash },
 	{ "__tostring", _tostring },
 	{ "__eq", _eq },
@@ -50,7 +50,7 @@ int newObjectID(lua_State *L) {
 	size_t len;
 	const char *str = lua_tolstring(L, 1, &len);
 	if (str) {
-		luaL_argcheck(L, bson_oid_is_valid(str, len), 1, "invalid value");
+		luaL_argcheck(L, bson_oid_is_valid(str, len), 1, "invalid format");
 		bson_oid_init_from_string(lua_newuserdata(L, sizeof(bson_oid_t)), str);
 	} else {
 		luaL_argcheck(L, lua_isnoneornil(L, 1), 1, "nil or string expected");

@@ -33,7 +33,7 @@ static int _type(lua_State *L) {
 	return 1;
 }
 
-static const struct luaL_Reg funcs[] = {
+static const luaL_Reg funcs[] = {
 	{ "type", _type },
 	{ "Binary", newBinary },
 	{ "BSON", newBSON },
@@ -48,9 +48,7 @@ static const struct luaL_Reg funcs[] = {
 	{ 0, 0 }
 };
 
-char GLOBAL_MAXKEY;
-char GLOBAL_MINKEY;
-char GLOBAL_NULL;
+char GLOBAL_MAXKEY, GLOBAL_MINKEY, GLOBAL_NULL;
 
 EXPORT int luaopen_mongo(lua_State *L) {
 #if LUA_VERSION_NUM >= 502

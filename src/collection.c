@@ -26,7 +26,7 @@ static int _count(lua_State *L) {
 	bson_error_t error;
 	int64_t n = mongoc_collection_count_with_opts(
 		checkCollection(L, 1), /* collection */
-		MONGOC_QUERY_NONE, /* flags */
+		checkQueryFlags(L, 6), /* flags */
 		toBSON(L, 2), /* query */
 		optInt64(L, 3, 0), /* skip */
 		optInt64(L, 4, 0), /* limit */
@@ -66,7 +66,7 @@ static int _insert(lua_State *L) {
 	bson_error_t error;
 	return checkStatus(L, mongoc_collection_insert(
 		checkCollection(L, 1), /* collection */
-		MONGOC_INSERT_NONE, /* flags */
+		checkInsertFlags(L, 3), /* flags */
 		castBSON(L, 2), /* document */
 		0, /* write_concern */
 		&error
@@ -77,7 +77,7 @@ static int _remove(lua_State *L) {
 	bson_error_t error;
 	return checkStatus(L, mongoc_collection_remove(
 		checkCollection(L, 1), /* collection */
-		MONGOC_REMOVE_NONE, /* flags */
+		checkRemoveFlags(L, 3), /* flags */
 		castBSON(L, 2), /* selector */
 		0, /* write_concern */
 		&error
@@ -98,7 +98,7 @@ static int _update(lua_State *L) {
 	bson_error_t error;
 	return checkStatus(L, mongoc_collection_update(
 		checkCollection(L, 1), /* collection */
-		MONGOC_UPDATE_NONE, /* flags */
+		checkUpdateFlags(L, 4), /* flags */
 		castBSON(L, 2), /* selector */
 		castBSON(L, 3), /* update */
 		0, /* write_concern */
@@ -112,7 +112,7 @@ static int _gc(lua_State *L) {
 	return 0;
 }
 
-static const struct luaL_Reg funcs[] = {
+static const luaL_Reg funcs[] = {
 	{ "count", _count },
 	{ "drop", _drop },
 	{ "find", _find },

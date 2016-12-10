@@ -4,8 +4,11 @@ local function testCollection(collection)
 	assert(mongo.type(collection) == 'mongo.Collection')
 	collection:drop()
 
-	assert(collection:insert { _id = 123 })
-	test.failure(insert, collection, { _id = 123 }) -- Duplicate key
+	test.error("A document was corrupt or contained invalid characters . or $", collection:insert({ ['$a'] = 123 })) -- Client-side error
+	test.error("Document can't have $ prefixed field names: $a", collection:insert({ ['$a'] = 123 }, { noValidate = true })) -- Server-side error
+
+	assert(collection:insert { _id = 123 }) -- "insert flags"
+	assert(not collection:insert { _id = 123 }) -- Duplicate key
 
 	assert(collection:save { _id = 456 })
 	assert(collection:save { _id = 789 })
@@ -13,6 +16,7 @@ local function testCollection(collection)
 	assert(collection:count() == 3)
 	assert(collection:count('{ "_id" : 123 }') == 1)
 	assert(collection:count { _id = { ['$gt'] = 123 } } == 2)
+	assert(collection:count({}, 1, 2, {}, { noCursorTimeout = false }) == 2) -- skip = 2, limit = 1, "query flags"
 
 	-- cursor:next()
 	local cursor = collection:find {} -- Find all
@@ -37,12 +41,15 @@ local function testCollection(collection)
 	test.failure(f, c) -- Cursor exhausted
 	collectgarbage()
 
-	assert(collection:update({ _id = 123 }, { a = 'a' }))
-	assert(tostring(collection:find({}):next()) == '{ "_id" : 123, "a" : "a" }')
-
-	assert(collection:remove { _id = 123 }) -- #1
-	assert(collection:remove { _id = 123 }) -- #2
+	assert(collection:remove({}, { singleRemove = true })) -- "remove flags"
 	assert(collection:count() == 2)
+	assert(collection:remove { _id = 123 })
+	assert(collection:remove { _id = 123 }) -- Remove reports 'true' even if not found
+	assert(not collection:find({ _id = 123 }):next()) -- Not found
+
+	assert(collection:update({ _id = 123 }, { a = 'abc' }, { noValidate = false, upsert = true })) -- "update flags" (inSERT)
+	assert(collection:update({ _id = 123 }, { a = 'def' }, { noValidate = false, upsert = true })) -- "update flags" (UPdate)
+	assert(tostring(collection:find({ _id = 123 }):next()) == '{ "_id" : 123, "a" : "def" }')
 
 	assert(collection:drop())
 

@@ -52,7 +52,7 @@ static int _gc(lua_State *L) {
 	return 0;
 }
 
-static const struct luaL_Reg funcs[] = {
+static const luaL_Reg funcs[] = {
 	{ "next", _next },
 	{ "__gc", _gc },
 	{ 0, 0 }

@@ -46,7 +46,7 @@ static int _call(lua_State *L) {
 	return lua_istable(L, 1) ? unpackParams(L, 1) : 0;
 }
 
-static const struct luaL_Reg funcs[] = {
+static const luaL_Reg funcs[] = {
 	{ "__tostring", _tostring },
 	{ "__call", _call },
 	{ 0, 0 }
