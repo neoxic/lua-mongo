@@ -25,6 +25,7 @@
 #include <lua.h>
 #include <lauxlib.h>
 #include <mongoc.h>
+#include <bson.h>
 
 #define MODNAME "lua-mongo"
 #define VERSION "0.1.0"
@@ -87,7 +88,7 @@ int checkQueryFlags(lua_State *L, int idx);
 int checkRemoveFlags(lua_State *L, int idx);
 int checkUpdateFlags(lua_State *L, int idx);
 
-/* Utilities */
+/* Helpers */
 
 bool pushType(lua_State *L, const char *tname, const luaL_Reg *funcs);
 void setType(lua_State *L, const char *tname, const luaL_Reg *funcs);
