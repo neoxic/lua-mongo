@@ -1,9 +1,9 @@
 # MongoDB Driver for Lua
 ------------------------
 
-_lua-mongo_ provides raw access to the MongoDB C Driver (http://mongoc.org) in Lua.
+_lua-mongo_ is a binding of the MongoDB C Driver (http://mongoc.org) for Lua.
 
-Please note that _lua-mongo_ is in beta which means that its API is likely to be backward-incompatible between versions.
+Please note that _lua-mongo_ is in beta which means that its API is likely to change between versions.
 
 
 ## Building and installation with CMake
@@ -15,7 +15,7 @@ To build in the source directory, run:
 	make test
 	make install
 
-To build against a specific Lua version, set the ``USE_LUA_VERSION`` variable:
+To build against a specific Lua version, set the `USE_LUA_VERSION` variable:
 
 	cmake -D USE_LUA_VERSION=5.1 .
 
@@ -95,6 +95,6 @@ The user should be able to refer to the original API documentation provided the 
 
 - Bitwise flags are recognized as tables with string keys:
 
-	`mongoc_collection_update(collection, MONGOC_UPDATE_UPSERT | MONGOC_UPDATE_MULTI_UPDATE, selector, update, ...)`  
+	`mongoc_collection_update(collection, MONGOC_UPDATE_UPSERT, selector, update, ...)`  
 	vs.  
-	`collection:update(selector, update, { upsert = true, multiUpdate = true })`  
+	`collection:update(selector, update, { upsert = true })`  
