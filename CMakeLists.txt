@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 project(lua-mongo)
 
 set(USE_LUA_VERSION "" CACHE STRING "Build against Lua version 'X.Y' (or 'JIT' for LuaJIT).")
+set(LUA_MODULE_PATH "" CACHE STRING "Path for Lua modules (or default if empty).")
 
 if(USE_LUA_VERSION MATCHES "^[0-9]\\.[0-9]$")
 	set(lua_ver ${USE_LUA_VERSION})
@@ -16,13 +17,17 @@ endif()
 
 find_package(PkgConfig)
 pkg_search_module(LUA REQUIRED ${lua_names})
-pkg_check_modules(LIBMONGOC REQUIRED libmongoc-1.0)
+pkg_check_modules(LIBMONGOC REQUIRED libmongoc-1.0 libbson-1.0)
 
 if(NOT LUA_FOUND)
 	message(FATAL_ERROR "Lua not found - set USE_LUA_VERSION to match your configuration")
 elseif(NOT lua_ver)
 	string(REGEX MATCH "^[0-9]\\.[0-9]" lua_ver ${LUA_VERSION})
 	message(STATUS "Lua ${lua_ver} detected (set USE_LUA_VERSION to override)")
+endif()
+
+if(NOT LUA_MODULE_PATH)
+	set(LUA_MODULE_PATH lib/lua/${lua_ver})
 endif()
 
 add_definitions(-Wall -Wextra -Wpedantic -Wundef -Wshadow -Wredundant-decls -fvisibility=hidden)
@@ -36,7 +41,8 @@ set_target_properties(mongo PROPERTIES PREFIX "")
 if(APPLE)
 	set_target_properties(mongo PROPERTIES SUFFIX ".so")
 endif()
-install(TARGETS mongo LIBRARY DESTINATION lib/lua/${lua_ver})
+
+install(TARGETS mongo LIBRARY DESTINATION ${LUA_MODULE_PATH})
 
 enable_testing()
 find_program(LUA_COMMAND NAMES ${lua_names})
