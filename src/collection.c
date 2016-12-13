@@ -26,11 +26,11 @@ static int _count(lua_State *L) {
 	bson_error_t error;
 	int64_t n = mongoc_collection_count_with_opts(
 		checkCollection(L, 1), /* collection */
-		checkQueryFlags(L, 6), /* flags */
+		MONGOC_QUERY_NONE, /* flags */
 		toBSON(L, 2), /* query */
-		optInt64(L, 3, 0), /* skip */
-		optInt64(L, 4, 0), /* limit */
-		toBSON(L, 5), /* opts */
+		0, /* skip */
+		0, /* limit */
+		toBSON(L, 3), /* opts */
 		0, /* read_prefs */
 		&error
 	);

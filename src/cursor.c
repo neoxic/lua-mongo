@@ -24,7 +24,7 @@
 
 static int _next(lua_State *L) {
 	mongoc_cursor_t *cursor = checkCursor(L, 1);
-	bool eval = lua_toboolean(L, 2); /* Evaluate returned document */
+	bool eval = lua_toboolean(L, 2);
 	bool iter = lua_toboolean(L, lua_upvalueindex(1)); /* Iterator mode */
 	const bson_t *bson;
 	bson_error_t error;

@@ -31,70 +31,42 @@ To build in a separate directory, replace `.` with a path to the source.
 ```Lua
 local mongo = require 'mongo'
 local client = mongo.Client 'mongodb://127.0.0.1'
-local collection = client:getCollection('db_name', 'collection_name')
+local collection = client:getCollection('lua-mongo-test', 'test')
 
 local id = mongo.ObjectID()
 local document = { _id = id, name = 'John Smith', age = 50 }
 collection:save(document)
 
 -- Iterate in a for-loop
-for v in collection:find('{ "age" : { "$gt" : 25 } }'):iterator() do
-	print(v.name)
+for item in collection:find('{ "age" : { "$gt" : 25 } }'):iterator() do
+	print(item.name)
 end
 
 -- Implicit Lua/JSON to BSON conversion where BSON is required
-collection:save { value = 123 }
-collection:save '{ "value" : "123" }'
+collection:insert { value = 123 }
+collection:insert '{ "value" : "456" }'
+
+-- Use options in queries
+print(collection:count({}, { skip = 1, limit = 2 }))
 
 -- Low-level access to BSON if needed
 local cursor = collection:find { _id = id }
 local bson = assert(cursor:next()) -- Fetch first BSON document
+print(bson) -- BSON is implicitly converted to a string, i.e. JSON
 
 -- Explicit BSON to Lua conversion
-local value = bson()
-print(value._id)
+local item = bson()
+print(item._id)
 
 -- Explicit BSON to JSON conversion
 local json = tostring(bson)
 print(json)
-print(bson) -- 'bson' is converted to string, i.e. JSON
 
 -- Re-use BSON documents
-collection:update({ _id = 123 }, bson)
-collection:update({ _id = 456 }, bson)
+local flags = { upsert = true }
+collection:update({ _id = 123 }, bson, flags)
+collection:update({ _id = 456 }, bson, flags)
+
+-- Cleanup
+collection:drop()
 ```
-
-## Lua API
-
-The Lua API of _lua-mongo_ aims to replicate that of the MongoDB C Driver as close as reasonably possible.
-The user should be able to refer to the original API documentation provided the following differences are observed:
-
-- Constructor names begin with a capital letter:
-
-	`mongoc_client_t *client = mongoc_client_new(uri)`  
-	vs.  
-	`local client = mongo.Client(uri)`  
-
-- Both `underscore_notation` and `CAPITALIZED_NOTATION` are converted to `camelCaseNotation`:
-
-	`mongoc_database_t *database = mongoc_client_get_database(client, name)`  
-	vs.  
-	`local database = client:getDatabase(name)`  
-
-- Operations with options are preferred to their older counterparts and are mapped without `*_with_opts` suffix:
-
-	`mongoc_collection_find_with_opts(collection, filter, opts)`  
-	vs.  
-	`collection:find(filter, opts)`  
-
-- Flags are moved to the end of the argument list:
-
-	`mongoc_collection_count_with_opts(collection, flags, query, skip, limit, opts, ...)`  
-	vs.  
-	`collection:count(query, skip, limit, opts, flags)`  
-
-- Bitwise flags are recognized as tables with string keys:
-
-	`mongoc_collection_update(collection, MONGOC_UPDATE_UPSERT, selector, update, ...)`  
-	vs.  
-	`collection:update(selector, update, { upsert = true })`  

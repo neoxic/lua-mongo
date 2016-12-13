@@ -6,8 +6,7 @@ source = {
 description = {
 	summary = 'MongoDB Driver for Lua',
 	detailed = [[
-		lua-mongo is a binding of the MongoDB C Driver (http://mongoc.org) for Lua
-		and aims to replicate the original API as close as reasonably possible.
+		lua-mongo is a binding of the MongoDB C Driver (http://mongoc.org) for Lua.
 	]],
 	license = 'MIT',
 	homepage = 'https://github.com/neoxic/lua-mongo',

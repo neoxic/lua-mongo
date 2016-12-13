@@ -107,24 +107,20 @@ int checkStatus(lua_State *L, bool cond, const char *msg);
 #define pushInt64 lua_pushinteger
 #define toInt64 lua_tointeger
 #define checkInt64 luaL_checkinteger
-#define optInt64 luaL_optinteger
 #else
 #define pushInt64 lua_pushnumber
 #define toInt64 lua_tonumber
 #define checkInt64 luaL_checknumber
-#define optInt64 luaL_optnumber
 #endif
 
 #if LUA_VERSION_NUM >= 503 && LUA_MAXINTEGER >= INT32_MAX
 #define pushInt32 lua_pushinteger
 #define toInt32 lua_tointeger
 #define checkInt32 luaL_checkinteger
-#define optInt32 luaL_optinteger
 #else
 #define pushInt32 lua_pushnumber
 #define toInt32 lua_tonumber
 #define checkInt32 luaL_checknumber
-#define optInt32 luaL_optnumber
 #endif
 
 #if LUA_VERSION_NUM < 502
