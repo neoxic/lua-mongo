@@ -62,7 +62,7 @@ static void setBSONType(lua_State *L, const char *tname, bson_type_t type) {
 
 int newBinary(lua_State *L) {
 	luaL_checkstring(L, 1);
-	luaL_checkinteger(L, 2);
+	luaL_optinteger(L, 2, 0);
 	packParams(L, 2);
 	setBSONType(L, TYPE_BINARY, BSON_TYPE_BINARY);
 	return 1;

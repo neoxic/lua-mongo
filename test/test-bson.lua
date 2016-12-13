@@ -44,7 +44,8 @@ check({ a = BSON { b = 1 } }, '{ "a" : { "b" : 1 } }') -- Nested document
 check({ a = mongo.Int32(1234) }, '{ "a" : 1234 }')
 check({ a = mongo.Int64(1234) }, '{ "a" : { "$numberLong" : "1234" } }')
 check({ a = mongo.Double(10) }, '{ "a" : 10.0 }')
-check({ a = mongo.Binary('abc', 0x81) }, '{ "a" : { "$binary" : "YWJj", "$type" : "81" } }')
+check({ a = mongo.Binary('abc') }, '{ "a" : { "$binary" : "YWJj", "$type" : "0" } }')
+check({ a = mongo.Binary('abc', 0x80) }, '{ "a" : { "$binary" : "YWJj", "$type" : "80" } }')
 if hasInt64 then -- DateTime as Int64
 	check({ a = mongo.DateTime(9223372036854775807) }, '{ "a" : { "$date": { "$numberLong" : "9223372036854775807" } } }')
 	check({ a = mongo.DateTime(-9223372036854775808) }, '{ "a" : { "$date": { "$numberLong" : "-9223372036854775808" } } }')
