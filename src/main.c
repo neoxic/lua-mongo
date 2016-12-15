@@ -48,6 +48,7 @@ static const luaL_Reg funcs[] = {
 	{ 0, 0 }
 };
 
+char NEW_BINARY, NEW_DATETIME, NEW_REGEX, NEW_TIMESTAMP;
 char GLOBAL_MAXKEY, GLOBAL_MINKEY, GLOBAL_NULL;
 
 EXPORT int luaopen_mongo(lua_State *L) {
@@ -61,16 +62,25 @@ EXPORT int luaopen_mongo(lua_State *L) {
 	lua_pushliteral(L, VERSION);
 	lua_setfield(L, -2, "_VERSION");
 
+	/* Cached BSON type constructors */
+	lua_getfield(L, -1, "Binary");
+	lua_rawsetp(L, LUA_REGISTRYINDEX, &NEW_BINARY);
+	lua_getfield(L, -1, "DateTime");
+	lua_rawsetp(L, LUA_REGISTRYINDEX, &NEW_DATETIME);
+	lua_getfield(L, -1, "Regex");
+	lua_rawsetp(L, LUA_REGISTRYINDEX, &NEW_REGEX);
+	lua_getfield(L, -1, "Timestamp");
+	lua_rawsetp(L, LUA_REGISTRYINDEX, &NEW_TIMESTAMP);
+
+	/* Singleton BSON types */
 	pushMaxKey(L);
 	lua_pushvalue(L, -1);
 	lua_setfield(L, -3, "MaxKey");
 	lua_rawsetp(L, LUA_REGISTRYINDEX, &GLOBAL_MAXKEY);
-
 	pushMinKey(L);
 	lua_pushvalue(L, -1);
 	lua_setfield(L, -3, "MinKey");
 	lua_rawsetp(L, LUA_REGISTRYINDEX, &GLOBAL_MINKEY);
-
 	pushNull(L);
 	lua_pushvalue(L, -1);
 	lua_setfield(L, -3, "Null");

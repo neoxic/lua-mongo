@@ -114,6 +114,14 @@ static bool appendBSONType(lua_State *L, bson_type_t type, int idx, int *nerr, b
 		case BSON_TYPE_DOUBLE:
 			bson_append_double(bson, key, klen, lua_tonumber(L, top + 1));
 			break;
+		case BSON_TYPE_BINARY: {
+			size_t len;
+			const char *str;
+			str = lua_tolstring(L, top + 1, &len);
+			if (!str) goto error;
+			bson_append_binary(bson, key, klen, lua_tointeger(L, top + 2), (const uint8_t *)str, len);
+			break;
+		}
 		case BSON_TYPE_DATE_TIME:
 			bson_append_date_time(bson, key, klen, toInt64(L, top + 1));
 			break;
@@ -123,14 +131,6 @@ static bool appendBSONType(lua_State *L, bson_type_t type, int idx, int *nerr, b
 		case BSON_TYPE_TIMESTAMP:
 			bson_append_timestamp(bson, key, klen, toInt32(L, top + 1), toInt32(L, top + 2));
 			break;
-		case BSON_TYPE_BINARY: {
-			size_t len;
-			const char *str;
-			str = lua_tolstring(L, top + 1, &len);
-			if (!str) goto error;
-			bson_append_binary(bson, key, klen, lua_tointeger(L, top + 2), (const uint8_t *)str, len);
-			break;
-		}
 		case BSON_TYPE_MAXKEY:
 			bson_append_maxkey(bson, key, klen);
 			break;
@@ -280,9 +280,6 @@ static void pushValue(lua_State *L, const bson_iter_t *iter) {
 			lua_pushlstring(L, str, len);
 			break;
 		}
-		case BSON_TYPE_OID:
-			pushObjectID(L, bson_iter_oid(iter));
-			break;
 		case BSON_TYPE_DOCUMENT:
 		case BSON_TYPE_ARRAY: {
 			bson_iter_t child;
@@ -290,14 +287,28 @@ static void pushValue(lua_State *L, const bson_iter_t *iter) {
 			pushTable(L, &child, type == BSON_TYPE_ARRAY);
 			break;
 		}
+		case BSON_TYPE_OID:
+			pushObjectID(L, bson_iter_oid(iter));
+			break;
+		case BSON_TYPE_BINARY: {
+			bson_subtype_t subtype;
+			uint32_t len;
+			const uint8_t *data;
+			bson_iter_binary(iter, &subtype, &len, &data);
+			lua_rawgetp(L, LUA_REGISTRYINDEX, &NEW_BINARY);
+			lua_pushlstring(L, (const char *)data, len);
+			lua_pushinteger(L, subtype);
+			lua_call(L, 2, 1);
+			break;
+		}
 		case BSON_TYPE_DATE_TIME:
-			lua_pushcfunction(L, newDateTime);
+			lua_rawgetp(L, LUA_REGISTRYINDEX, &NEW_DATETIME);
 			pushInt64(L, bson_iter_date_time(iter));
 			lua_call(L, 1, 1);
 			break;
 		case BSON_TYPE_REGEX: {
 			const char *options;
-			lua_pushcfunction(L, newRegex);
+			lua_rawgetp(L, LUA_REGISTRYINDEX, &NEW_REGEX);
 			lua_pushstring(L, bson_iter_regex(iter, &options));
 			lua_pushstring(L, options);
 			lua_call(L, 2, 1);
@@ -306,20 +317,9 @@ static void pushValue(lua_State *L, const bson_iter_t *iter) {
 		case BSON_TYPE_TIMESTAMP: {
 			uint32_t t, i;
 			bson_iter_timestamp(iter, &t, &i);
-			lua_pushcfunction(L, newTimestamp);
+			lua_rawgetp(L, LUA_REGISTRYINDEX, &NEW_TIMESTAMP);
 			pushInt32(L, t);
 			pushInt32(L, i);
-			lua_call(L, 2, 1);
-			break;
-		}
-		case BSON_TYPE_BINARY: {
-			bson_subtype_t subtype;
-			uint32_t len;
-			const uint8_t *data;
-			bson_iter_binary(iter, &subtype, &len, &data);
-			lua_pushcfunction(L, newBinary);
-			lua_pushlstring(L, (const char *)data, len);
-			lua_pushinteger(L, subtype);
 			lua_call(L, 2, 1);
 			break;
 		}
