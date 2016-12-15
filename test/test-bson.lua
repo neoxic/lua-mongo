@@ -7,7 +7,8 @@ local function check(v1, v2)
 	local b1 = BSON(v1)
 	local b2 = BSON(v2)
 	-- print(b1, b2)
-	assert(b1 == b2) -- Compare as binary
+	assert(b1 == b2) -- Compare with overloaded equality operator
+	assert(b1:getData() == b2:getData()) -- Compare binary data
 	assert(tostring(b1) == tostring(b2)) -- Compare as strings
 	test.equal(b1(), b2()) -- Compare as values
 	collectgarbage()
@@ -64,6 +65,10 @@ check({ a = mongo.Regex('abc') }, '{ "a" : { "$regex" : "abc", "$options" : "" }
 check({ a = mongo.Regex('abc', 'def') }, '{ "a" : { "$regex" : "abc", "$options" : "def" } }')
 check({ a = mongo.Timestamp(4294967295, 4294967295) }, '{ "a" : { "$timestamp" : { "t" : 4294967295, "i" : 4294967295 } } }')
 
+-- FIXME These tests fail because binary data differs unexpectedly - bug report pending
+-- check({ a = mongo.Javascript('abc') }, '{ "a" : { "$code" : "abc" } }')
+-- check({ a = mongo.Javascript('abc', { a = 1 }) }, '{ "$code" : "abc", "$scope" : { "a" : 1 } } }')
+
 local obj = setmetatable({ str = 'abc' }, { __mongo = function (t) return mongo.Binary(t.str) end }) -- '__mongo' metamethod
 check({ a = obj }, '{ "a" : { "$binary" : "YWJj", "$type" : "0" } }')
 
@@ -85,8 +90,11 @@ local function newBSONType(n, ...)
 	return setmetatable({ ... }, { __bsontype = n })
 end
 
-checkFailure { a = newBSONType(0x99) } -- Invalid type code
-checkFailure { a = newBSONType(0x05) } -- Invalid binary data
+checkFailure { a = newBSONType(0x99) } -- Invalid type
+checkFailure { a = newBSONType(0x05) } -- Binary: invalid string
+checkFailure { a = newBSONType(0x0d) } -- Javascript: invalid string
+checkFailure { a = newBSONType(0x0f) } -- Javascript w/ scope: invalid string
+checkFailure { a = newBSONType(0x0f, 'abc') } -- Javascript w/ scope: invalid BSON
 
 -- ObjectID
 

@@ -58,7 +58,7 @@ static int _gc(lua_State *L) {
 }
 
 static const luaL_Reg funcs[] = {
-	{ "_getData", _getData },
+	{ "getData", _getData },
 	{ "__tostring", _tostring },
 	{ "__call", _call },
 	{ "__len", _len },
@@ -116,8 +116,7 @@ static bool appendBSONType(lua_State *L, bson_type_t type, int idx, int *nerr, b
 			break;
 		case BSON_TYPE_BINARY: {
 			size_t len;
-			const char *str;
-			str = lua_tolstring(L, top + 1, &len);
+			const char *str = lua_tolstring(L, top + 1, &len);
 			if (!str) goto error;
 			bson_append_binary(bson, key, klen, lua_tointeger(L, top + 2), (const uint8_t *)str, len);
 			break;
@@ -131,6 +130,19 @@ static bool appendBSONType(lua_State *L, bson_type_t type, int idx, int *nerr, b
 		case BSON_TYPE_TIMESTAMP:
 			bson_append_timestamp(bson, key, klen, toInt32(L, top + 1), toInt32(L, top + 2));
 			break;
+		case BSON_TYPE_CODE: {
+			const char *code = lua_tostring(L, top + 1);
+			if (!code) goto error;
+			bson_append_code(bson, key, klen, code);
+			break;
+		}
+		case BSON_TYPE_CODEWSCOPE: {
+			const char *code = lua_tostring(L, top + 1);
+			bson_t *scope = testBSON(L, top + 2);
+			if (!code || !scope) goto error;
+			bson_append_code_with_scope(bson, key, klen, code, scope);
+			break;
+		}
 		case BSON_TYPE_MAXKEY:
 			bson_append_maxkey(bson, key, klen);
 			break;
@@ -311,6 +323,26 @@ static void pushValue(lua_State *L, const bson_iter_t *iter) {
 			pushInt64(L, bson_iter_date_time(iter));
 			lua_call(L, 1, 1);
 			break;
+		case BSON_TYPE_CODE: {
+			uint32_t len;
+			const char *code = bson_iter_code(iter, &len);
+			lua_rawgetp(L, LUA_REGISTRYINDEX, &NEW_JAVASCRIPT);
+			lua_pushlstring(L, (const char *)code, len);
+			lua_call(L, 1, 1);
+			break;
+		}
+		case BSON_TYPE_CODEWSCOPE: {
+			bson_t bson;
+			uint32_t clen, dlen;
+			const uint8_t *data;
+			const char *code = bson_iter_codewscope(iter, &clen, &dlen, &data);
+			bson_init_static(&bson, data, dlen);
+			lua_rawgetp(L, LUA_REGISTRYINDEX, &NEW_JAVASCRIPT);
+			lua_pushlstring(L, (const char *)code, clen);
+			pushBSON(L, &bson, false);
+			lua_call(L, 2, 1);
+			break;
+		}
 		case BSON_TYPE_REGEX: {
 			const char *options;
 			lua_rawgetp(L, LUA_REGISTRYINDEX, &NEW_REGEX);
@@ -337,11 +369,10 @@ static void pushValue(lua_State *L, const bson_iter_t *iter) {
 		case BSON_TYPE_NULL:
 			lua_rawgetp(L, LUA_REGISTRYINDEX, &GLOBAL_NULL);
 			break;
+		/* Deprecated types */
 		case BSON_TYPE_UNDEFINED:
 		case BSON_TYPE_DBPOINTER:
-		case BSON_TYPE_CODE:
 		case BSON_TYPE_SYMBOL:
-		case BSON_TYPE_CODEWSCOPE:
 			lua_pushnil(L);
 			break;
 		default:

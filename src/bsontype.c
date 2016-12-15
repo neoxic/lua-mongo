@@ -28,14 +28,16 @@ static int _tostring(lua_State *L) {
 	if (!lua_istable(L, 1) || !luaL_getmetafield(L, 1, "__name")) return 0;
 	n = lua_rawlen(L, 1);
 	if (!n) return 1; /* Type name with no arguments */
+	lua_checkstack(L, LUA_MINSTACK + n * 2);
 	lua_pushliteral(L, "(");
-	lua_checkstack(L, n * 2); /* arg + ',' or ')' */
 	for (i = 0; i < n; ++i) {
 		if (i) lua_pushliteral(L, ", ");
 		lua_rawgeti(L, 1, i + 1);
-		if (lua_type(L, -1) != LUA_TSTRING) continue;
-		lua_pushfstring(L, "\"%s\"", lua_tostring(L, -1));
-		lua_replace(L, -2);
+		if (luaL_callmeta(L, -1, "__tostring")) lua_replace(L, -2);
+		if (lua_type(L, -1) == LUA_TSTRING) {
+			lua_pushfstring(L, "\"%s\"", lua_tostring(L, -1));
+			lua_replace(L, -2);
+		}
 	}
 	lua_pushliteral(L, ")");
 	lua_concat(L, lua_gettop(L) - 1);
@@ -93,6 +95,15 @@ int newInt64(lua_State *L) {
 	checkInt64(L, 1);
 	packParams(L, 1);
 	setBSONType(L, TYPE_INT64, BSON_TYPE_INT64);
+	return 1;
+}
+
+int newJavascript(lua_State *L) {
+	bson_t *scope;
+	luaL_checkstring(L, 1);
+	scope = toBSON(L, 2);
+	packParams(L, 2);
+	setBSONType(L, TYPE_JAVASCRIPT, scope ? BSON_TYPE_CODEWSCOPE : BSON_TYPE_CODE);
 	return 1;
 }
 

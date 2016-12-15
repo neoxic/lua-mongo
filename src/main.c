@@ -42,13 +42,14 @@ static const luaL_Reg funcs[] = {
 	{ "Double", newDouble },
 	{ "Int32", newInt32 },
 	{ "Int64", newInt64 },
+	{ "Javascript", newJavascript },
 	{ "ObjectID", newObjectID },
 	{ "Regex", newRegex },
 	{ "Timestamp", newTimestamp },
 	{ 0, 0 }
 };
 
-char NEW_BINARY, NEW_DATETIME, NEW_REGEX, NEW_TIMESTAMP;
+char NEW_BINARY, NEW_DATETIME, NEW_JAVASCRIPT, NEW_REGEX, NEW_TIMESTAMP;
 char GLOBAL_MAXKEY, GLOBAL_MINKEY, GLOBAL_NULL;
 
 EXPORT int luaopen_mongo(lua_State *L) {
@@ -67,6 +68,8 @@ EXPORT int luaopen_mongo(lua_State *L) {
 	lua_rawsetp(L, LUA_REGISTRYINDEX, &NEW_BINARY);
 	lua_getfield(L, -1, "DateTime");
 	lua_rawsetp(L, LUA_REGISTRYINDEX, &NEW_DATETIME);
+	lua_getfield(L, -1, "Javascript");
+	lua_rawsetp(L, LUA_REGISTRYINDEX, &NEW_JAVASCRIPT);
 	lua_getfield(L, -1, "Regex");
 	lua_rawsetp(L, LUA_REGISTRYINDEX, &NEW_REGEX);
 	lua_getfield(L, -1, "Timestamp");

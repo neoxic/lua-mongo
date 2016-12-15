@@ -40,6 +40,7 @@
 #define TYPE_DOUBLE "mongo.Double"
 #define TYPE_INT32 "mongo.Int32"
 #define TYPE_INT64 "mongo.Int64"
+#define TYPE_JAVASCRIPT "mongo.Javascript"
 #define TYPE_MAXKEY "mongo.MaxKey"
 #define TYPE_MINKEY "mongo.MinKey"
 #define TYPE_NULL "mongo.Null"
@@ -47,7 +48,7 @@
 #define TYPE_REGEX "mongo.Regex"
 #define TYPE_TIMESTAMP "mongo.Timestamp"
 
-extern char NEW_BINARY, NEW_DATETIME, NEW_REGEX, NEW_TIMESTAMP;
+extern char NEW_BINARY, NEW_DATETIME, NEW_JAVASCRIPT, NEW_REGEX, NEW_TIMESTAMP;
 extern char GLOBAL_MAXKEY, GLOBAL_MINKEY, GLOBAL_NULL;
 
 int newBinary(lua_State *L);
@@ -57,6 +58,7 @@ int newDateTime(lua_State *L);
 int newDouble(lua_State *L);
 int newInt32(lua_State *L);
 int newInt64(lua_State *L);
+int newJavascript(lua_State *L);
 int newObjectID(lua_State *L);
 int newRegex(lua_State *L);
 int newTimestamp(lua_State *L);

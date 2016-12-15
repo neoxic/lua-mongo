@@ -39,13 +39,6 @@ static int _next(lua_State *L) {
 	return 2;
 }
 
-static int _iterator(lua_State *L) {
-	checkCursor(L, 1);
-	lua_pushvalue(L, lua_upvalueindex(1));
-	lua_pushvalue(L, 1);
-	return 2;
-}
-
 static int _gc(lua_State *L) {
 	mongoc_cursor_destroy(checkCursor(L, 1));
 	unsetType(L);
@@ -57,6 +50,13 @@ static const luaL_Reg funcs[] = {
 	{ "__gc", _gc },
 	{ 0, 0 }
 };
+
+static int _iterator(lua_State *L) {
+	checkCursor(L, 1);
+	lua_pushvalue(L, lua_upvalueindex(1));
+	lua_pushvalue(L, 1);
+	return 2;
+}
 
 void pushCursor(lua_State *L, mongoc_cursor_t *cursor) {
 	pushHandle(L, cursor);
