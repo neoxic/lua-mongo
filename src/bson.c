@@ -153,6 +153,11 @@ error:
 static bool appendTable(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson);
 
 static bool appendValue(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson, const char *key, size_t klen) {
+	if (luaL_getmetafield(L, idx, "__mongo")) {
+		lua_pushvalue(L, idx);
+		if (lua_pcall(L, 1, 1, 0)) return error(L, nerr, "error in '__mongo' metamethod: %s", lua_tostring(L, -1));
+		lua_replace(L, idx);
+	}
 	switch (lua_type(L, idx)) {
 		case LUA_TNIL:
 			bson_append_null(bson, key, klen);

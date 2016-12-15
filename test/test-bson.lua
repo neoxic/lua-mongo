@@ -13,6 +13,10 @@ local function check(v1, v2)
 	collectgarbage()
 end
 
+local function checkFailure(v)
+	test.failure(BSON, v)
+end
+
 local function a(n)
 	local t = {}
 	for i = 1, n do
@@ -60,28 +64,29 @@ check({ a = mongo.Regex('abc') }, '{ "a" : { "$regex" : "abc", "$options" : "" }
 check({ a = mongo.Regex('abc', 'def') }, '{ "a" : { "$regex" : "abc", "$options" : "def" } }')
 check({ a = mongo.Timestamp(4294967295, 4294967295) }, '{ "a" : { "$timestamp" : { "t" : 4294967295, "i" : 4294967295 } } }')
 
+local obj = setmetatable({ str = 'abc' }, { __mongo = function (t) return mongo.Binary(t.str) end }) -- '__mongo' metamethod
+check({ a = obj }, '{ "a" : { "$binary" : "YWJj", "$type" : "0" } }')
+
 -- Errors
 
-local function failedBSON(v)
-	test.failure(BSON, v)
-end
+test.failure(mongo.type, setmetatable({}, {})) -- Invalid object for 'mongo.type'
+checkFailure { a = setmetatable({}, { __mongo = function (t) t() end }) } -- Error in '__mongo' metamethod
 
 local t = {}
 t.t = t
 local f = function () end
-failedBSON { a = t } -- Circular reference
-failedBSON { a = f } -- Invalid value type
-failedBSON { [f] = 1 } -- Invalid key type
-failedBSON '' -- Empty JSON
-failedBSON 'abc' -- Invalid JSON
+checkFailure { a = t } -- Circular reference
+checkFailure { a = f } -- Invalid value type
+checkFailure { [f] = 1 } -- Invalid key type
+checkFailure '' -- Empty JSON
+checkFailure 'abc' -- Invalid JSON
 
 local function newBSONType(n, ...)
 	return setmetatable({ ... }, { __bsontype = n })
 end
 
-failedBSON { a = newBSONType(0x99) } -- Invalid type code
-failedBSON { a = newBSONType(0x05) } -- Invalid binary data
-test.failure(mongo.type, newBSONType()) -- Invalid object for 'mongo.type'
+checkFailure { a = newBSONType(0x99) } -- Invalid type code
+checkFailure { a = newBSONType(0x05) } -- Invalid binary data
 
 -- ObjectID
 
