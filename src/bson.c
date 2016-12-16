@@ -158,16 +158,15 @@ static bool appendBSONType(lua_State *L, bson_type_t type, int idx, int *nerr, b
 	lua_settop(L, top);
 	return true;
 error:
-	lua_settop(L, top);
 	return error(L, nerr, "invalid BSON type %d", type);
 }
 
-static bool appendTable(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson);
+static bool appendTable(lua_State *L, int idx, int ref, int *nerr, bson_t *bson);
 
-static bool appendValue(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson, const char *key, size_t klen) {
-	if (luaL_getmetafield(L, idx, "__mongo")) {
+static bool appendValue(lua_State *L, int idx, int ref, int *nerr, bson_t *bson, const char *key, size_t klen) {
+	if (luaL_getmetafield(L, idx, "__tobson")) { /* Transform value with '__tobson' metamethod */
 		lua_pushvalue(L, idx);
-		if (lua_pcall(L, 1, 1, 0)) return error(L, nerr, "error in '__mongo' metamethod: %s", lua_tostring(L, -1));
+		if (lua_pcall(L, 1, 1, 0)) return error(L, nerr, "%s", lua_tostring(L, -1));
 		lua_replace(L, idx);
 	}
 	switch (lua_type(L, idx)) {
@@ -194,40 +193,38 @@ static bool appendValue(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson
 			break;
 		}
 		case LUA_TTABLE: {
-			bool ref;
-			bson_t child;
+			bson_t doc;
 			if (luaL_getmetafield(L, idx, "__bsontype")) {
 				if (!appendBSONType(L, lua_tointeger(L, -1), idx, nerr, bson, key, klen)) return false;
 				lua_pop(L, 1);
 				return true;
 			}
 			lua_pushvalue(L, idx);
-			lua_rawget(L, ridx);
-			ref = lua_toboolean(L, -1);
+			lua_rawget(L, ref);
+			if (lua_toboolean(L, -1)) return error(L, nerr, "circular reference detected");
 			lua_pop(L, 1);
-			if (ref) return error(L, nerr, "circular reference detected");
 			lua_pushvalue(L, idx);
 			lua_pushboolean(L, 1);
-			lua_rawset(L, ridx);
+			lua_rawset(L, ref);
 			if (isArray(L, idx)) {
-				bson_append_array_begin(bson, key, klen, &child);
-				if (!appendTable(L, idx, ridx, nerr, &child)) return false;
-				bson_append_array_end(bson, &child);
+				bson_append_array_begin(bson, key, klen, &doc);
+				if (!appendTable(L, idx, ref, nerr, &doc)) return false;
+				bson_append_array_end(bson, &doc);
 			} else {
-				bson_append_document_begin(bson, key, klen, &child);
-				if (!appendTable(L, idx, ridx, nerr, &child)) return false;
-				bson_append_document_end(bson, &child);
+				bson_append_document_begin(bson, key, klen, &doc);
+				if (!appendTable(L, idx, ref, nerr, &doc)) return false;
+				bson_append_document_end(bson, &doc);
 			}
 			lua_pushvalue(L, idx);
 			lua_pushnil(L);
-			lua_rawset(L, ridx);
+			lua_rawset(L, ref);
 			break;
 		}
 		case LUA_TUSERDATA: {
-			bson_t *child;
+			bson_t *doc;
 			bson_oid_t *oid;
-			if ((child = testBSON(L, idx))) {
-				bson_append_document(bson, key, klen, child);
+			if ((doc = testBSON(L, idx))) {
+				bson_append_document(bson, key, klen, doc);
 				break;
 			}
 			if ((oid = testObjectID(L, idx))) {
@@ -242,13 +239,13 @@ static bool appendValue(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson
 	return true;
 }
 
-static bool appendTable(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson) {
+static bool appendTable(lua_State *L, int idx, int ref, int *nerr, bson_t *bson) {
 	char buf[64];
 	const char *key;
 	size_t klen;
 	lua_Integer kval;
 	int kidx = lua_gettop(L) + 1;
-	lua_checkstack(L, LUA_MINSTACK);
+	luaL_checkstack(L, LUA_MINSTACK, "too many nested tables");
 	for (lua_pushnil(L); lua_next(L, idx); lua_pop(L, 1)) {
 		switch (lua_type(L, kidx)) {
 			case LUA_TNUMBER:
@@ -269,7 +266,7 @@ static bool appendTable(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson
 			default:
 				return error(L, nerr, "invalid key type '%s'", luaL_typename(L, idx));
 		}
-		if (!appendValue(L, kidx + 1, ridx, nerr, bson, key, klen)) return error(L, nerr, "[\"%s\"] => ", key);
+		if (!appendValue(L, kidx + 1, ref, nerr, bson, key, klen)) return error(L, nerr, "[\"%s\"] => ", key);
 	}
 	return true;
 }
@@ -299,9 +296,9 @@ static void pushValue(lua_State *L, const bson_iter_t *iter) {
 		}
 		case BSON_TYPE_DOCUMENT:
 		case BSON_TYPE_ARRAY: {
-			bson_iter_t child;
-			if (!bson_iter_recurse(iter, &child)) luaL_error(L, "bson_iter_recurse() failed");
-			pushTable(L, &child, type == BSON_TYPE_ARRAY);
+			bson_iter_t doc;
+			if (!bson_iter_recurse(iter, &doc)) luaL_error(L, "bson_iter_recurse() failed");
+			pushTable(L, &doc, type == BSON_TYPE_ARRAY);
 			break;
 		}
 		case BSON_TYPE_OID:
@@ -327,19 +324,20 @@ static void pushValue(lua_State *L, const bson_iter_t *iter) {
 			uint32_t len;
 			const char *code = bson_iter_code(iter, &len);
 			lua_rawgetp(L, LUA_REGISTRYINDEX, &NEW_JAVASCRIPT);
-			lua_pushlstring(L, (const char *)code, len);
+			lua_pushlstring(L, code, len);
 			lua_call(L, 1, 1);
 			break;
 		}
 		case BSON_TYPE_CODEWSCOPE: {
-			bson_t bson;
-			uint32_t clen, dlen;
-			const uint8_t *data;
-			const char *code = bson_iter_codewscope(iter, &clen, &dlen, &data);
-			bson_init_static(&bson, data, dlen);
+			bson_t doc;
+			uint32_t clen, slen;
+			const uint8_t *scope;
+			const char *code = bson_iter_codewscope(iter, &clen, &slen, &scope);
+			if (!bson_init_static(&doc, scope, slen)) luaL_error(L, "bson_init_static() failed");
 			lua_rawgetp(L, LUA_REGISTRYINDEX, &NEW_JAVASCRIPT);
-			lua_pushlstring(L, (const char *)code, clen);
-			pushBSON(L, &bson, false);
+			lua_pushlstring(L, code, clen);
+			pushBSON(L, &doc, false);
+			bson_destroy(&doc);
 			lua_call(L, 2, 1);
 			break;
 		}
@@ -384,7 +382,7 @@ static void pushValue(lua_State *L, const bson_iter_t *iter) {
 static void pushTable(lua_State *L, bson_iter_t *iter, bool array) {
 	lua_Integer n = 0;
 	lua_newtable(L);
-	lua_checkstack(L, LUA_MINSTACK);
+	luaL_checkstack(L, LUA_MINSTACK, "too many nested tables");
 	while (bson_iter_next(iter)) {
 		if (array) lua_pushinteger(L, ++n);
 		else lua_pushstring(L, bson_iter_key(iter));
@@ -399,7 +397,7 @@ static bson_t *fromString(lua_State *L, int idx) {
 	const char *str = lua_tolstring(L, idx, &len);
 	bson_error_t error;
 	if (!bson_init_from_json(bson, str, len, &error)) {
-		luaL_argcheck(L, len, 1, "invalid JSON"); /* FIXME Follow up with bug report: https://jira.mongodb.org/browse/CDRIVER-1936 */
+		luaL_argcheck(L, len, idx, "invalid JSON"); /* FIXME Follow up with bug report: https://jira.mongodb.org/browse/CDRIVER-1936 */
 		luaL_argerror(L, idx, error.message);
 		return 0;
 	}
@@ -409,12 +407,17 @@ static bson_t *fromString(lua_State *L, int idx) {
 }
 
 static bson_t *fromTable(lua_State *L, int idx) {
-	bson_t *bson = lua_newuserdata(L, sizeof *bson);
+	bson_t *bson;
 	int nerr = 0;
+	if (luaL_callmeta(L, idx, "__tobson")) { /* Transform table with '__tobson' metamethod */
+		lua_replace(L, idx);
+		luaL_checktype(L, idx, LUA_TTABLE); /* Root '__tobson' should return table */
+	}
+	bson = lua_newuserdata(L, sizeof *bson);
 	bson_init(bson);
 	lua_newtable(L);
 	if (!appendTable(L, idx, lua_gettop(L), &nerr, bson)) {
-		bson_destroy(bson); /* 'bson' should be discarded */
+		bson_destroy(bson);
 		lua_concat(L, nerr);
 		luaL_argerror(L, idx, lua_tostring(L, -1));
 		return 0;
@@ -449,12 +452,12 @@ void pushBSON(lua_State *L, const bson_t *bson, bool eval) {
 	}
 }
 
-bson_t *testBSON(lua_State *L, int idx) {
-	return luaL_testudata(L, idx, TYPE_BSON);
-}
-
 bson_t *checkBSON(lua_State *L, int idx) {
 	return luaL_checkudata(L, idx, TYPE_BSON);
+}
+
+bson_t *testBSON(lua_State *L, int idx) {
+	return luaL_testudata(L, idx, TYPE_BSON);
 }
 
 bson_t *castBSON(lua_State *L, int idx) {

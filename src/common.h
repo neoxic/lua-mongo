@@ -28,7 +28,7 @@
 #include <bson.h>
 
 #define MODNAME "lua-mongo"
-#define VERSION "0.1.0"
+#define VERSION "0.1.0-dev"
 
 #define TYPE_BINARY "mongo.Binary"
 #define TYPE_BSON "mongo.BSON"
@@ -73,13 +73,13 @@ void pushCollection(lua_State *L, mongoc_collection_t *collection);
 void pushCursor(lua_State *L, mongoc_cursor_t *cursor);
 void pushDatabase(lua_State *L, mongoc_database_t *database);
 
-bson_t *testBSON(lua_State *L, int idx);
 bson_t *checkBSON(lua_State *L, int idx);
+bson_t *testBSON(lua_State *L, int idx);
 bson_t *castBSON(lua_State *L, int idx);
 bson_t *toBSON(lua_State *L, int idx);
 
-bson_oid_t *testObjectID(lua_State *L, int idx);
 bson_oid_t *checkObjectID(lua_State *L, int idx);
+bson_oid_t *testObjectID(lua_State *L, int idx);
 
 mongoc_client_t *checkClient(lua_State *L, int idx);
 mongoc_collection_t *checkCollection(lua_State *L, int idx);

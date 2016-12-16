@@ -65,10 +65,10 @@ void pushObjectID(lua_State *L, const bson_oid_t *oid) {
 	setType(L, TYPE_OBJECTID, funcs);
 }
 
-bson_oid_t *testObjectID(lua_State *L, int idx) {
-	return luaL_testudata(L, idx, TYPE_OBJECTID);
-}
-
 bson_oid_t *checkObjectID(lua_State *L, int idx) {
 	return luaL_checkudata(L, idx, TYPE_OBJECTID);
+}
+
+bson_oid_t *testObjectID(lua_State *L, int idx) {
+	return luaL_testudata(L, idx, TYPE_OBJECTID);
 }

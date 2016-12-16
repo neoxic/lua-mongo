@@ -65,17 +65,20 @@ check({ a = mongo.Regex('abc') }, '{ "a" : { "$regex" : "abc", "$options" : "" }
 check({ a = mongo.Regex('abc', 'def') }, '{ "a" : { "$regex" : "abc", "$options" : "def" } }')
 check({ a = mongo.Timestamp(4294967295, 4294967295) }, '{ "a" : { "$timestamp" : { "t" : 4294967295, "i" : 4294967295 } } }')
 
--- FIXME These tests fail because binary data differs unexpectedly - bug report pending
+-- FIXME These tests fail because binary data differs for some unknown reason; 'libbson' bug report pending
 -- check({ a = mongo.Javascript('abc') }, '{ "a" : { "$code" : "abc" } }')
 -- check({ a = mongo.Javascript('abc', { a = 1 }) }, '{ "$code" : "abc", "$scope" : { "a" : 1 } } }')
 
-local obj = setmetatable({ str = 'abc' }, { __mongo = function (t) return mongo.Binary(t.str) end }) -- '__mongo' metamethod
-check({ a = obj }, '{ "a" : { "$binary" : "YWJj", "$type" : "0" } }')
+local obj = setmetatable({ str = 'abc' }, { __tobson = function (t) return { bin = mongo.Binary(t.str) } end })
+check(obj, '{ "bin" : { "$binary" : "YWJj", "$type" : "0" } }') -- Root '__tobson' metamethod
+check({ a = obj }, '{ "a" : { "bin" : { "$binary" : "YWJj", "$type" : "00" } } }') -- Nested '__tobson' metamethod
 
 -- Errors
 
 test.failure(mongo.type, setmetatable({}, {})) -- Invalid object for 'mongo.type'
-checkFailure { a = setmetatable({}, { __mongo = function (t) t() end }) } -- Error in '__mongo' metamethod
+checkFailure(setmetatable({}, { __tobson = function (t) return 123 end })) -- Root '__tobson' should return table
+checkFailure(setmetatable({}, { __tobson = function (t) t() end })) -- Run-time error in root '__tobson'
+checkFailure { a = setmetatable({}, { __tobson = function (t) t() end }) } -- Run-time error in nested '__tobson'
 
 local t = {}
 t.t = t

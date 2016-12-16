@@ -3,7 +3,7 @@
 
 _lua-mongo_ is a binding of the MongoDB C Driver (http://mongoc.org) for Lua.
 
-Please note that _lua-mongo_ is in beta which means that its API is likely to change between versions.
+Please note that _lua-mongo_ is in development beta which means that its API is likely to change between versions.
 
 
 ## Building and installation with CMake

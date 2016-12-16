@@ -28,16 +28,15 @@ static int _tostring(lua_State *L) {
 	if (!lua_istable(L, 1) || !luaL_getmetafield(L, 1, "__name")) return 0;
 	n = lua_rawlen(L, 1);
 	if (!n) return 1; /* Type name with no arguments */
-	lua_checkstack(L, LUA_MINSTACK + n * 2);
+	luaL_checkstack(L, LUA_MINSTACK + n * 2, "too many parameters");
 	lua_pushliteral(L, "(");
 	for (i = 0; i < n; ++i) {
 		if (i) lua_pushliteral(L, ", ");
 		lua_rawgeti(L, 1, i + 1);
 		if (luaL_callmeta(L, -1, "__tostring")) lua_replace(L, -2);
-		if (lua_type(L, -1) == LUA_TSTRING) {
-			lua_pushfstring(L, "\"%s\"", lua_tostring(L, -1));
-			lua_replace(L, -2);
-		}
+		if (lua_type(L, -1) != LUA_TSTRING) continue;
+		lua_pushfstring(L, "\"%s\"", lua_tostring(L, -1));
+		lua_replace(L, -2);
 	}
 	lua_pushliteral(L, ")");
 	lua_concat(L, lua_gettop(L) - 1);

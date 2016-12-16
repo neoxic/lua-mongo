@@ -85,7 +85,7 @@ void packParams(lua_State *L, int n) {
 
 int unpackParams(lua_State *L, int idx) {
 	int i = 0, n = lua_rawlen(L, idx);
-	lua_checkstack(L, n);
+	luaL_checkstack(L, n, "too many parameters");
 	while (i < n) lua_rawgeti(L, idx, ++i);
 	return n;
 }
