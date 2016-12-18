@@ -8,11 +8,10 @@ Please note that _lua-mongo_ is in development beta which means that its API is 
 
 ## Building and installation with CMake
 
-To build in the source directory, run:
+To build in the source directory, type:
 
 	cmake .
 	make
-	make test
 	make install
 
 To build against a specific Lua version, set the `USE_LUA_VERSION` variable:
@@ -24,6 +23,12 @@ For LuaJIT:
 	cmake -D USE_LUA_VERSION=jit .
 
 To build in a separate directory, replace `.` with a path to the source.
+
+To run tests, type:
+
+	make test
+
+Test settings can be configured in `test/test.lua`.
 
 
 ## Usage example
