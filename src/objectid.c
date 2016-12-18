@@ -22,6 +22,12 @@
 
 #include "common.h"
 
+static int _data(lua_State *L) {
+	bson_oid_t *oid = checkObjectID(L, 1);
+	lua_pushlstring(L, (const char *)oid->bytes, sizeof oid->bytes);
+	return 1;
+}
+
 static int _hash(lua_State *L) {
 	pushInt32(L, bson_oid_hash(checkObjectID(L, 1)));
 	return 1;
@@ -40,6 +46,7 @@ static int _eq(lua_State *L) {
 }
 
 static const luaL_Reg funcs[] = {
+	{ "data", _data },
 	{ "hash", _hash },
 	{ "__tostring", _tostring },
 	{ "__eq", _eq },

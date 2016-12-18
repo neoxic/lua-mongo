@@ -3,14 +3,14 @@ local test = require 'test'
 local BSON = mongo.BSON
 local hasInt64 = math.maxinteger and math.maxinteger == 9223372036854775807
 
-local function check(v1, v2)
+local function check(v1, v2, cb)
 	local b1 = BSON(v1)
 	local b2 = BSON(v2)
 	-- print(b1, b2)
 	assert(b1 == b2) -- Compare with overloaded equality operator
-	assert(b1:getData() == b2:getData()) -- Compare binary data
+	assert(b1:data() == b2:data()) -- Compare binary data
 	assert(tostring(b1) == tostring(b2)) -- Compare as strings
-	test.equal(b1(), b2()) -- Compare as values
+	test.equal(b1(cb), b2(cb)) -- Compare as values
 	collectgarbage()
 end
 
@@ -69,14 +69,21 @@ check({ a = mongo.Timestamp(4294967295, 4294967295) }, '{ "a" : { "$timestamp" :
 -- check({ a = mongo.Javascript('abc') }, '{ "a" : { "$code" : "abc" } }')
 -- check({ a = mongo.Javascript('abc', { a = 1 }) }, '{ "$code" : "abc", "$scope" : { "a" : 1 } } }')
 
-local obj = setmetatable({ str = 'abc' }, { __tobson = function (t) return { bin = mongo.Binary(t.str) } end })
-check(obj, '{ "bin" : { "$binary" : "YWJj", "$type" : "0" } }') -- Root '__tobson' metamethod
-check({ a = obj }, '{ "a" : { "bin" : { "$binary" : "YWJj", "$type" : "00" } } }') -- Nested '__tobson' metamethod
+-- Callbacks
+
+local mt = { __tobson = function (t) return { bin = mongo.Binary(t.str) } end }
+local obj = setmetatable({ str = 'abc' }, mt)
+local cb1 = function (t) return setmetatable({ str = t.bin() }, mt) end
+local cb2 = function (t) return t.a and t or cb1(t) end
+
+check(obj, '{ "bin" : { "$binary" : "YWJj", "$type" : "0" } }', cb1) -- Root transformation
+check({ a = obj }, '{ "a" : { "bin" : { "$binary" : "YWJj", "$type" : "00" } } }', cb2) -- Nested transformation
 
 -- Errors
 
 test.failure(mongo.type, setmetatable({}, {})) -- Invalid object for 'mongo.type'
-checkFailure(setmetatable({}, { __tobson = function (t) return 123 end })) -- Root '__tobson' should return table
+checkFailure(setmetatable({}, { __tobson = function (t) return { t = t } end })) -- Recursion in '__tobson'
+checkFailure(setmetatable({}, { __tobson = function (t) return 'abc' end })) -- Root '__tobson' should return table or BSON
 checkFailure(setmetatable({}, { __tobson = function (t) t() end })) -- Run-time error in root '__tobson'
 checkFailure { a = setmetatable({}, { __tobson = function (t) t() end }) } -- Run-time error in nested '__tobson'
 
@@ -104,9 +111,11 @@ checkFailure { a = newBSONType(0x0f, 'abc') } -- Javascript w/ scope: invalid BS
 local oid1 = mongo.ObjectID('000000000000000000000000')
 local oid2 = mongo.ObjectID('000000000000000000000000')
 assert(mongo.type(oid1) == 'mongo.ObjectID')
-assert(oid1 == oid2) -- Compare as binary
-assert(tostring(oid1) == tostring(oid2)) -- Compare as strings
+assert(oid1 == oid2) -- Compare with overloaded equality operator
+assert(oid1:data() == oid1:data()) -- Compare binary data
 assert(oid1:hash() == oid2:hash()) -- Compare hashes
+assert(tostring(oid1) == tostring(oid2)) -- Compare as strings
 check({ a = oid1 }, '{ "a" : { "$oid" : "000000000000000000000000" } }')
 test.failure(mongo.ObjectID, 'abc') -- Invalid format
-assert(oid1 ~= mongo.ObjectID()) -- Random ObjectID
+local oid = mongo.ObjectID() -- Random ObjectID
+assert(oid ~= oid1 and oid:data() ~= oid1:data() and tostring(oid) ~= tostring(oid1)) -- Compare everything except hashes

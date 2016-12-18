@@ -22,7 +22,7 @@
 
 #include "common.h"
 
-static int _getData(lua_State *L) {
+static int _data(lua_State *L) {
 	bson_t *bson = checkBSON(L, 1);
 	lua_pushlstring(L, (const char *)bson_get_data(bson), bson->len);
 	return 1;
@@ -37,7 +37,8 @@ static int _tostring(lua_State *L) {
 }
 
 static int _call(lua_State *L) {
-	pushBSON(L, checkBSON(L, 1), true);
+	lua_settop(L, 2); /* Ensure callback index */
+	pushBSON(L, checkBSON(L, 1), 2);
 	return 1;
 }
 
@@ -58,7 +59,7 @@ static int _gc(lua_State *L) {
 }
 
 static const luaL_Reg funcs[] = {
-	{ "getData", _getData },
+	{ "data", _data },
 	{ "__tostring", _tostring },
 	{ "__call", _call },
 	{ "__len", _len },
@@ -244,12 +245,13 @@ static bool appendTable(lua_State *L, int idx, int ref, int *nerr, bson_t *bson)
 	const char *key;
 	size_t klen;
 	lua_Integer kval;
-	int kidx = lua_gettop(L) + 1;
-	luaL_checkstack(L, LUA_MINSTACK, "too many nested tables");
+	int top = lua_gettop(L);
+	if (top >= 1000) return error(L, nerr, "recursion detected");
+	lua_checkstack(L, LUA_MINSTACK);
 	for (lua_pushnil(L); lua_next(L, idx); lua_pop(L, 1)) {
-		switch (lua_type(L, kidx)) {
+		switch (lua_type(L, top + 1)) {
 			case LUA_TNUMBER:
-				if (isInteger(L, kidx, &kval) && isInt32(kval)) {
+				if (isInteger(L, top + 1, &kval) && isInt32(kval)) {
 					klen = bson_uint32_to_string(kval, &key, buf, sizeof buf);
 					break;
 				}
@@ -261,19 +263,19 @@ static bool appendTable(lua_State *L, int idx, int ref, int *nerr, bson_t *bson)
 #endif
 				break;
 			case LUA_TSTRING:
-				key = lua_tolstring(L, kidx, &klen);
+				key = lua_tolstring(L, top + 1, &klen);
 				break;
 			default:
 				return error(L, nerr, "invalid key type '%s'", luaL_typename(L, idx));
 		}
-		if (!appendValue(L, kidx + 1, ref, nerr, bson, key, klen)) return error(L, nerr, "[\"%s\"] => ", key);
+		if (!appendValue(L, top + 2, ref, nerr, bson, key, klen)) return error(L, nerr, "[\"%s\"] => ", key);
 	}
 	return true;
 }
 
-static void pushTable(lua_State *L, bson_iter_t *iter, bool array);
+static void pushTable(lua_State *L, bson_iter_t *iter, int cb, bool array);
 
-static void pushValue(lua_State *L, const bson_iter_t *iter) {
+static void pushValue(lua_State *L, bson_iter_t *iter, int cb) {
 	bson_type_t type = bson_iter_type(iter);
 	switch (type) {
 		case BSON_TYPE_BOOL:
@@ -298,7 +300,7 @@ static void pushValue(lua_State *L, const bson_iter_t *iter) {
 		case BSON_TYPE_ARRAY: {
 			bson_iter_t doc;
 			if (!bson_iter_recurse(iter, &doc)) luaL_error(L, "bson_iter_recurse() failed");
-			pushTable(L, &doc, type == BSON_TYPE_ARRAY);
+			pushTable(L, &doc, cb, type == BSON_TYPE_ARRAY);
 			break;
 		}
 		case BSON_TYPE_OID:
@@ -336,7 +338,7 @@ static void pushValue(lua_State *L, const bson_iter_t *iter) {
 			if (!bson_init_static(&doc, scope, slen)) luaL_error(L, "bson_init_static() failed");
 			lua_rawgetp(L, LUA_REGISTRYINDEX, &NEW_JAVASCRIPT);
 			lua_pushlstring(L, code, clen);
-			pushBSON(L, &doc, false);
+			pushBSON(L, &doc, 0);
 			bson_destroy(&doc);
 			lua_call(L, 2, 1);
 			break;
@@ -379,74 +381,33 @@ static void pushValue(lua_State *L, const bson_iter_t *iter) {
 	}
 }
 
-static void pushTable(lua_State *L, bson_iter_t *iter, bool array) {
+static void pushTable(lua_State *L, bson_iter_t *iter, int cb, bool array) {
 	lua_Integer n = 0;
 	lua_newtable(L);
-	luaL_checkstack(L, LUA_MINSTACK, "too many nested tables");
+	luaL_checkstack(L, LUA_MINSTACK, "too many nested documents");
 	while (bson_iter_next(iter)) {
 		if (array) lua_pushinteger(L, ++n);
 		else lua_pushstring(L, bson_iter_key(iter));
-		pushValue(L, iter);
+		pushValue(L, iter, cb);
 		lua_rawset(L, -3);
 	}
-}
-
-static bson_t *fromString(lua_State *L, int idx) {
-	bson_t *bson = lua_newuserdata(L, sizeof *bson);
-	size_t len;
-	const char *str = lua_tolstring(L, idx, &len);
-	bson_error_t error;
-	if (!bson_init_from_json(bson, str, len, &error)) {
-		luaL_argcheck(L, len, idx, "invalid JSON"); /* FIXME Follow up with bug report: https://jira.mongodb.org/browse/CDRIVER-1936 */
-		luaL_argerror(L, idx, error.message);
-		return 0;
-	}
-	setType(L, TYPE_BSON, funcs);
-	lua_replace(L, idx);
-	return bson;
-}
-
-static bson_t *fromTable(lua_State *L, int idx) {
-	bson_t *bson;
-	int nerr = 0;
-	if (luaL_callmeta(L, idx, "__tobson")) { /* Transform table with '__tobson' metamethod */
-		lua_replace(L, idx);
-		luaL_checktype(L, idx, LUA_TTABLE); /* Root '__tobson' should return table */
-	}
-	bson = lua_newuserdata(L, sizeof *bson);
-	bson_init(bson);
-	lua_newtable(L);
-	if (!appendTable(L, idx, lua_gettop(L), &nerr, bson)) {
-		bson_destroy(bson);
-		lua_concat(L, nerr);
-		luaL_argerror(L, idx, lua_tostring(L, -1));
-		return 0;
-	}
-	lua_pop(L, 1);
-	setType(L, TYPE_BSON, funcs);
-	lua_replace(L, idx);
-	return bson;
+	if (lua_isnoneornil(L, cb)) return;
+	lua_pushvalue(L, cb);
+	lua_insert(L, -2);
+	lua_call(L, 1, 1); /* Transform table with a callback */
 }
 
 int newBSON(lua_State *L) {
-	switch (lua_type(L, 1)) {
-		case LUA_TSTRING:
-			fromString(L, 1);
-			return 1;
-		case LUA_TTABLE:
-			fromTable(L, 1);
-			return 1;
-		default:
-			return luaL_argerror(L, 1, "string or table expected");
-	}
+	castBSON(L, 1);
+	return 1;
 }
 
-void pushBSON(lua_State *L, const bson_t *bson, bool eval) {
-	if (eval) { /* Lua value */
+void pushBSON(lua_State *L, const bson_t *bson, int cb) {
+	if (cb) { /* Evaluate */
 		bson_iter_t iter;
 		if (!bson_iter_init(&iter, bson)) luaL_error(L, "bson_iter_init() failed");
-		pushTable(L, &iter, false);
-	} else { /* Raw copy */
+		pushTable(L, &iter, cb, false);
+	} else { /* Copy-by-value */
 		bson_copy_to(bson, lua_newuserdata(L, sizeof *bson));
 		setType(L, TYPE_BSON, funcs);
 	}
@@ -461,19 +422,36 @@ bson_t *testBSON(lua_State *L, int idx) {
 }
 
 bson_t *castBSON(lua_State *L, int idx) {
-	switch (lua_type(L, idx)) {
-		case LUA_TSTRING:
-			return fromString(L, idx);
-		case LUA_TTABLE:
-			return fromTable(L, idx);
-		case LUA_TUSERDATA:
-			return checkBSON(L, idx);
-		default:
-			luaL_argerror(L, idx, "string, table or " TYPE_BSON " expected");
-			return 0;
+	bson_t *bson;
+	size_t len;
+	const char *str = lua_tolstring(L, idx, &len);
+	if (str) { /* From string */
+		bson_error_t error;
+		bson = lua_newuserdata(L, sizeof *bson);
+		if (!bson_init_from_json(bson, str, len, &error)) {
+			luaL_argcheck(L, len, idx, "JSON expected"); /* FIXME Follow up with bug report: https://jira.mongodb.org/browse/CDRIVER-1936 */
+			luaL_argerror(L, idx, error.message);
+		}
+	} else { /* From value */
+		int nerr = 0;
+		if (luaL_callmeta(L, idx, "__tobson")) lua_replace(L, idx); /* Transform value with '__tobson' metamethod */
+		if ((bson = testBSON(L, idx))) return bson; /* Value is a BSON object */
+		luaL_argcheck(L, lua_istable(L, idx), idx, "string, table or " TYPE_BSON " expected");
+		bson = lua_newuserdata(L, sizeof *bson);
+		bson_init(bson);
+		lua_newtable(L);
+		if (!appendTable(L, idx, lua_gettop(L), &nerr, bson)) {
+			bson_destroy(bson);
+			lua_concat(L, nerr);
+			luaL_argerror(L, idx, lua_tostring(L, -1));
+		}
+		lua_pop(L, 1);
 	}
+	setType(L, TYPE_BSON, funcs);
+	lua_replace(L, idx);
+	return bson;
 }
 
 bson_t *toBSON(lua_State *L, int idx) {
-	return !lua_isnoneornil(L, idx) ? castBSON(L, idx) : 0;
+	return lua_isnoneornil(L, idx) ? 0 : castBSON(L, idx);
 }

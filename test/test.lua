@@ -11,6 +11,9 @@ local function equal(v1, v2)
 	if v1 == v2  then
 		return true
 	end
+	if not equal(getmetatable(v1), getmetatable(v2)) then
+		return false
+	end
 	for k, v in pairs(v1) do
 		if not equal(v, v2[k]) then
 			return false

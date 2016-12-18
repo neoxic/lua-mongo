@@ -27,8 +27,9 @@ local function testCollection(collection)
 	local b, e = cursor:next()
 	assert(b == nil and e == nil) -- nil + no error
 	b, e = cursor:next()
-	assert(b == nil and e ~= nil) -- nil + error is set
-	assert(collection:find({ _id = 123 }):next(true)._id == 123) -- Evaluate first value
+	assert(b == nil and type(e) == 'string') -- nil + error
+	assert(collection:find({ _id = 123 }):next(true)._id == 123) -- Evaluation
+	assert(collection:find({ _id = 123 }):next(true, function (t) return { id = t._id } end).id == 123) -- Evaluation with transformation
 	collectgarbage()
 
 	-- cursor:iterator()
@@ -38,6 +39,10 @@ local function testCollection(collection)
 	assert(v1._id == 789)
 	assert(v2._id == 456)
 	assert(not f(c)) -- No more items
+	test.failure(f, c) -- Cursor exhausted
+	f, c = collection:find({ _id = 123 }):iterator(function (t) return { id = t._id } end) -- Iterator with transformation
+	assert(f(c).id == 123)
+	assert(not f(c))
 	test.failure(f, c) -- Cursor exhausted
 	collectgarbage()
 
