@@ -25,12 +25,11 @@
 static int _next(lua_State *L) {
 	mongoc_cursor_t *cursor = checkCursor(L, 1);
 	bool iter = lua_toboolean(L, lua_upvalueindex(1)); /* Iterator mode */
-	int cb = iter ? lua_upvalueindex(2) : lua_toboolean(L, 2) ? 3 : 0; /* Callback index */
+	int hidx = iter ? lua_upvalueindex(2) : lua_toboolean(L, 2) ? 3 : 0; /* Handler index */
 	const bson_t *bson;
 	bson_error_t error;
-	lua_settop(L, 3); /* Ensure callback index */
 	if (mongoc_cursor_next(cursor, &bson)) {
-		pushBSON(L, bson, cb);
+		pushBSON(L, bson, hidx);
 		return 1;
 	}
 	lua_pushnil(L);
@@ -54,11 +53,11 @@ static const luaL_Reg funcs[] = {
 
 static int _iterator(lua_State *L) {
 	checkCursor(L, 1);
-	if (lua_isnoneornil(L, 2)) lua_pushvalue(L, lua_upvalueindex(1)); /* Cached default iterator */
+	if (lua_isnoneornil(L, 2)) lua_pushvalue(L, lua_upvalueindex(1)); /* Default iterator */
 	else {
 		lua_pushboolean(L, 1); /* Iterator mode on */
-		lua_pushvalue(L, 2); /* Callback object */
-		lua_pushcclosure(L, _next, 2); /* Callback iterator */
+		lua_pushvalue(L, 2); /* Handler object */
+		lua_pushcclosure(L, _next, 2); /* Iterator with handler */
 	}
 	lua_pushvalue(L, 1);
 	return 2; /* OUT: iterator, cursor */
@@ -68,8 +67,8 @@ void pushCursor(lua_State *L, mongoc_cursor_t *cursor) {
 	pushHandle(L, cursor);
 	if (pushType(L, TYPE_CURSOR, funcs)) {
 		lua_pushboolean(L, 1); /* Iterator mode on */
-		lua_pushcclosure(L, _next, 1); /* Default iterator */
-		lua_pushcclosure(L, _iterator, 1); /* Cached as upvalue 1 */
+		lua_pushcclosure(L, _next, 1); /* Default iterator ... */
+		lua_pushcclosure(L, _iterator, 1); /* ... cached as upvalue 1 */
 		lua_setfield(L, -2, "iterator");
 	}
 	lua_setmetatable(L, -2);

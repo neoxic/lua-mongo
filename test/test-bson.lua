@@ -3,14 +3,14 @@ local test = require 'test'
 local BSON = mongo.BSON
 local hasInt64 = math.maxinteger and math.maxinteger == 9223372036854775807
 
-local function check(v1, v2, cb)
+local function check(v1, v2, h)
 	local b1 = BSON(v1)
 	local b2 = BSON(v2)
 	-- print(b1, b2)
 	assert(b1 == b2) -- Compare with overloaded equality operator
 	assert(b1:data() == b2:data()) -- Compare binary data
 	assert(tostring(b1) == tostring(b2)) -- Compare as strings
-	test.equal(b1(cb), b2(cb)) -- Compare as values
+	test.equal(b1(h), b2(h)) -- Compare as values
 	collectgarbage()
 end
 
@@ -69,15 +69,15 @@ check({ a = mongo.Timestamp(4294967295, 4294967295) }, '{ "a" : { "$timestamp" :
 -- check({ a = mongo.Javascript('abc') }, '{ "a" : { "$code" : "abc" } }')
 -- check({ a = mongo.Javascript('abc', { a = 1 }) }, '{ "$code" : "abc", "$scope" : { "a" : 1 } } }')
 
--- Callbacks
+-- Handlers
 
 local mt = { __tobson = function (t) return { bin = mongo.Binary(t.str) } end }
 local obj = setmetatable({ str = 'abc' }, mt)
-local cb1 = function (t) return setmetatable({ str = t.bin() }, mt) end
-local cb2 = function (t) return t.a and t or cb1(t) end
+local h1 = function (t) return setmetatable({ str = t.bin() }, mt) end
+local h2 = function (t) return t.a and t or h1(t) end
 
-check(obj, '{ "bin" : { "$binary" : "YWJj", "$type" : "0" } }', cb1) -- Root transformation
-check({ a = obj }, '{ "a" : { "bin" : { "$binary" : "YWJj", "$type" : "00" } } }', cb2) -- Nested transformation
+check(obj, '{ "bin" : { "$binary" : "YWJj", "$type" : "0" } }', h1) -- Root transformation
+check({ a = obj }, '{ "a" : { "bin" : { "$binary" : "YWJj", "$type" : "00" } } }', h2) -- Nested transformation
 
 -- Errors
 

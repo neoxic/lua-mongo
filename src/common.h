@@ -63,7 +63,7 @@ int newObjectID(lua_State *L);
 int newRegex(lua_State *L);
 int newTimestamp(lua_State *L);
 
-void pushBSON(lua_State *L, const bson_t *bson, int cb);
+void pushBSON(lua_State *L, const bson_t *bson, int hidx);
 void pushObjectID(lua_State *L, const bson_oid_t *oid);
 void pushMaxKey(lua_State *L);
 void pushMinKey(lua_State *L);

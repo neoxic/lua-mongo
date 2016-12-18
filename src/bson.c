@@ -22,6 +22,8 @@
 
 #include "common.h"
 
+#define MAXSTACK 1000 /* Arbitrary stack size limit that triggers recursion error */
+
 static int _data(lua_State *L) {
 	bson_t *bson = checkBSON(L, 1);
 	lua_pushlstring(L, (const char *)bson_get_data(bson), bson->len);
@@ -37,7 +39,6 @@ static int _tostring(lua_State *L) {
 }
 
 static int _call(lua_State *L) {
-	lua_settop(L, 2); /* Ensure callback index */
 	pushBSON(L, checkBSON(L, 1), 2);
 	return 1;
 }
@@ -162,9 +163,9 @@ error:
 	return error(L, nerr, "invalid BSON type %d", type);
 }
 
-static bool appendTable(lua_State *L, int idx, int ref, int *nerr, bson_t *bson);
+static bool appendTable(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson);
 
-static bool appendValue(lua_State *L, int idx, int ref, int *nerr, bson_t *bson, const char *key, size_t klen) {
+static bool appendValue(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson, const char *key, size_t klen) {
 	if (luaL_getmetafield(L, idx, "__tobson")) { /* Transform value with '__tobson' metamethod */
 		lua_pushvalue(L, idx);
 		if (lua_pcall(L, 1, 1, 0)) return error(L, nerr, "%s", lua_tostring(L, -1));
@@ -201,24 +202,24 @@ static bool appendValue(lua_State *L, int idx, int ref, int *nerr, bson_t *bson,
 				return true;
 			}
 			lua_pushvalue(L, idx);
-			lua_rawget(L, ref);
+			lua_rawget(L, ridx);
 			if (lua_toboolean(L, -1)) return error(L, nerr, "circular reference detected");
 			lua_pop(L, 1);
 			lua_pushvalue(L, idx);
 			lua_pushboolean(L, 1);
-			lua_rawset(L, ref);
+			lua_rawset(L, ridx);
 			if (isArray(L, idx)) {
 				bson_append_array_begin(bson, key, klen, &doc);
-				if (!appendTable(L, idx, ref, nerr, &doc)) return false;
+				if (!appendTable(L, idx, ridx, nerr, &doc)) return false;
 				bson_append_array_end(bson, &doc);
 			} else {
 				bson_append_document_begin(bson, key, klen, &doc);
-				if (!appendTable(L, idx, ref, nerr, &doc)) return false;
+				if (!appendTable(L, idx, ridx, nerr, &doc)) return false;
 				bson_append_document_end(bson, &doc);
 			}
 			lua_pushvalue(L, idx);
 			lua_pushnil(L);
-			lua_rawset(L, ref);
+			lua_rawset(L, ridx);
 			break;
 		}
 		case LUA_TUSERDATA: {
@@ -240,13 +241,13 @@ static bool appendValue(lua_State *L, int idx, int ref, int *nerr, bson_t *bson,
 	return true;
 }
 
-static bool appendTable(lua_State *L, int idx, int ref, int *nerr, bson_t *bson) {
+static bool appendTable(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson) {
 	char buf[64];
 	const char *key;
 	size_t klen;
 	lua_Integer kval;
 	int top = lua_gettop(L);
-	if (top >= 1000) return error(L, nerr, "recursion detected");
+	if (top >= MAXSTACK) return error(L, nerr, "recursion detected");
 	lua_checkstack(L, LUA_MINSTACK);
 	for (lua_pushnil(L); lua_next(L, idx); lua_pop(L, 1)) {
 		switch (lua_type(L, top + 1)) {
@@ -268,14 +269,14 @@ static bool appendTable(lua_State *L, int idx, int ref, int *nerr, bson_t *bson)
 			default:
 				return error(L, nerr, "invalid key type '%s'", luaL_typename(L, idx));
 		}
-		if (!appendValue(L, top + 2, ref, nerr, bson, key, klen)) return error(L, nerr, "[\"%s\"] => ", key);
+		if (!appendValue(L, top + 2, ridx, nerr, bson, key, klen)) return error(L, nerr, "[\"%s\"] => ", key);
 	}
 	return true;
 }
 
-static void pushTable(lua_State *L, bson_iter_t *iter, int cb, bool array);
+static void pushTable(lua_State *L, bson_iter_t *iter, int hidx, bool array);
 
-static void pushValue(lua_State *L, bson_iter_t *iter, int cb) {
+static void pushValue(lua_State *L, bson_iter_t *iter, int hidx) {
 	bson_type_t type = bson_iter_type(iter);
 	switch (type) {
 		case BSON_TYPE_BOOL:
@@ -300,7 +301,7 @@ static void pushValue(lua_State *L, bson_iter_t *iter, int cb) {
 		case BSON_TYPE_ARRAY: {
 			bson_iter_t doc;
 			if (!bson_iter_recurse(iter, &doc)) luaL_error(L, "bson_iter_recurse() failed");
-			pushTable(L, &doc, cb, type == BSON_TYPE_ARRAY);
+			pushTable(L, &doc, hidx, type == BSON_TYPE_ARRAY);
 			break;
 		}
 		case BSON_TYPE_OID:
@@ -381,20 +382,20 @@ static void pushValue(lua_State *L, bson_iter_t *iter, int cb) {
 	}
 }
 
-static void pushTable(lua_State *L, bson_iter_t *iter, int cb, bool array) {
+static void pushTable(lua_State *L, bson_iter_t *iter, int hidx, bool array) {
 	lua_Integer n = 0;
 	lua_newtable(L);
 	luaL_checkstack(L, LUA_MINSTACK, "too many nested documents");
 	while (bson_iter_next(iter)) {
 		if (array) lua_pushinteger(L, ++n);
 		else lua_pushstring(L, bson_iter_key(iter));
-		pushValue(L, iter, cb);
+		pushValue(L, iter, hidx);
 		lua_rawset(L, -3);
 	}
-	if (lua_isnoneornil(L, cb)) return;
-	lua_pushvalue(L, cb);
+	if (lua_isnoneornil(L, hidx)) return; /* No handler */
+	lua_pushvalue(L, hidx);
 	lua_insert(L, -2);
-	lua_call(L, 1, 1); /* Transform table with a callback */
+	lua_call(L, 1, 1); /* Transform value */
 }
 
 int newBSON(lua_State *L) {
@@ -402,11 +403,13 @@ int newBSON(lua_State *L) {
 	return 1;
 }
 
-void pushBSON(lua_State *L, const bson_t *bson, int cb) {
-	if (cb) { /* Evaluate */
+void pushBSON(lua_State *L, const bson_t *bson, int hidx) {
+	if (hidx) { /* Evaluate */
 		bson_iter_t iter;
 		if (!bson_iter_init(&iter, bson)) luaL_error(L, "bson_iter_init() failed");
-		pushTable(L, &iter, cb, false);
+		lua_pushvalue(L, hidx); /* Ensure handler index is valid */
+		pushTable(L, &iter, lua_gettop(L), false);
+		lua_replace(L, -2);
 	} else { /* Copy-by-value */
 		bson_copy_to(bson, lua_newuserdata(L, sizeof *bson));
 		setType(L, TYPE_BSON, funcs);
@@ -435,7 +438,7 @@ bson_t *castBSON(lua_State *L, int idx) {
 	} else { /* From value */
 		int nerr = 0;
 		if (luaL_callmeta(L, idx, "__tobson")) lua_replace(L, idx); /* Transform value with '__tobson' metamethod */
-		if ((bson = testBSON(L, idx))) return bson; /* Value is a BSON object */
+		if ((bson = testBSON(L, idx))) return bson; /* Nothing to do */
 		luaL_argcheck(L, lua_istable(L, idx), idx, "string, table or " TYPE_BSON " expected");
 		bson = lua_newuserdata(L, sizeof *bson);
 		bson_init(bson);
