@@ -110,7 +110,7 @@ local class = {
 	end
 }
 
--- BSON evaluation handler (something callable, i.e. a function or a table/userdata with a '__call' metamethod)
+-- BSON evaluation handler can be a function or a table/userdata with a '__call' metamethod
 local handler = function (doc)
 	return setmetatable({ -- The way 'doc' is restored from BSON
 		id = doc._id,
