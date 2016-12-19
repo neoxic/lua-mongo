@@ -28,8 +28,15 @@ local function testCollection(collection)
 	assert(b == nil and e == nil) -- nil + no error
 	b, e = cursor:next()
 	assert(b == nil and type(e) == 'string') -- nil + error
-	assert(collection:find({ _id = 123 }):next(true)._id == 123) -- Evaluation
-	assert(collection:find({ _id = 123 }):next(true, function (t) return { id = t._id } end).id == 123) -- Evaluation with transformation
+	-- cursor:value()
+	cursor = collection:find { _id = 123 }
+	assert(cursor:value()._id == 123)
+	assert(cursor:value() == nil) -- No more items
+	test.failure(cursor.value, cursor) -- Cursor exhausted
+	cursor = collection:find { _id = 123 }
+	assert(cursor:value(function (t) return { id = t._id } end).id == 123) -- With transformation
+	assert(cursor:value() == nil) -- No more items
+	test.failure(cursor.value, cursor) -- Cursor exhausted
 	collectgarbage()
 
 	-- cursor:iterator()
@@ -38,11 +45,11 @@ local function testCollection(collection)
 	local v2 = assert(f(c))
 	assert(v1._id == 789)
 	assert(v2._id == 456)
-	assert(not f(c)) -- No more items
+	assert(f(c) == nil) -- No more items
 	test.failure(f, c) -- Cursor exhausted
-	f, c = collection:find({ _id = 123 }):iterator(function (t) return { id = t._id } end) -- Iterator with transformation
+	f, c = collection:find({ _id = 123 }):iterator(function (t) return { id = t._id } end) -- With transformation
 	assert(f(c).id == 123)
-	assert(not f(c))
+	assert(f(c) == nil) -- No more items
 	test.failure(f, c) -- Cursor exhausted
 	collectgarbage()
 
@@ -50,11 +57,11 @@ local function testCollection(collection)
 	assert(collection:count() == 2)
 	assert(collection:remove { _id = 123 })
 	assert(collection:remove { _id = 123 }) -- Remove reports 'true' even if not found
-	assert(not collection:find({ _id = 123 }):next()) -- Not found
+	assert(collection:find({ _id = 123 }):value() == nil) -- Not found
 
 	assert(collection:update({ _id = 123 }, { a = 'abc' }, { noValidate = false, upsert = true })) -- inSERT
 	assert(collection:update({ _id = 123 }, { a = 'def' }, { noValidate = false, upsert = true })) -- UPdate
-	assert(tostring(collection:find({ _id = 123 }):next()) == '{ "_id" : 123, "a" : "def" }')
+	assert(collection:find({ _id = 123 }):value().a == 'def')
 
 	assert(collection:drop())
 

@@ -22,10 +22,8 @@
 
 #include "common.h"
 
-static int _next(lua_State *L) {
+static int next(lua_State *L, int hidx) {
 	mongoc_cursor_t *cursor = checkCursor(L, 1);
-	bool iter = lua_toboolean(L, lua_upvalueindex(1)); /* Iterator mode */
-	int hidx = iter ? lua_upvalueindex(2) : lua_toboolean(L, 2) ? 3 : 0; /* Handler index */
 	const bson_t *bson;
 	bson_error_t error;
 	if (mongoc_cursor_next(cursor, &bson)) {
@@ -34,9 +32,17 @@ static int _next(lua_State *L) {
 	}
 	lua_pushnil(L);
 	if (!mongoc_cursor_error(cursor, &error)) return 1;
-	if (iter) return luaL_error(L, "mongoc_cursor_next() failed: %s", error.message);
+	if (hidx) return luaL_error(L, "mongoc_cursor_next() failed: %s", error.message);
 	lua_pushstring(L, error.message);
 	return 2;
+}
+
+static int _next(lua_State *L) {
+	return next(L, 0);
+}
+
+static int _value(lua_State *L) {
+	return next(L, 2);
 }
 
 static int _gc(lua_State *L) {
@@ -47,27 +53,30 @@ static int _gc(lua_State *L) {
 
 static const luaL_Reg funcs[] = {
 	{ "next", _next },
+	{ "value", _value },
 	{ "__gc", _gc },
 	{ 0, 0 }
 };
+
+static int iterator(lua_State *L) {
+	return next(L, lua_upvalueindex(1));
+}
 
 static int _iterator(lua_State *L) {
 	checkCursor(L, 1);
 	if (lua_isnoneornil(L, 2)) lua_pushvalue(L, lua_upvalueindex(1)); /* Default iterator */
 	else {
-		lua_pushboolean(L, 1); /* Iterator mode on */
-		lua_pushvalue(L, 2); /* Handler object */
-		lua_pushcclosure(L, _next, 2); /* Iterator with handler */
+		lua_pushvalue(L, 2); /* Handler */
+		lua_pushcclosure(L, iterator, 1); /* Iterator with handler */
 	}
-	lua_pushvalue(L, 1);
-	return 2; /* OUT: iterator, cursor */
+	lua_pushvalue(L, 1); /* Cursor */
+	return 2;
 }
 
 void pushCursor(lua_State *L, mongoc_cursor_t *cursor) {
 	pushHandle(L, cursor);
 	if (pushType(L, TYPE_CURSOR, funcs)) {
-		lua_pushboolean(L, 1); /* Iterator mode on */
-		lua_pushcclosure(L, _next, 1); /* Default iterator ... */
+		lua_pushcfunction(L, iterator); /* Default iterator ... */
 		lua_pushcclosure(L, _iterator, 1); /* ... cached as upvalue 1 */
 		lua_setfield(L, -2, "iterator");
 	}

@@ -75,7 +75,6 @@ local mt = { __tobson = function (t) return { bin = mongo.Binary(t.str) } end }
 local obj = setmetatable({ str = 'abc' }, mt)
 local h1 = function (t) return setmetatable({ str = t.bin() }, mt) end
 local h2 = function (t) return t.a and t or h1(t) end
-
 check(obj, '{ "bin" : { "$binary" : "YWJj", "$type" : "0" } }', h1) -- Root transformation
 check({ a = obj }, '{ "a" : { "bin" : { "$binary" : "YWJj", "$type" : "00" } } }', h2) -- Nested transformation
 
