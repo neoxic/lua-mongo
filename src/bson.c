@@ -22,7 +22,7 @@
 
 #include "common.h"
 
-#define MAXSTACK 1000 /* Arbitrary stack size limit that triggers recursion error */
+#define MAXSTACK 1000 /* Arbitrary stack size limit to check for recursion */
 
 static int _data(lua_State *L) {
 	bson_t *bson = checkBSON(L, 1);
@@ -247,8 +247,7 @@ static bool appendTable(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson
 	size_t klen;
 	lua_Integer kval;
 	int top = lua_gettop(L);
-	if (top >= MAXSTACK) return error(L, nerr, "recursion detected");
-	lua_checkstack(L, LUA_MINSTACK);
+	if (!lua_checkstack(L, LUA_MINSTACK) || top >= MAXSTACK) return error(L, nerr, "recursion detected");
 	for (lua_pushnil(L); lua_next(L, idx); lua_pop(L, 1)) {
 		switch (lua_type(L, top + 1)) {
 			case LUA_TNUMBER:
