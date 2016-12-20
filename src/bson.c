@@ -247,7 +247,8 @@ static bool appendTable(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson
 	size_t klen;
 	lua_Integer kval;
 	int top = lua_gettop(L);
-	if (!lua_checkstack(L, LUA_MINSTACK) || top >= MAXSTACK) return error(L, nerr, "recursion detected");
+	if (top >= MAXSTACK) return error(L, nerr, "recursion detected");
+	lua_checkstack(L, LUA_MINSTACK);
 	for (lua_pushnil(L); lua_next(L, idx); lua_pop(L, 1)) {
 		switch (lua_type(L, top + 1)) {
 			case LUA_TNUMBER:

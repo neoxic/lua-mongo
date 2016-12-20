@@ -7,7 +7,7 @@ _lua-mongo_ is a binding to the MongoDB C Driver (http://mongoc.org) for Lua.
 
 * Support for custom data transformation handlers when converting to/from BSON documents.
 
-* Automatic conversion of Lua numbers to/from BSON Int32, Int64 and Double types depending on
+* Automatic conversion of Lua numbers to/from BSON _Int32_, _Int64_ and _Double_ types depending on
   their capacity without precision loss (when Lua allows it). Explicit casts are also available.
 
 * Unified API for MongoDB CRUD operations, wrappers and types as they are introduced in `mongoc`.
@@ -56,7 +56,7 @@ Test settings can be configured in `test/test.lua`.
 Getting started
 ---------------
 
-Require the `mongo` module and create a testing collection handle:
+Preparing the playground:
 
 ```Lua
 local mongo = require 'mongo'
@@ -65,12 +65,12 @@ local collection = client:getCollection('lua-mongo-test', 'test')
 
 -- Common variables
 local id = mongo.ObjectID()
-local filter = mongo.BSON { _id = id }
 local query = mongo.BSON '{ "age" : { "$gt" : 25 } }'
+local filter = mongo.BSON { _id = id }
 ```
 
 
-Play with basic features and MongoDB CRUD operations:
+Basic features and MongoDB CRUD operations:
 
 ```Lua
 -- Save document
@@ -173,8 +173,85 @@ end
 ```
 
 
-Cleanup by dropping the testing collection:
+Dropping the testing collection:
 
 ```Lua
 collection:drop()
 ```
+
+
+Reference
+---------
+
+#### mongo.type(value)
+
+Returns a type name of a _lua-mongo_ `value`.
+
+```Lua
+print(mongo.type(mongo.Int32(123))) -- mongo.Int32
+print(mongo.type(mongo.Null)) -- mongo.Null
+```
+
+#### mongo.Binary(data, [subtype])
+
+Creates an instance of a BSON _Binary_ type.
+
+```Lua
+local binary = mongo.Binary('abc', 0x80)
+print(binary) -- mongo.Binary("abc", 128)
+print(binary()) -- abc 128
+```
+
+#### mongo.BSON(value): `bson`
+
+Creates an instance of a BSON document from a `value` convertible to BSON, i.e. a BSON document
+(in which case this method is no-op), a JSON string, a table, or a table/userdata with a `__tobson`
+metamethod that returns a table or a BSON document. This is the general rule for values where a BSON
+document is required.
+
+#### mongo.Client(uri): `client`
+
+Creates an instance of a MongoDB _client_ handle.
+
+#### mongo.DateTime(milliseconds)
+
+Creates an instance of a BSON _DateTime_ type.
+
+#### mongo.Double(number)
+
+Creates an instance of a BSON _Double_ type. Overrides automatic number conversion.
+
+#### mongo.Int32(integer)
+
+Creates an instance of a BSON _Int32_ type. Overrides automatic number conversion.
+
+#### mongo.Int64(integer)
+
+Creates an instance of a BSON _Int64_ type. Overrides automatic number conversion.
+
+#### mongo.Javascript(code, [scope])
+
+Creates an instance of a BSON _Javascript_ type.
+
+#### mongo.ObjectID([value])
+
+Creates an instance of a BSON _ObjectID_ type. If a hexadecimal string `value` is provided, it is
+used to initialize the instance. Otherwise, a new random value is generated.
+
+#### mongo.Regex(regex, [options])
+
+Creates an instance of a BSON _Regex_ type.
+
+#### mongo.Timestamp(timestamp, increment)
+
+Creates an instance of a BSON _Timestamp_ type.
+
+
+### `bson`
+
+#### bson:data()
+
+
+### `client`
+
+#### client:getCollection(dbname, cname)
