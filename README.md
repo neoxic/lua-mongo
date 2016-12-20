@@ -1,15 +1,36 @@
 MongoDB Driver for Lua
 ======================
 
-_lua-mongo_ is a binding of the MongoDB C Driver (http://mongoc.org) for Lua.
+_lua-mongo_ is a binding to the MongoDB C Driver (http://mongoc.org) for Lua.
 
-Please note that _lua-mongo_ is in development beta which means that its API is likely to change between versions.
+* Transparent conversion from Lua/JSON to BSON.
+
+* Support for custom data transformation handlers when converting to/from BSON documents.
+
+* Automatic conversion of Lua numbers to/from BSON Int32, Int64 and Double types depending on
+  their capacity without precision loss (when Lua allows it). Explicit casts are also available.
+
+* Unified API for MongoDB CRUD operations, wrappers and types as they are introduced in `mongoc`.
+
+* Support for query/insert/update/remove flags.
 
 
-Building and installation with CMake
-------------------------------------
+Please note that _lua-mongo_ is in development beta which means that its API is likely to change
+between versions.
 
-To build in the source directory, type:
+
+Installing with LuaRocks
+------------------------
+
+To install the current development version, run:
+
+	luarocks install --server=http://luarocks.org/dev lua-mongo
+
+
+Building and installing with CMake
+----------------------------------
+
+To build in the source directory, run:
 
 	cmake .
 	make
@@ -25,34 +46,42 @@ or for LuaJIT:
 
 To build in a separate directory, replace `.` with a path to the source.
 
-To run tests, type:
+To test the build, run:
 
 	make test
 
 Test settings can be configured in `test/test.lua`.
 
 
-Usage example
--------------
+Getting started
+---------------
 
-Basic features and CRUD operations:
+Require the `mongo` module and create a testing collection handle:
 
 ```Lua
 local mongo = require 'mongo'
 local client = mongo.Client 'mongodb://127.0.0.1'
 local collection = client:getCollection('lua-mongo-test', 'test')
 
--- Create and save document
+-- Common variables
 local id = mongo.ObjectID()
-local document = { _id = id, name = 'John Smith', age = 50 }
-collection:save(document)
+local filter = mongo.BSON { _id = id }
+local query = mongo.BSON '{ "age" : { "$gt" : 25 } }'
+```
+
+
+Play with basic features and MongoDB CRUD operations:
+
+```Lua
+-- Save document
+collection:save { _id = id, name = 'John Smith', age = 50 }
 
 -- Fetch document
-local result = collection:find({ _id = id }):value()
+local result = collection:find(query):value()
 print(result.name)
 
 -- Iterate in a for-loop
-for item in collection:find('{ "age" : { "$gt" : 25 } }'):iterator() do
+for item in collection:find(query):iterator() do
 	print(item.name)
 end
 
@@ -63,10 +92,10 @@ collection:insert '{ "value" : "456" }'
 -- Use options in queries
 print(collection:count({}, { skip = 1, limit = 2 }))
 
--- Access to BSON if needed
-local cursor = collection:find { _id = id }
-local bson = cursor:next() -- Fetch document
-print(bson) -- BSON is implicitly converted to a string, i.e. JSON
+-- Access to BSON where needed
+local cursor = collection:find(query)
+local bson = cursor:next() -- Fetch BSON document
+print(bson) -- BSON is implicitly converted JSON
 
 -- Explicit BSON to Lua conversion
 local value = bson()
@@ -76,27 +105,17 @@ print(value.name)
 local json = tostring(bson)
 print(json)
 
--- Create/cache/re-use BSON objects
-local selector = mongo.BSON { _id = id }
-local update = mongo.BSON { age = 60, oldinfo = bson }
-local flags = { upsert = true }
-collection:update(selector, update, flags) -- Update document
-collection:remove(selector) -- Remove document
-
--- Cleanup
-collection:drop()
+-- Transparently include BSON documents in other documents
+collection:update(filter, { age = 60, backup = bson }, { upsert = true }) -- Update document
+collection:remove(filter) -- Remove document
 ```
 
-The use of `__tobson` metamethods and BSON handlers gives full control over how
-Lua values are represented in BSON objects and vice versa. In particular, this API
-facilitates transparent support for Lua classes (tables with metatables) on their
-way to and from MongoDB. For example:
+
+The use of `__tobson` metamethods and BSON handlers gives full control over how Lua values are
+represented in BSON documents and vice versa. In particular, this API facilitates support for
+classes (tables with metatables) on their way to and/or from MongoDB. For example:
 
 ```Lua
-local mongo = require 'mongo'
-local client = mongo.Client 'mongodb://127.0.0.1'
-local collection = client:getCollection('lua-mongo-test', 'test')
-
 -- Class metatable
 local class = {
 	__tostring = function (obj)
@@ -110,7 +129,10 @@ local class = {
 	end
 }
 
--- BSON evaluation handler can be a function or a table/userdata with a '__call' metamethod
+-- A root '__tobson' metamethod may return a table or a BSON document.
+-- A nested '__tobson' metamethod may return a convertible Lua type, a BSON type or a BSON document.
+
+-- BSON handler
 local handler = function (doc)
 	return setmetatable({ -- The way 'doc' is restored from BSON
 		id = doc._id,
@@ -118,8 +140,12 @@ local handler = function (doc)
 	}, class)
 end
 
-local id = 123
-local filter = mongo.BSON { _id = id }
+-- Anything callable can serve as a BSON handler. For instance, it can be a table or a userdata
+-- with a '__call' metamethod.
+
+-- Please note that the same handler will be called for each root and nested document in the order
+-- of appearance. It is thus the sole responsibility of the handler to differentiate documents by
+-- their types.
 
 -- Simple object with a "class" metatable
 local object = setmetatable({
@@ -144,7 +170,11 @@ print(object)
 for object in collection:find(filter):iterator(handler) do
 	print(object)
 end
+```
 
--- Cleanup
+
+Cleanup by dropping the testing collection:
+
+```Lua
 collection:drop()
 ```
