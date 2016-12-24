@@ -19,8 +19,8 @@ error message.
 Executes a `query` with `options` on `collection`. Returns a [Cursor].
 
 ### collection:findAndModify(query, options)
-A wrapper for the _findAndModify_ MongoDB command. On success, returns a [BSON document]. On failure,
-returns `nil` and the error message.
+A wrapper for the _findAndModify_ MongoDB command. On success, returns the server's reply as a
+[BSON document]. On failure, returns `nil` and the error message.
 
 ### collection:insert(document, [flags])
 Inserts `document` into `collection`. On success, returns `true`. On failure, returns `nil` and
@@ -40,12 +40,12 @@ Updates documents in `collection` that match `query`. On success, returns `true`
 returns `nil` and the error message. Refer to [Update flags] for `flags` description.
 
 ### collection:validate([options])
-A wrapper for the _validate_ MongoDB command. On success, returns a [BSON document]. On failure,
-returns `nil` and the error message.
+A wrapper for the _validate_ MongoDB command. On success, returns the server's reply as a
+[BSON document]. On failure, returns `nil` and the error message.
 
 
 [BSON document]: bson.md
 [Cursor]: cursor.md
-[Insert flags]: flags.md#Insert_flags
-[Remove flags]: flags.md#Remove_flags
-[Update flags]: flags.md#Update_flags
+[Insert flags]: flags.md#insert-flags
+[Remove flags]: flags.md#remove-flags
+[Update flags]: flags.md#update-flags
