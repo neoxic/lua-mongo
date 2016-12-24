@@ -14,7 +14,7 @@ MongoDB Driver for Lua
 * Automatic conversion of Lua numbers to/from BSON Int32, Int64 and Double types depending on their
   capacity without precision loss (when Lua allows it). Explicit casts are also available.
 
-Please refer to [The MongoDB Manual] for information about MongoDB commands and CRUD operations.
+Please refer to the [MongoDB Manual] for information about MongoDB commands and CRUD operations.
 
 
 Installing with LuaRocks
@@ -169,5 +169,5 @@ Please check out the [API Reference] for more information.
 
 [lua-mongo]: https://github.com/neoxic/lua-mongo
 [MongoDB C Driver]: http://mongoc.org
-[The MongoDB Manual]: https://docs.mongodb.com/manual/
+[MongoDB Manual]: https://docs.mongodb.com/manual/
 [API Reference]: doc/main.md
