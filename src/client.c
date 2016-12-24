@@ -23,19 +23,17 @@
 #include "common.h"
 
 static int _getCollection(lua_State *L) {
-	pushCollection(L, mongoc_client_get_collection(
-		checkClient(L, 1), /* client */
-		luaL_checkstring(L, 2), /* db */
-		luaL_checkstring(L, 3) /* collection */
-	));
+	mongoc_client_t *client = checkClient(L, 1);
+	const char *dbname = luaL_checkstring(L, 2);
+	const char *cname = luaL_checkstring(L, 3);
+	pushCollection(L, mongoc_client_get_collection(client, dbname, cname));
 	return 1;
 }
 
 static int _getDatabase(lua_State *L) {
-	pushDatabase(L, mongoc_client_get_database(
-		checkClient(L, 1), /* client */
-		luaL_checkstring(L, 2) /* name */
-	));
+	mongoc_client_t *client = checkClient(L, 1);
+	const char *name = luaL_checkstring(L, 2);
+	pushDatabase(L, mongoc_client_get_database(client, name));
 	return 1;
 }
 

@@ -63,7 +63,7 @@ EXPORT int luaopen_mongo(lua_State *L) {
 	lua_pushliteral(L, VERSION);
 	lua_setfield(L, -2, "_VERSION");
 
-	/* Cached BSON type constructors */
+	/* Cache BSON type constructors for quick access */
 	lua_getfield(L, -1, "Binary");
 	lua_rawsetp(L, LUA_REGISTRYINDEX, &NEW_BINARY);
 	lua_getfield(L, -1, "DateTime");
@@ -75,7 +75,7 @@ EXPORT int luaopen_mongo(lua_State *L) {
 	lua_getfield(L, -1, "Timestamp");
 	lua_rawsetp(L, LUA_REGISTRYINDEX, &NEW_TIMESTAMP);
 
-	/* Singleton BSON types */
+	/* Create BSON type singletons */
 	pushMaxKey(L);
 	lua_pushvalue(L, -1);
 	lua_setfield(L, -3, "MaxKey");

@@ -34,9 +34,9 @@ static int _hash(lua_State *L) {
 }
 
 static int _tostring(lua_State *L) {
-	char str[25];
-	bson_oid_to_string(checkObjectID(L, 1), str);
-	lua_pushstring(L, str);
+	char buf[25];
+	bson_oid_to_string(checkObjectID(L, 1), buf);
+	lua_pushstring(L, buf);
 	return 1;
 }
 

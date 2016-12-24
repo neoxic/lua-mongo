@@ -22,6 +22,10 @@
 
 #include "common.h"
 
+static int _unpack(lua_State *L) {
+	return lua_istable(L, 1) ? unpackParams(L, 1) : 0;
+}
+
 static int _tostring(lua_State *L) {
 	int i, n;
 	lua_settop(L, 1);
@@ -43,13 +47,9 @@ static int _tostring(lua_State *L) {
 	return 1;
 }
 
-static int _call(lua_State *L) {
-	return lua_istable(L, 1) ? unpackParams(L, 1) : 0;
-}
-
 static const luaL_Reg funcs[] = {
+	{ "unpack", _unpack },
 	{ "__tostring", _tostring },
-	{ "__call", _call },
 	{ 0, 0 }
 };
 

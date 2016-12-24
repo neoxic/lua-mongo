@@ -90,14 +90,25 @@ int unpackParams(lua_State *L, int idx) {
 	return n;
 }
 
-int checkStatus(lua_State *L, bool cond, const char *msg) {
-	if (cond) {
-		lua_pushboolean(L, 1);
-		return 1;
-	}
-	lua_pushboolean(L, 0);
-	lua_pushstring(L, msg);
+int commandError(lua_State *L, const bson_error_t *error) {
+	lua_pushnil(L);
+	lua_pushstring(L, error->message);
 	return 2;
+}
+
+int commandStatus(lua_State *L, bool status, const bson_error_t *error) {
+	if (!status) return commandError(L, error);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
+int commandReply(lua_State *L, bool status, bson_t *reply, const bson_error_t *error) {
+	if (!status) {
+		bson_destroy(reply);
+		return commandError(L, error);
+	}
+	pushBSON_steal(L, reply);
+	return 1;
 }
 
 #if LUA_VERSION_NUM < 502

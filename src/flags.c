@@ -33,30 +33,19 @@ static const Flag insertFlags[] = {
 	{ 0, 0 }
 };
 
-static const Flag queryFlags[] = {
-	{ "tailableCursor", MONGOC_QUERY_TAILABLE_CURSOR },
-	{ "slaveOk", MONGOC_QUERY_SLAVE_OK },
-	{ "oplogReplay", MONGOC_QUERY_OPLOG_REPLAY },
-	{ "noCursorTimeout", MONGOC_QUERY_NO_CURSOR_TIMEOUT },
-	{ "awaitData", MONGOC_QUERY_AWAIT_DATA },
-	{ "exhaust", MONGOC_QUERY_EXHAUST },
-	{ "partial", MONGOC_QUERY_PARTIAL },
-	{ 0, 0 }
-};
-
 static const Flag removeFlags[] = {
-	{ "singleRemove", MONGOC_REMOVE_SINGLE_REMOVE },
+	{ "single", MONGOC_REMOVE_SINGLE_REMOVE },
 	{ 0, 0 }
 };
 
 static const Flag updateFlags[] = {
 	{ "upsert", MONGOC_UPDATE_UPSERT },
-	{ "multiUpdate", MONGOC_UPDATE_MULTI_UPDATE },
+	{ "multi", MONGOC_UPDATE_MULTI_UPDATE },
 	{ "noValidate", MONGOC_UPDATE_NO_VALIDATE },
 	{ 0, 0 }
 };
 
-static int checkFlags(lua_State *L, int idx, const Flag flags[]) {
+static int toFlags(lua_State *L, int idx, const Flag flags[]) {
 	const Flag *flag;
 	const char *key, *name;
 	int val = 0;
@@ -77,18 +66,14 @@ static int checkFlags(lua_State *L, int idx, const Flag flags[]) {
 	return val;
 }
 
-int checkInsertFlags(lua_State *L, int idx) {
-	return checkFlags(L, idx, insertFlags);
+int toInsertFlags(lua_State *L, int idx) {
+	return toFlags(L, idx, insertFlags);
 }
 
-int checkQueryFlags(lua_State *L, int idx) {
-	return checkFlags(L, idx, queryFlags);
+int toRemoveFlags(lua_State *L, int idx) {
+	return toFlags(L, idx, removeFlags);
 }
 
-int checkRemoveFlags(lua_State *L, int idx) {
-	return checkFlags(L, idx, removeFlags);
-}
-
-int checkUpdateFlags(lua_State *L, int idx) {
-	return checkFlags(L, idx, updateFlags);
+int toUpdateFlags(lua_State *L, int idx) {
+	return toFlags(L, idx, updateFlags);
 }

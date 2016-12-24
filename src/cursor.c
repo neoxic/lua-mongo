@@ -22,7 +22,7 @@
 
 #include "common.h"
 
-static int next(lua_State *L, int hidx) {
+static int iterate(lua_State *L, int hidx) {
 	mongoc_cursor_t *cursor = checkCursor(L, 1);
 	const bson_t *bson;
 	bson_error_t error;
@@ -30,19 +30,20 @@ static int next(lua_State *L, int hidx) {
 		pushBSON(L, bson, hidx);
 		return 1;
 	}
+	if (mongoc_cursor_error(cursor, &error)) {
+		if (hidx) luaL_error(L, "%s", error.message); /* Raise error when evaluating */
+		return commandError(L, &error);
+	}
 	lua_pushnil(L);
-	if (!mongoc_cursor_error(cursor, &error)) return 1;
-	if (hidx) return luaL_error(L, "mongoc_cursor_next() failed: %s", error.message);
-	lua_pushstring(L, error.message);
-	return 2;
+	return 1;
 }
 
 static int _next(lua_State *L) {
-	return next(L, 0);
+	return iterate(L, 0);
 }
 
 static int _value(lua_State *L) {
-	return next(L, 2);
+	return iterate(L, 2);
 }
 
 static int _gc(lua_State *L) {
@@ -59,7 +60,7 @@ static const luaL_Reg funcs[] = {
 };
 
 static int iterator(lua_State *L) {
-	return next(L, lua_upvalueindex(1));
+	return iterate(L, lua_upvalueindex(1));
 }
 
 static int _iterator(lua_State *L) {

@@ -23,10 +23,9 @@
 #include "common.h"
 
 static int _getCollection(lua_State *L) {
-	pushCollection(L, mongoc_database_get_collection(
-		checkDatabase(L, 1), /* database */
-		luaL_checkstring(L, 2) /* name */
-	));
+	mongoc_database_t *database = checkDatabase(L, 1);
+	const char *name = luaL_checkstring(L, 2);
+	pushCollection(L, mongoc_database_get_collection(database, name));
 	return 1;
 }
 

@@ -40,29 +40,34 @@ local function testCollection(collection)
 	collectgarbage()
 
 	-- cursor:iterator()
-	local f, c = collection:find('{ "_id" : { "$gt" : 123 } }', { sort = { _id = -1 }}):iterator() -- _id > 123, desc order
+	local f, c = collection:find('{ "_id" : { "$gt" : 123 } }', { sort = { _id = -1 } }):iterator() -- _id > 123, desc order
 	local v1 = assert(f(c))
 	local v2 = assert(f(c))
 	assert(v1._id == 789)
 	assert(v2._id == 456)
 	assert(f(c) == nil) -- No more items
 	test.failure(f, c) -- Cursor exhausted
-	f, c = collection:find({ _id = 123 }):iterator(function (t) return { id = t._id } end) -- With transformation
+	f, c = collection:find { _id = 123 }:iterator(function (t) return { id = t._id } end) -- With transformation
 	assert(f(c).id == 123)
 	assert(f(c) == nil) -- No more items
 	test.failure(f, c) -- Cursor exhausted
 	collectgarbage()
 
-	assert(collection:remove({}, { singleRemove = true })) -- Flags
+	assert(collection:remove({}, { single = true })) -- Flags
 	assert(collection:count() == 2)
 	assert(collection:remove { _id = 123 })
 	assert(collection:remove { _id = 123 }) -- Remove reports 'true' even if not found
-	assert(collection:find({ _id = 123 }):value() == nil) -- Not found
+	assert(collection:find { _id = 123 }:value() == nil) -- Not found
 
-	assert(collection:update({ _id = 123 }, { a = 'abc' }, { noValidate = false, upsert = true })) -- inSERT
-	assert(collection:update({ _id = 123 }, { a = 'def' }, { noValidate = false, upsert = true })) -- UPdate
-	assert(collection:find({ _id = 123 }):value().a == 'def')
+	assert(collection:update({ _id = 123 }, { a = 'abc' }, { upsert = true })) -- inSERT
+	assert(collection:update({ _id = 123 }, { a = 'def' }, { upsert = true })) -- UPdate
+	assert(collection:find { _id = 123 }:value().a == 'def')
 
+	assert(collection:findAndModify({ _id = 123 }, { update = { a = 'abc' } }):value().value.a == 'def')
+
+	assert(collection:aggregate('[ { "$group" : { "_id" : "$a", "count" : { "$sum" : 1 } } } ]'):value().count == 1)
+
+	assert(collection:validate { full = true }:value().valid)
 	assert(collection:drop())
 
 	collection = nil

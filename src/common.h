@@ -28,7 +28,7 @@
 #include <bson.h>
 
 #define MODNAME "lua-mongo"
-#define VERSION "0.1.0-dev"
+#define VERSION "0.2.0"
 
 #define TYPE_BINARY "mongo.Binary"
 #define TYPE_BSON "mongo.BSON"
@@ -64,14 +64,14 @@ int newRegex(lua_State *L);
 int newTimestamp(lua_State *L);
 
 void pushBSON(lua_State *L, const bson_t *bson, int hidx);
-void pushObjectID(lua_State *L, const bson_oid_t *oid);
-void pushMaxKey(lua_State *L);
-void pushMinKey(lua_State *L);
-void pushNull(lua_State *L);
-
+void pushBSON_steal(lua_State *L, bson_t *bson);
 void pushCollection(lua_State *L, mongoc_collection_t *collection);
 void pushCursor(lua_State *L, mongoc_cursor_t *cursor);
 void pushDatabase(lua_State *L, mongoc_database_t *database);
+void pushMaxKey(lua_State *L);
+void pushMinKey(lua_State *L);
+void pushNull(lua_State *L);
+void pushObjectID(lua_State *L, const bson_oid_t *oid);
 
 bson_t *checkBSON(lua_State *L, int idx);
 bson_t *testBSON(lua_State *L, int idx);
@@ -86,10 +86,9 @@ mongoc_collection_t *checkCollection(lua_State *L, int idx);
 mongoc_cursor_t *checkCursor(lua_State *L, int idx);
 mongoc_database_t *checkDatabase(lua_State *L, int idx);
 
-int checkInsertFlags(lua_State *L, int idx);
-int checkQueryFlags(lua_State *L, int idx);
-int checkRemoveFlags(lua_State *L, int idx);
-int checkUpdateFlags(lua_State *L, int idx);
+int toInsertFlags(lua_State *L, int idx);
+int toRemoveFlags(lua_State *L, int idx);
+int toUpdateFlags(lua_State *L, int idx);
 
 /* Helpers */
 
@@ -102,9 +101,11 @@ void pushHandle(lua_State *L, void *ptr);
 void packParams(lua_State *L, int n);
 int unpackParams(lua_State *L, int idx);
 
-int checkStatus(lua_State *L, bool cond, const char *msg);
+int commandError(lua_State *L, const bson_error_t *error);
+int commandStatus(lua_State *L, bool status, const bson_error_t *error);
+int commandReply(lua_State *L, bool status, bson_t *reply, const bson_error_t *error);
 
-#define isInt32(n) ((n) >= INT32_MIN && (n) <= INT32_MAX)
+#define check(L, cond) (void)((cond) || luaL_error(L, "precondition failed: %s at %s:%d", #cond, __FILE__, __LINE__))
 
 #if LUA_VERSION_NUM >= 503 && LUA_MAXINTEGER >= INT64_MAX
 #define pushInt64 lua_pushinteger
