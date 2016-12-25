@@ -16,10 +16,10 @@ Executes a count `query` with `options` on `collection` and returns the result. 
 Drops `collection` with `options` and returns `true`. On error, returns `nil` and the error message.
 
 ### collection:find(query, [options])
-Executes a `query` with `options` on `collection` and returns a [Cursor] to fetch the result.
+Executes a find `query` with `options` on `collection` and returns a [Cursor] to fetch the result.
 
 ### collection:findAndModify(query, options)
-Executes a _findAndModify_ `query` on `collection` and returns the result as a [BSON document] or
+Executes a find-and-modify `query` on `collection` and returns the result as a [BSON document] or
 [BSON Null][BSON type] if nothing was found. On error, returns `nil` and the error message.
 
 ### collection:insert(document, [flags])
