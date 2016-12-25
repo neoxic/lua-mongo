@@ -10,8 +10,8 @@ local flags = {
 }
 ```
 
-Insert flags
-------------
+_Insert_ flags
+--------------
 
 | Name            | Translation                     |
 |-----------------|---------------------------------|
@@ -21,8 +21,8 @@ Insert flags
 Refer to http://mongoc.org/libmongoc/current/mongoc_insert_flags_t.html for more information.
 
 
-Remove flags
-------------
+_Remove_ flags
+--------------
 
 | Name   | Translation                 |
 |--------|-----------------------------|
@@ -31,8 +31,8 @@ Remove flags
 Refer to http://mongoc.org/libmongoc/current/mongoc_remove_flags_t.html for more information.
 
 
-Update flags
-------------
+_Update_ flags
+--------------
 
 | Name       | Translation                |
 |------------|----------------------------|
