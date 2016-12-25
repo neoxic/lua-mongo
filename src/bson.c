@@ -31,6 +31,13 @@ static int _data(lua_State *L) {
 	return 1;
 }
 
+static int _find(lua_State *L) {
+	bson_t *bson = checkBSON(L, 1);
+	const char *name = luaL_checkstring(L, 2);
+	pushBSONField(L, bson, name);
+	return 1;
+}
+
 static int _value(lua_State *L) {
 	pushBSON(L, checkBSON(L, 1), 2);
 	return 1;
@@ -62,6 +69,7 @@ static int _gc(lua_State *L) {
 
 static const luaL_Reg funcs[] = {
 	{ "data", _data },
+	{ "find", _find },
 	{ "value", _value },
 	{ "__tostring", _tostring },
 	{ "__len", _len },
@@ -193,7 +201,7 @@ static bool appendValue(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson
 		}
 		case LUA_TTABLE: {
 			bool array;
-			bson_t val;
+			bson_t doc;
 			if (luaL_getmetafield(L, idx, "__bsontype")) {
 				if (!appendBSONType(L, lua_tointeger(L, -1), idx, nerr, bson, key, klen)) return false;
 				lua_pop(L, 1);
@@ -207,13 +215,13 @@ static bool appendValue(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson
 			lua_pushboolean(L, 1);
 			lua_rawset(L, ridx);
 			if ((array = isArray(L, idx))) {
-				bson_append_array_begin(bson, key, klen, &val);
-				if (!appendTable(L, idx, ridx, nerr, &val, array)) return false;
-				bson_append_array_end(bson, &val);
+				bson_append_array_begin(bson, key, klen, &doc);
+				if (!appendTable(L, idx, ridx, nerr, &doc, array)) return false;
+				bson_append_array_end(bson, &doc);
 			} else {
-				bson_append_document_begin(bson, key, klen, &val);
-				if (!appendTable(L, idx, ridx, nerr, &val, array)) return false;
-				bson_append_document_end(bson, &val);
+				bson_append_document_begin(bson, key, klen, &doc);
+				if (!appendTable(L, idx, ridx, nerr, &doc, array)) return false;
+				bson_append_document_end(bson, &doc);
 			}
 			lua_pushvalue(L, idx);
 			lua_pushnil(L);
@@ -221,10 +229,10 @@ static bool appendValue(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson
 			break;
 		}
 		case LUA_TUSERDATA: {
-			bson_t *val;
+			bson_t *doc;
 			bson_oid_t *oid;
-			if ((val = testBSON(L, idx))) {
-				bson_append_document(bson, key, klen, val);
+			if ((doc = testBSON(L, idx))) {
+				bson_append_document(bson, key, klen, doc);
 				break;
 			}
 			if ((oid = testObjectID(L, idx))) {
@@ -291,9 +299,9 @@ static void pushValue(lua_State *L, bson_iter_t *iter, int hidx) {
 		}
 		case BSON_TYPE_DOCUMENT:
 		case BSON_TYPE_ARRAY: {
-			bson_iter_t val;
-			check(L, bson_iter_recurse(iter, &val));
-			pushTable(L, &val, hidx, type == BSON_TYPE_ARRAY);
+			bson_iter_t child;
+			check(L, bson_iter_recurse(iter, &child));
+			pushTable(L, &child, hidx, type == BSON_TYPE_ARRAY);
 			break;
 		}
 		case BSON_TYPE_OID:
@@ -324,14 +332,14 @@ static void pushValue(lua_State *L, bson_iter_t *iter, int hidx) {
 			break;
 		}
 		case BSON_TYPE_CODEWSCOPE: {
-			bson_t sval;
-			uint32_t len, slen;
-			const uint8_t *sbuf;
-			const char *code = bson_iter_codewscope(iter, &len, &slen, &sbuf);
-			check(L, bson_init_static(&sval, sbuf, slen));
+			bson_t scope;
+			uint32_t clen, slen;
+			const uint8_t *buf;
+			const char *code = bson_iter_codewscope(iter, &clen, &slen, &buf);
+			check(L, bson_init_static(&scope, buf, slen));
 			lua_rawgetp(L, LUA_REGISTRYINDEX, &NEW_JAVASCRIPT);
-			lua_pushlstring(L, code, len);
-			pushBSON(L, &sval, 0);
+			lua_pushlstring(L, code, clen);
+			pushBSON(L, &scope, 0);
 			lua_call(L, 2, 1);
 			break;
 		}
@@ -412,7 +420,27 @@ void pushBSON(lua_State *L, const bson_t *bson, int hidx) {
 	}
 }
 
-void pushBSON_steal(lua_State *L, bson_t *bson) {
+void pushBSONField(lua_State *L, const bson_t *bson, const char *name) {
+	bson_iter_t iter, child;
+	uint32_t len;
+	const uint8_t *buf;
+	bson_t doc;
+	check(L, bson_iter_init(&iter, bson));
+	if (!bson_iter_find_descendant(&iter, name, &child)) {
+		lua_pushnil(L);
+		return;
+	}
+	if (BSON_ITER_HOLDS_DOCUMENT(&child)) bson_iter_document(&child, &len, &buf);
+	else if (BSON_ITER_HOLDS_ARRAY(&child)) bson_iter_array(&child, &len, &buf);
+	else {
+		pushValue(L, &child, 0);
+		return;
+	}
+	check(L, bson_init_static(&doc, buf, len));
+	pushBSON(L, &doc, 0);
+}
+
+void pushBSONSteal(lua_State *L, bson_t *bson) {
 	bson_steal(lua_newuserdata(L, sizeof *bson), bson);
 	setType(L, TYPE_BSON, funcs);
 }

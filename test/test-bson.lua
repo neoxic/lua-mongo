@@ -48,6 +48,13 @@ testV(a2, '{ "a1" : [ 1, 2, 3 ] }') -- Nested array
 testX(a1)
 testX(a2)
 
+local b = BSON { a = 1, b = { c = mongo.Null } }
+assert(b:find('') == nil)
+assert(b:find('abc') == nil)
+assert(b:find('a') == 1)
+assert(mongo.type(b:find('b')) == 'mongo.BSON')
+assert(mongo.type(b:find('b.c')) == 'mongo.Null')
+
 -- Numeric values
 
 testV({ a = 2147483647 }, '{ "a" : 2147483647 }') -- Max Int32

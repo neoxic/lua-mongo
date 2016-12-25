@@ -67,7 +67,7 @@ static int _findAndModify(lua_State *L) {
 	mongoc_find_and_modify_opts_append(opts, options);
 	status = mongoc_collection_find_and_modify_with_opts(collection, query, opts, &reply, &error);
 	mongoc_find_and_modify_opts_destroy(opts);
-	return commandReply(L, status, &reply, &error);
+	return commandReply(L, status, &reply, "value", &error);
 }
 
 static int _insert(lua_State *L) {
@@ -107,7 +107,7 @@ static int _validate(lua_State *L) {
 	bson_t *options = toBSON(L, 2);
 	bson_t reply;
 	bson_error_t error;
-	return commandReply(L, mongoc_collection_validate(collection, options, &reply, &error), &reply, &error);
+	return commandReply(L, mongoc_collection_validate(collection, options, &reply, &error), &reply, 0, &error);
 }
 
 static int _gc(lua_State *L) {

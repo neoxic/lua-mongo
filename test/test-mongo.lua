@@ -63,11 +63,12 @@ local function testCollection(collection)
 	assert(collection:update({ _id = 123 }, { a = 'def' }, { upsert = true })) -- UPdate
 	assert(collection:find { _id = 123 }:value().a == 'def')
 
-	assert(collection:findAndModify({ _id = 123 }, { update = { a = 'abc' } }):value().value.a == 'def')
+	assert(collection:findAndModify({ _id = 123 }, { update = { a = 'abc' } }):find('a') == 'def') -- Old value
+	assert(collection:findAndModify({ _id = 'abc' }, { remove = true }) == mongo.Null) -- Not found
 
 	assert(collection:aggregate('[ { "$group" : { "_id" : "$a", "count" : { "$sum" : 1 } } } ]'):value().count == 1)
 
-	assert(collection:validate { full = true }:value().valid)
+	assert(collection:validate { full = true }:find('valid'))
 	assert(collection:drop())
 
 	collection = nil

@@ -13,8 +13,13 @@ Functions
 Returns the type name of a `value`.
 
 ```Lua
-print(mongo.type(mongo.Int32(123))) -- mongo.Int32
-print(mongo.type(mongo.Null)) -- mongo.Null
+print(mongo.type(mongo.Int32(123)))
+print(mongo.type(mongo.Null))
+```
+Output:
+```
+mongo.Int32
+mongo.Null
 ```
 
 

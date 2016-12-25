@@ -5,46 +5,46 @@ Methods
 -------
 
 ### collection:aggregate(pipeline, [options])
-Executes an aggregation `pipeline` with `options` on `collection`. Returns a [Cursor].
+Executes an aggregation `pipeline` with `options` on `collection` and returns a [Cursor] to fetch
+the result.
 
 ### collection:count([query], [options])
-Executes a count `query` with `options` on `collection`. On success, returns the result. On
-failure, returns `nil` and the error message.
+Executes a count `query` with `options` on `collection` and returns the result. On error, returns
+`nil` and the error message.
 
 ### collection:drop([options])
-Drops `collection` with `options`. On success, returns `true`. On failure, returns `nil` and the
-error message.
+Drops `collection` with `options` and returns `true`. On error, returns `nil` and the error message.
 
 ### collection:find(query, [options])
-Executes a `query` with `options` on `collection`. Returns a [Cursor].
+Executes a `query` with `options` on `collection` and returns a [Cursor] to fetch the result.
 
 ### collection:findAndModify(query, options)
-A wrapper for the _findAndModify_ MongoDB command. On success, returns the server's reply as a
-[BSON document]. On failure, returns `nil` and the error message.
+Executes a _findAndModify_ `query` on `collection` and returns the result as a [BSON document] or
+[BSON Null][BSON type] if nothing was found. On error, returns `nil` and the error message.
 
 ### collection:insert(document, [flags])
-Inserts `document` into `collection`. On success, returns `true`. On failure, returns `nil` and
-the error message. Refer to [Insert flags] for `flags` description.
+Inserts `document` into `collection` and returns `true`. On error, returns `nil` and the error
+message. Refer to [Insert flags] for `flags` description.
 
 ### collection:remove([query], [flags])
-Removes documents in `collection` that match `query`. On success, returns `true`. On failure,
-returns `nil` and the error message. Refer to [Remove flags] for `flags` description.
+Removes documents in `collection` that match `query` and returns `true`. On error, returns `nil`
+and the error message. Refer to [Remove flags] for `flags` description.
 
 ### collection:save(document)
-Saves `document` into `collection`. If the document has an `_id` field it will be updated.
-Otherwise it will be inserted. On success, returns `true`. On failure, returns `nil` and the error
-message.
+Saves `document` into `collection` and returns `true`. On error, returns `nil` and the error
+message. If the document has an `_id` field it will be updated. Otherwise it will be inserted.
 
 ### collection:update(query, update, [flags])
-Updates documents in `collection` that match `query`. On success, returns `true`. On failure,
-returns `nil` and the error message. Refer to [Update flags] for `flags` description.
+Updates documents in `collection` that match `query` and returns `true`. On error, returns `nil`
+and the error message. Refer to [Update flags] for `flags` description.
 
 ### collection:validate([options])
-A wrapper for the _validate_ MongoDB command. On success, returns the server's reply as a
-[BSON document]. On failure, returns `nil` and the error message.
+Validates `collection` and returns the result as a [BSON document]. On error, returns `nil` and
+the error message.
 
 
 [BSON document]: bson.md
+[BSON type]: bsontype.md
 [Cursor]: cursor.md
 [Insert flags]: flags.md#insert-flags
 [Remove flags]: flags.md#remove-flags

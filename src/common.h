@@ -64,7 +64,8 @@ int newRegex(lua_State *L);
 int newTimestamp(lua_State *L);
 
 void pushBSON(lua_State *L, const bson_t *bson, int hidx);
-void pushBSON_steal(lua_State *L, bson_t *bson);
+void pushBSONField(lua_State *L, const bson_t *bson, const char *name);
+void pushBSONSteal(lua_State *L, bson_t *bson);
 void pushCollection(lua_State *L, mongoc_collection_t *collection);
 void pushCursor(lua_State *L, mongoc_cursor_t *cursor);
 void pushDatabase(lua_State *L, mongoc_database_t *database);
@@ -103,7 +104,7 @@ int unpackParams(lua_State *L, int idx);
 
 int commandError(lua_State *L, const bson_error_t *error);
 int commandStatus(lua_State *L, bool status, const bson_error_t *error);
-int commandReply(lua_State *L, bool status, bson_t *reply, const bson_error_t *error);
+int commandReply(lua_State *L, bool status, bson_t *reply, const char *field, const bson_error_t *error);
 
 #define check(L, cond) (void)((cond) || luaL_error(L, "precondition failed: %s at %s:%d", #cond, __FILE__, __LINE__))
 

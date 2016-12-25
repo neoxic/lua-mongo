@@ -26,8 +26,7 @@ end
 
 ### cursor:next()
 Iterates `cursor` and returns the next [BSON document] from it or `nil` if there are no more
-elements to read or an error occurred (in which case the error message is returned as the second
-return value).
+elements to read. On error, returns `nil` and the error message.
 
 ### cursor:value([handler])
 Iterates `cursor` and returns the next value from it or `nil` if there are no more elements to read.

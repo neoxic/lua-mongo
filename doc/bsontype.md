@@ -9,7 +9,11 @@ Returns `bsontype`'s parameters.
 
 ```Lua
 local binary = mongo.Binary('abc', 0x80)
-local data, subtype = binary:unpack() -- 'abc', 128
+print(binary:unpack())
+```
+Output:
+```
+abc	128
 ```
 
 
@@ -20,6 +24,9 @@ Operators
 Returns string representation of `bsontype`.
 
 ```Lua
-local regex = mongo.Regex('abc', 'i')
-print(regex) -- mongo.Regex("abc", "i")
+print(mongo.Regex('abc', 'i'))
+```
+Output:
+```
+mongo.Regex("abc", "i")
 ```

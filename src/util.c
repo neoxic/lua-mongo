@@ -102,12 +102,17 @@ int commandStatus(lua_State *L, bool status, const bson_error_t *error) {
 	return 1;
 }
 
-int commandReply(lua_State *L, bool status, bson_t *reply, const bson_error_t *error) {
+int commandReply(lua_State *L, bool status, bson_t *reply, const char *field, const bson_error_t *error) {
 	if (!status) {
 		bson_destroy(reply);
 		return commandError(L, error);
 	}
-	pushBSON_steal(L, reply);
+	if (field) {
+		pushBSONField(L, reply, field);
+		bson_destroy(reply);
+		return 1;
+	}
+	pushBSONSteal(L, reply);
 	return 1;
 }
 

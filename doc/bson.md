@@ -7,6 +7,24 @@ Methods
 ### bson:data()
 Returns binary contents of `bson`.
 
+### bson:find(name)
+Finds a field `name` in `bson` and returns it. The name follows standard MongoDB dot notation to
+recurse into subdocuments.
+
+```Lua
+local bson = mongo.BSON { a = { b = 1 } }
+print(bson:find('a'))
+print(bson:find('a.b'))
+print(bson:find('a.b.c'))
+```
+Output:
+```
+{ "b" : 1 }
+1
+nil
+```
+
+
 ### bson:value([handler])
 Converts `bson` into a Lua value and returns it. If `handler` is provided, it is called for
 every nested document. Its returned value is then used to replace the original value.
@@ -20,7 +38,13 @@ local function sum(t)
 	end
 	return r
 end
-print(bson:value(sum)) -- 6
+print(type(bson:value()))
+print(bson:value(sum))
+```
+Output:
+```
+table
+6
 ```
 
 
