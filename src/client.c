@@ -26,14 +26,27 @@ static int _getCollection(lua_State *L) {
 	mongoc_client_t *client = checkClient(L, 1);
 	const char *dbname = luaL_checkstring(L, 2);
 	const char *cname = luaL_checkstring(L, 3);
-	pushCollection(L, mongoc_client_get_collection(client, dbname, cname));
+	pushCollection(L, mongoc_client_get_collection(client, dbname, cname), 1);
 	return 1;
 }
 
 static int _getDatabase(lua_State *L) {
 	mongoc_client_t *client = checkClient(L, 1);
 	const char *name = luaL_checkstring(L, 2);
-	pushDatabase(L, mongoc_client_get_database(client, name));
+	pushDatabase(L, mongoc_client_get_database(client, name), 1);
+	return 1;
+}
+
+static int _getDatabaseNames(lua_State *L) {
+	mongoc_client_t *client = checkClient(L, 1);
+	bson_error_t error;
+	return commandStrVec(L, mongoc_client_get_database_names(client, &error), &error);
+}
+
+static int _getDefaultDatabase(lua_State *L) {
+	mongoc_database_t *database = mongoc_client_get_default_database(checkClient(L, 1));
+	if (!database) luaL_error(L, "default database is not configured");
+	pushDatabase(L, database, 1);
 	return 1;
 }
 
@@ -46,6 +59,8 @@ static int _gc(lua_State *L) {
 static const luaL_Reg funcs[] = {
 	{ "getCollection", _getCollection },
 	{ "getDatabase", _getDatabase },
+	{ "getDatabaseNames", _getDatabaseNames },
+	{ "getDefaultDatabase", _getDefaultDatabase },
 	{ "__gc", _gc },
 	{ 0, 0 }
 };
@@ -53,7 +68,7 @@ static const luaL_Reg funcs[] = {
 int newClient(lua_State *L) {
 	mongoc_client_t *client = mongoc_client_new(luaL_checkstring(L, 1));
 	luaL_argcheck(L, client, 1, "invalid format");
-	pushHandle(L, client);
+	pushHandle(L, client, 0);
 	setType(L, TYPE_CLIENT, funcs);
 	return 1;
 }

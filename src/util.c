@@ -56,24 +56,21 @@ void unsetType(lua_State *L) {
 	lua_setmetatable(L, -2);
 }
 
-void pushHandle(lua_State *L, void *ptr) {
-	assert(ptr);
+void pushHandle(lua_State *L, void *ptr, int pidx) {
+	BSON_ASSERT(ptr);
 	*(void **)lua_newuserdata(L, sizeof ptr) = ptr;
-	if (!lua_touserdata(L, 1)) return; /* No parent handle */
-	/* Save parent handle to make sure it doesn't get garbage collected */
+	/* Save reference to root to make sure it doesn't get GCed */
+	if (pidx) lua_getuservalue(L, pidx); /* Get from parent */
+	else { /* Create new */
 #if LUA_VERSION_NUM >= 503
-	lua_pushvalue(L, 1);
-	lua_setuservalue(L, -2); /* Set directly as user value */
+		lua_pushvalue(L, -1);
 #else
-	lua_createtable(L, 1, 0);
-	lua_pushvalue(L, 1);
-	lua_rawseti(L, -2, 1); /* Store as t[1] ... */
-#if LUA_VERSION_NUM >= 502
-	lua_setuservalue(L, -2); /* ... and set as user table */
-#else
-	lua_setfenv(L, -2); /* ... and set as environment table */
+		lua_createtable(L, 1, 0);
+		lua_pushvalue(L, -2);
+		lua_rawseti(L, -2, 1);
 #endif
-#endif
+	}
+	lua_setuservalue(L, -2);
 }
 
 void packParams(lua_State *L, int n) {
@@ -92,6 +89,7 @@ int unpackParams(lua_State *L, int idx) {
 
 int commandError(lua_State *L, const bson_error_t *error) {
 	lua_pushnil(L);
+	if (!error->domain && !error->code) return 1; /* No actual error */
 	lua_pushstring(L, error->message);
 	return 2;
 }
@@ -113,6 +111,18 @@ int commandReply(lua_State *L, bool status, bson_t *reply, const char *field, co
 		return 1;
 	}
 	pushBSONSteal(L, reply);
+	return 1;
+}
+
+int commandStrVec(lua_State *L, char **strv, const bson_error_t *error) {
+	int i = 0;
+	if (!strv) return commandError(L, error);
+	lua_newtable(L);
+	while (strv[i]) {
+		lua_pushstring(L, strv[i]);
+		lua_rawseti(L, -2, ++i);
+	}
+	bson_strfreev(strv);
 	return 1;
 }
 

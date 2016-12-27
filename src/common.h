@@ -28,7 +28,7 @@
 #include <bson.h>
 
 #define MODNAME "lua-mongo"
-#define VERSION "0.2.0"
+#define VERSION "0.2.0-dev"
 
 #define TYPE_BINARY "mongo.Binary"
 #define TYPE_BSON "mongo.BSON"
@@ -66,9 +66,9 @@ int newTimestamp(lua_State *L);
 void pushBSON(lua_State *L, const bson_t *bson, int hidx);
 void pushBSONField(lua_State *L, const bson_t *bson, const char *name);
 void pushBSONSteal(lua_State *L, bson_t *bson);
-void pushCollection(lua_State *L, mongoc_collection_t *collection);
-void pushCursor(lua_State *L, mongoc_cursor_t *cursor);
-void pushDatabase(lua_State *L, mongoc_database_t *database);
+void pushCollection(lua_State *L, mongoc_collection_t *collection, int pidx);
+void pushCursor(lua_State *L, mongoc_cursor_t *cursor, int pidx);
+void pushDatabase(lua_State *L, mongoc_database_t *database, int pidx);
 void pushMaxKey(lua_State *L);
 void pushMinKey(lua_State *L);
 void pushNull(lua_State *L);
@@ -97,7 +97,7 @@ bool pushType(lua_State *L, const char *tname, const luaL_Reg *funcs);
 void setType(lua_State *L, const char *tname, const luaL_Reg *funcs);
 void unsetType(lua_State *L);
 
-void pushHandle(lua_State *L, void *ptr);
+void pushHandle(lua_State *L, void *ptr, int pidx);
 
 void packParams(lua_State *L, int n);
 int unpackParams(lua_State *L, int idx);
@@ -105,6 +105,7 @@ int unpackParams(lua_State *L, int idx);
 int commandError(lua_State *L, const bson_error_t *error);
 int commandStatus(lua_State *L, bool status, const bson_error_t *error);
 int commandReply(lua_State *L, bool status, bson_t *reply, const char *field, const bson_error_t *error);
+int commandStrVec(lua_State *L, char **strv, const bson_error_t *error);
 
 #define check(L, cond) (void)((cond) || luaL_error(L, "precondition failed: %s at %s:%d", #cond, __FILE__, __LINE__))
 
@@ -129,7 +130,9 @@ int commandReply(lua_State *L, bool status, bson_t *reply, const char *field, co
 #endif
 
 #if LUA_VERSION_NUM < 502
-#define lua_rawlen(L, idx) lua_objlen(L, idx)
+#define lua_rawlen lua_objlen
+#define lua_getuservalue lua_getfenv
+#define lua_setuservalue lua_setfenv
 #define lua_rawgetp(L, idx, ptr) (lua_pushlightuserdata(L, ptr), lua_rawget(L, idx))
 #define lua_rawsetp(L, idx, ptr) (lua_pushlightuserdata(L, ptr), lua_insert(L, -2), lua_rawset(L, idx))
 void *luaL_testudata(lua_State* L, int idx, const char *tname);

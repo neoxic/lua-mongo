@@ -2,6 +2,7 @@ local test = require 'test'
 
 local function testCollection(collection)
 	assert(mongo.type(collection) == 'mongo.Collection')
+	assert(collection:getName() == test.cname)
 	collection:drop()
 
 	test.error("A document was corrupt or contained invalid characters . or $", collection:insert({ ['$a'] = 123 })) -- Client-side error
@@ -69,7 +70,6 @@ local function testCollection(collection)
 	assert(collection:aggregate('[ { "$group" : { "_id" : "$a", "count" : { "$sum" : 1 } } } ]'):value().count == 1)
 
 	assert(collection:validate { full = true }:find('valid'))
-	assert(collection:drop())
 
 	collection = nil
 	collectgarbage()
@@ -77,8 +77,16 @@ end
 
 local function testDatabase(database)
 	assert(mongo.type(database) == 'mongo.Database')
+	assert(database:getName() == test.dbname)
 
-	testCollection(database:getCollection(test.cname))
+	assert(database:removeAllUsers())
+	assert(database:addUser('test', 'test'))
+	assert(not database:addUser('test', 'test'))
+	assert(database:removeUser('test'))
+	assert(not database:removeUser('test'))
+
+	test.value(assert(database:getCollectionNames()), test.cname)
+	assert(database:hasCollection(test.cname))
 
 	database = nil
 	collectgarbage()
@@ -87,12 +95,19 @@ end
 local function testClient(client)
 	assert(mongo.type(client) == 'mongo.Client')
 
-	testDatabase(client:getDatabase(test.dbname))
 	testCollection(client:getCollection(test.dbname, test.cname))
+	testDatabase(client:getDatabase(test.dbname))
+	test.value(assert(client:getDatabaseNames()), test.dbname)
+	assert(client:getDatabase(test.dbname):drop())
 
 	client = nil
 	collectgarbage()
 end
 
-test.failure(mongo.Client, 'abc') -- Invalid URI format
 testClient(mongo.Client(test.uri))
+
+test.failure(mongo.Client, 'abc') -- Invalid URI format
+local c1 = mongo.Client 'mongodb://aaa'
+local c2 = mongo.Client 'mongodb://aaa/bbb'
+test.failure(c1.getDefaultDatabase, c1) -- No default database in URI
+assert(c2:getDefaultDatabase():getName() == 'bbb')

@@ -31,6 +31,24 @@ function test.equal(v1, v2)
 	assert(equal(v1, v2), 'values differ!')
 end
 
+function test.key(t, x)
+	for k in pairs(t) do
+		if equal(k, x) then
+			return
+		end
+	end
+	error('key not found!')
+end
+
+function test.value(t, x)
+	for _, v in pairs(t) do
+		if equal(v, x) then
+			return
+		end
+	end
+	error('value not found!')
+end
+
 function test.error(e, ...)
 	local s, m = ...
 	assert(not s, 'call succeeded!')

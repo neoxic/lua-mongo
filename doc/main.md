@@ -10,7 +10,7 @@ Functions
 ---------
 
 ### mongo.type(value)
-Returns the type name of a `value`.
+Returns the type name of `value`.
 
 ```Lua
 print(mongo.type(mongo.Int32(123)))
@@ -30,12 +30,15 @@ Constructors
 Returns an instance of [BSON Binary][BSON type].
 
 ### mongo.BSON(value)
-Returns an instance of [BSON document] cast from a `value`, i.e. another [BSON document]
-(in which case this method is no-op), a JSON string, a table, or a table/userdata with a
-`__tobson` metamethod that returns a table or a [BSON document].
+Returns an instance of [BSON document] cast from `value` that takes one of the following forms:
+- a [BSON document] in which case this method does nothing;
+- a JSON string;
+- a table;
+- a table/userdata with a `__tobson` metamethod that returns a table or a [BSON document]. This
+  metamethod will also be called for nested values.
 
 ### mongo.Client(uri)
-Returns a [Client].
+Returns a [Client]. See [MongoDB Connection String URI Format] for more information about `uri`.
 
 ### mongo.DateTime(milliseconds)
 Returns an instance of [BSON DateTime][BSON type].
@@ -83,3 +86,4 @@ The [BSON Null][BSON type] singleton object.
 [BSON ObjectID]: objectid.md
 [BSON type]: bsontype.md
 [Client]: client.md
+[MongoDB Connection String URI Format]: https://docs.mongodb.com/manual/reference/connection-string/

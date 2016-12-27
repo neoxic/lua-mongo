@@ -1,5 +1,5 @@
-MongoDB command flags
-=====================
+Command flags
+=============
 
 Flags are tables with flag names as string keys and flag settings as boolean values:
 
@@ -10,8 +10,8 @@ local flags = {
 }
 ```
 
-_Insert_ flags
---------------
+Flags for _insert_
+------------------
 
 | Name            | Translation                     |
 |-----------------|---------------------------------|
@@ -21,8 +21,8 @@ _Insert_ flags
 Refer to http://mongoc.org/libmongoc/current/mongoc_insert_flags_t.html for more information.
 
 
-_Remove_ flags
---------------
+Flags for _remove_
+------------------
 
 | Name   | Translation                 |
 |--------|-----------------------------|
@@ -31,8 +31,8 @@ _Remove_ flags
 Refer to http://mongoc.org/libmongoc/current/mongoc_remove_flags_t.html for more information.
 
 
-_Update_ flags
---------------
+Flags for _update_
+------------------
 
 | Name       | Translation                |
 |------------|----------------------------|

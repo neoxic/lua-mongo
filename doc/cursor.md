@@ -1,5 +1,5 @@
-MongoDB cursor
-==============
+Cursor class
+============
 
 Methods
 -------

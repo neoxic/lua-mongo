@@ -26,7 +26,7 @@ static int _aggregate(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
 	bson_t *pipeline = castBSON(L, 2);
 	bson_t *options = toBSON(L, 3);
-	pushCursor(L, mongoc_collection_aggregate(collection, MONGOC_QUERY_NONE, pipeline, options, 0));
+	pushCursor(L, mongoc_collection_aggregate(collection, MONGOC_QUERY_NONE, pipeline, options, 0), 1);
 	return 1;
 }
 
@@ -52,7 +52,7 @@ static int _find(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
 	bson_t *query = castBSON(L, 2);
 	bson_t *options = toBSON(L, 3);
-	pushCursor(L, mongoc_collection_find_with_opts(collection, query, options, 0));
+	pushCursor(L, mongoc_collection_find_with_opts(collection, query, options, 0), 1);
 	return 1;
 }
 
@@ -68,6 +68,11 @@ static int _findAndModify(lua_State *L) {
 	status = mongoc_collection_find_and_modify_with_opts(collection, query, opts, &reply, &error);
 	mongoc_find_and_modify_opts_destroy(opts);
 	return commandReply(L, status, &reply, "value", &error);
+}
+
+static int _getName(lua_State *L) {
+	lua_pushstring(L, mongoc_collection_get_name(checkCollection(L, 1)));
+	return 1;
 }
 
 static int _insert(lua_State *L) {
@@ -122,6 +127,7 @@ static const luaL_Reg funcs[] = {
 	{ "drop", _drop },
 	{ "find", _find },
 	{ "findAndModify", _findAndModify },
+	{ "getName", _getName },
 	{ "insert", _insert },
 	{ "remove", _remove },
 	{ "save", _save },
@@ -131,8 +137,8 @@ static const luaL_Reg funcs[] = {
 	{ 0, 0 }
 };
 
-void pushCollection(lua_State *L, mongoc_collection_t *collection) {
-	pushHandle(L, collection);
+void pushCollection(lua_State *L, mongoc_collection_t *collection, int pidx) {
+	pushHandle(L, collection, pidx);
 	setType(L, TYPE_COLLECTION, funcs);
 }
 
