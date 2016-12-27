@@ -30,7 +30,7 @@ Constructors
 Returns an instance of [BSON Binary][BSON type].
 
 ### mongo.BSON(value)
-Returns an instance of [BSON document] cast from `value` that takes one of the following forms:
+Returns an instance of [BSON document] cast from `value` that may take one of the following forms:
 - a [BSON document] in which case this method does nothing;
 - a JSON string;
 - a table;
@@ -38,7 +38,7 @@ Returns an instance of [BSON document] cast from `value` that takes one of the f
   metamethod will also be called for nested values.
 
 ### mongo.Client(uri)
-Returns a [Client]. See [MongoDB Connection String URI Format] for more information about `uri`.
+Returns a [Client] object. See [MongoDB Connection String URI Format] for information about `uri`.
 
 ### mongo.DateTime(milliseconds)
 Returns an instance of [BSON DateTime][BSON type].

@@ -5,10 +5,10 @@ Methods
 -------
 
 ### oid:data()
-Returns binary contents of `objectid`.
+Returns binary contents of `oid`.
 
 ### oid:hash()
-Returns the hash value of `objectid`.
+Returns the hash value of `oid`.
 
 
 Operators

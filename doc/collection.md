@@ -5,8 +5,7 @@ Methods
 -------
 
 ### collection:aggregate(pipeline, [options])
-Executes an aggregation `pipeline` with `options` on `collection` and returns a [Cursor] to fetch
-the result.
+Executes an aggregation `pipeline` with `options` on `collection` and returns a [Cursor] object.
 
 ### collection:count([query], [options])
 Executes a count `query` with `options` on `collection` and returns the result. On error, returns
@@ -16,7 +15,7 @@ Executes a count `query` with `options` on `collection` and returns the result. 
 Drops `collection` with `options` and returns `true`. On error, returns `nil` and the error message.
 
 ### collection:find(query, [options])
-Executes a find `query` with `options` on `collection` and returns a [Cursor] to fetch the result.
+Executes a find `query` with `options` on `collection` and returns a [Cursor] object.
 
 ### collection:findAndModify(query, options)
 Executes a find-and-modify `query` on `collection` and returns the result as a [BSON document] or

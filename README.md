@@ -5,8 +5,6 @@ MongoDB Driver for Lua
 
 * Unified API for MongoDB commands and CRUD operations in the [MongoDB C Driver].
 
-* Full control over data and error handling.
-
 * Support for custom data transformation handlers when converting to/from BSON documents.
 
 * Transparent conversion from Lua/JSON to BSON for convenience.
@@ -44,11 +42,12 @@ or for LuaJIT:
 
 To build in a separate directory, replace `.` with a path to the source.
 
-To test the build, run:
+To check your build, run:
 
 	make test
 
-Test settings can be configured in `test/test.lua`.
+A local MongoDB server at `mongodb://127.0.0.1` will be used for testing by default. Test settings
+can be configured in `test/test.lua`.
 
 
 Getting started
@@ -134,7 +133,7 @@ end
 
 -- BSON handler
 local function handler(document)
-	return SimpleObject(document._id, document.binary:unpack())
+	return SimpleObject(document._id, (document.binary:unpack()))
 end
 
 -- Anything callable can serve as a BSON handler. For instance, it can be a table or a userdata

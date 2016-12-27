@@ -11,10 +11,11 @@ Creates a new user with access to `database`.
 Drops `database` with `options` and returns `true`. On error, returns `nil` and the error message.
 
 ### database:getCollection(name)
-Returns a [Collection].
+Returns a [Collection] object.
 
 ### database:getCollectionNames()
-Returns a list of collection names in `database`. On error, returns `nil` and the error message.
+Returns a list of the names of all collections in `database`. On error, returns `nil` and the error
+message.
 
 ### database:getName()
 Returns the name of `database`.

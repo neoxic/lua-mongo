@@ -27,7 +27,7 @@ nil
 
 ### bson:value([handler])
 Converts `bson` into a Lua value and returns it. If `handler` is provided, it is called for
-every nested document. Its returned value is then used to replace the original value.
+every nested document. The result of the call is then used to replace the original value.
 
 ```Lua
 local bson = mongo.BSON { a = { 1, 2 }, b = 3 }
