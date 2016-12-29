@@ -1,8 +1,11 @@
-Cursor class
-============
+Cursor
+======
 
 Methods
 -------
+
+### cursor:isAlive()
+Checks if `cursor` allows for more documents to be acquired (useful for tailable cursors).
 
 ### cursor:iterator([handler])
 Returns an iterator function and `cursor` itself so that the statement
@@ -11,7 +14,7 @@ Returns an iterator function and `cursor` itself so that the statement
 for value in cursor:iterator() do ... end
 ```
 
-will fetch all values from the cursor. If `handler` is provided, it is used to evaluate documents.
+will iterate over all values from the cursor.
 
 This method is equivalent to:
 

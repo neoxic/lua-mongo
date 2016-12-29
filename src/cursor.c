@@ -31,10 +31,15 @@ static int iterate(lua_State *L, int hidx) {
 		return 1;
 	}
 	if (mongoc_cursor_error(cursor, &error)) {
-		if (hidx) luaL_error(L, "%s", error.message); /* Raise error when evaluating */
+		if (hidx) luaL_error(L, "%s", error.message); /* Evaluation throws exception */
 		return commandError(L, &error);
 	}
 	lua_pushnil(L);
+	return 1;
+}
+
+static int _isAlive(lua_State *L) {
+	lua_pushboolean(L, mongoc_cursor_is_alive(checkCursor(L, 1)));
 	return 1;
 }
 
@@ -53,6 +58,7 @@ static int _gc(lua_State *L) {
 }
 
 static const luaL_Reg funcs[] = {
+	{ "isAlive", _isAlive },
 	{ "next", _next },
 	{ "value", _value },
 	{ "__gc", _gc },

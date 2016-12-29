@@ -49,10 +49,9 @@ function test.value(t, x)
 	error('value not found!')
 end
 
-function test.error(e, ...)
-	local s, m = ...
-	assert(not s, 'call succeeded!')
-	assert(e == m, 'error messages differ!')
+function test.error(s, e)
+	assert(not s, 'status is ok!')
+	assert(type(e) == 'string', 'error is not string!')
 end
 
 function test.failure(f, ...)

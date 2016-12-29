@@ -1,5 +1,5 @@
-Database class
-==============
+Database
+========
 
 Methods
 -------

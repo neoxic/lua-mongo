@@ -110,7 +110,7 @@ int commandReply(lua_State *L, bool status, bson_t *reply, const char *field, co
 		bson_destroy(reply);
 		return 1;
 	}
-	pushBSONSteal(L, reply);
+	pushBSONWithSteal(L, reply);
 	return 1;
 }
 

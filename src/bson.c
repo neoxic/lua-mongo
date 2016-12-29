@@ -161,7 +161,8 @@ static bool appendBSONType(lua_State *L, bson_type_t type, int idx, int *nerr, b
 		case BSON_TYPE_NULL:
 			bson_append_null(bson, key, klen);
 			break;
-		default: error:
+		default:
+		error:
 			return error(L, nerr, "invalid parameters for BSON type %d", type);
 	}
 	lua_settop(L, top);
@@ -266,7 +267,8 @@ static bool appendTable(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson
 				if (array) goto error;
 				key = lua_tolstring(L, top + 1, &klen);
 				break;
-			default: error:
+			default:
+			error:
 				return error(L, nerr, "%s key unexpected in %s", luaL_typename(L, top + 1), array ? "array" : "document");
 		}
 		if (!appendValue(L, top + 2, ridx, nerr, bson, key, klen)) return error(L, nerr, "[\"%s\"] => ", key);
@@ -397,9 +399,20 @@ static void pushTable(lua_State *L, bson_iter_t *iter, int hidx, bool array) {
 	lua_call(L, 1, 1); /* Transform value */
 }
 
-static bool bsonIsArray(const bson_t *bson) {
+static bool isBSONArray(const bson_t *bson) {
 	bson_iter_t iter;
 	return bson_iter_init(&iter, bson) && bson_iter_next(&iter) && !strcmp(bson_iter_key(&iter), "0");
+}
+
+static int findBSONField(const bson_t *bson, const char *name, bson_iter_t *child, bson_t *doc) {
+	bson_iter_t iter;
+	uint32_t len;
+	const uint8_t *buf;
+	if (!bson_iter_init(&iter, bson) || !bson_iter_find_descendant(&iter, name, child)) return 0;
+	if (BSON_ITER_HOLDS_DOCUMENT(child)) bson_iter_document(child, &len, &buf);
+	else if (BSON_ITER_HOLDS_ARRAY(child)) bson_iter_array(child, &len, &buf);
+	else return 1;
+	return bson_init_static(doc, buf, len) ? 2 : 0;
 }
 
 int newBSON(lua_State *L) {
@@ -408,11 +421,11 @@ int newBSON(lua_State *L) {
 }
 
 void pushBSON(lua_State *L, const bson_t *bson, int hidx) {
-	if (hidx) { /* Evaluate */
+	if (hidx) { /* Evaluation may throw exceptions */
 		bson_iter_t iter;
 		check(L, bson_iter_init(&iter, bson));
 		lua_pushvalue(L, hidx); /* Ensure handler index is valid */
-		pushTable(L, &iter, lua_gettop(L), bsonIsArray(bson));
+		pushTable(L, &iter, lua_gettop(L), isBSONArray(bson));
 		lua_replace(L, -2);
 	} else { /* Copy-by-value */
 		bson_copy_to(bson, lua_newuserdata(L, sizeof *bson));
@@ -421,26 +434,22 @@ void pushBSON(lua_State *L, const bson_t *bson, int hidx) {
 }
 
 void pushBSONField(lua_State *L, const bson_t *bson, const char *name) {
-	bson_iter_t iter, child;
-	uint32_t len;
-	const uint8_t *buf;
+	bson_iter_t iter;
 	bson_t doc;
-	check(L, bson_iter_init(&iter, bson));
-	if (!bson_iter_find_descendant(&iter, name, &child)) {
-		lua_pushnil(L);
-		return;
+	switch (findBSONField(bson, name, &iter, &doc)) {
+		case 0:
+			lua_pushnil(L);
+			break;
+		case 1:
+			pushValue(L, &iter, 0);
+			break;
+		case 2:
+			pushBSON(L, &doc, 0);
+			break;
 	}
-	if (BSON_ITER_HOLDS_DOCUMENT(&child)) bson_iter_document(&child, &len, &buf);
-	else if (BSON_ITER_HOLDS_ARRAY(&child)) bson_iter_array(&child, &len, &buf);
-	else {
-		pushValue(L, &child, 0);
-		return;
-	}
-	check(L, bson_init_static(&doc, buf, len));
-	pushBSON(L, &doc, 0);
 }
 
-void pushBSONSteal(lua_State *L, bson_t *bson) {
+void pushBSONWithSteal(lua_State *L, bson_t *bson) {
 	bson_steal(lua_newuserdata(L, sizeof *bson), bson);
 	setType(L, TYPE_BSON, funcs);
 }

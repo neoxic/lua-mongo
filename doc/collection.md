@@ -1,5 +1,5 @@
-Collection class
-================
+Collection
+==========
 
 Methods
 -------
@@ -26,19 +26,23 @@ Returns the name of `collection`.
 
 ### collection:insert(document, [flags])
 Inserts `document` into `collection` and returns `true`. On error, returns `nil` and the error
-message. See [Flags for insert] for `flags` description.
+message. See also [Flags for insert] for information on `flags`.
+
+If the document does not have an `_id` field, a new unique [BSON ObjectID][BSON type] will be
+generated locally and added to the document. If you must know the inserted document's `_id`,
+generate it in your code and add to the document before calling this method.
 
 ### collection:remove([query], [flags])
 Removes documents in `collection` that match `query` and returns `true`. On error, returns `nil`
-and the error message. See [Flags for remove] for `flags` description.
+and the error message. See also [Flags for remove] for information on `flags`.
 
 ### collection:save(document)
 Saves `document` into `collection` and returns `true`. On error, returns `nil` and the error
-message. If the document has an `_id` field it will be updated. Otherwise it will be inserted.
+message. If the document has an `_id` field, it will be updated. Otherwise, it will be inserted.
 
 ### collection:update(query, update, [flags])
 Updates documents in `collection` that match `query` and returns `true`. On error, returns `nil`
-and the error message. See [Flags for update] for `flags` description.
+and the error message. See also [Flags for update] for information on `flags`.
 
 ### collection:validate([options])
 Validates `collection` and returns the result as a [BSON document]. On error, returns `nil` and

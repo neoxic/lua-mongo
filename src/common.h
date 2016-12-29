@@ -65,7 +65,7 @@ int newTimestamp(lua_State *L);
 
 void pushBSON(lua_State *L, const bson_t *bson, int hidx);
 void pushBSONField(lua_State *L, const bson_t *bson, const char *name);
-void pushBSONSteal(lua_State *L, bson_t *bson);
+void pushBSONWithSteal(lua_State *L, bson_t *bson);
 void pushCollection(lua_State *L, mongoc_collection_t *collection, int pidx);
 void pushCursor(lua_State *L, mongoc_cursor_t *cursor, int pidx);
 void pushDatabase(lua_State *L, mongoc_database_t *database, int pidx);
