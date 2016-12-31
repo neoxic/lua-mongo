@@ -16,6 +16,10 @@ MongoDB Driver for Lua
 Installing with LuaRocks
 ------------------------
 
+To install the latest release, run:
+
+	luarocks install lua-mongo
+
 To install the current development version, run:
 
 	luarocks install --server=http://luarocks.org/dev lua-mongo
