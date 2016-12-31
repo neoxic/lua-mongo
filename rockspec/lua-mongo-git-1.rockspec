@@ -30,6 +30,7 @@ build = {
 			sources = {
 				'src/bson.c',
 				'src/bsontype.c',
+				'src/bulkoperation.c',
 				'src/client.c',
 				'src/collection.c',
 				'src/cursor.c',
