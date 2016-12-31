@@ -38,7 +38,7 @@ Returns an instance of [BSON document] cast from `value` that may take one of th
   metamethod will also be called for nested values.
 
 ### mongo.Client(uri)
-Returns a [Client] object. See also [MongoDB Connection String URI Format] for information on `uri`.
+Returns a new [Client] object. See also [MongoDB Connection String URI Format] for information on `uri`.
 
 ### mongo.DateTime(milliseconds)
 Returns an instance of [BSON DateTime][BSON type].

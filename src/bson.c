@@ -25,6 +25,14 @@
 #define MAXSTACK 1000 /* Arbitrary stack size limit to check for recursion */
 #define isInt32(n) ((n) >= INT32_MIN && (n) <= INT32_MAX)
 
+static int _concat(lua_State *L) {
+	bson_t *bson = checkBSON(L, 1);
+	bson_t *value = castBSON(L, 2);
+	luaL_argcheck(L, bson != value, 2, "self unexpected");
+	bson_concat(bson, value);
+	return 0;
+}
+
 static int _data(lua_State *L) {
 	bson_t *bson = checkBSON(L, 1);
 	lua_pushlstring(L, (const char *)bson_get_data(bson), bson->len);
@@ -68,6 +76,7 @@ static int _gc(lua_State *L) {
 }
 
 static const luaL_Reg funcs[] = {
+	{ "concat", _concat },
 	{ "data", _data },
 	{ "find", _find },
 	{ "value", _value },
@@ -393,6 +402,7 @@ static void pushTable(lua_State *L, bson_iter_t *iter, int hidx, bool array) {
 		pushValue(L, iter, hidx);
 		lua_rawset(L, -3);
 	}
+	BSON_ASSERT(hidx);
 	if (lua_isnoneornil(L, hidx)) return; /* No handler */
 	lua_pushvalue(L, hidx);
 	lua_insert(L, -2);

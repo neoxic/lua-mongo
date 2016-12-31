@@ -30,14 +30,21 @@ static int _aggregate(lua_State *L) {
 	return 1;
 }
 
+static int _createBulkOperation(lua_State *L) {
+	mongoc_collection_t *collection = checkCollection(L, 1);
+	bool ordered = lua_isnone(L, 2) || lua_toboolean(L, 2); /* 'true' if omitted */
+	pushBulkOperation(L, mongoc_collection_create_bulk_operation(collection, ordered, 0), 1);
+	return 1;
+}
+
 static int _count(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
 	bson_t *query = toBSON(L, 2);
 	bson_t *options = toBSON(L, 3);
 	bson_error_t error;
-	int64_t n = mongoc_collection_count_with_opts(collection, MONGOC_QUERY_NONE, query, 0, 0, options, 0, &error);
-	if (n == -1) return commandError(L, &error);
-	pushInt64(L, n);
+	int64_t result = mongoc_collection_count_with_opts(collection, MONGOC_QUERY_NONE, query, 0, 0, options, 0, &error);
+	if (result == -1) return commandError(L, &error);
+	pushInt64(L, result);
 	return 1;
 }
 
@@ -123,6 +130,7 @@ static int _gc(lua_State *L) {
 
 static const luaL_Reg funcs[] = {
 	{ "aggregate", _aggregate },
+	{ "createBulkOperation", _createBulkOperation },
 	{ "count", _count },
 	{ "drop", _drop },
 	{ "find", _find },

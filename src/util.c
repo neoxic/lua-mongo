@@ -87,6 +87,10 @@ int unpackParams(lua_State *L, int idx) {
 	return n;
 }
 
+void checkStatus(lua_State *L, bool status, const bson_error_t *error) {
+	if (!status) luaL_error(L, "%s", error->message);
+}
+
 int commandError(lua_State *L, const bson_error_t *error) {
 	lua_pushnil(L);
 	if (!error->domain && !error->code) return 1; /* No actual error */

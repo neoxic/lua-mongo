@@ -4,8 +4,25 @@ BSON document
 Methods
 -------
 
+### bson:concat(value)
+Appends the contents of `value` (a BSON document or something convertible to it) to `bson`.
+
+```Lua
+local bson1 = mongo.BSON { a = 1 }
+local bson2 = mongo.BSON { b = 2 }
+bson1:concat(bson2)
+print(bson1)
+bson1:concat(bson2)
+print(bson1)
+```
+Output:
+```
+{ "a" : 1, "b" : 2 }
+{ "a" : 1, "b" : 2, "b" : 2 }
+```
+
 ### bson:data()
-Returns binary contents of `bson`.
+Returns the contents of `bson`.
 
 ### bson:find(name)
 Finds a field `name` in `bson` and returns it. The name follows standard MongoDB dot notation to
@@ -23,7 +40,6 @@ Output:
 1
 nil
 ```
-
 
 ### bson:value([handler])
 Converts `bson` into a Lua value and returns it. If `handler` is provided, it is called for
@@ -58,4 +74,4 @@ Returns JSON representation of `bson`.
 Returns the size of `bson`.
 
 ### bson1 == bson2
-Compares binary contents of `bson1` and `bson2`.
+Compares the contents of `bson1` and `bson2`.

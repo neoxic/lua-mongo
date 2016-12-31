@@ -8,10 +8,10 @@ Methods
 Creates a new user with access to `database`.
 
 ### database:drop([options])
-Drops `database` with `options` and returns `true`. On error, returns `nil` and the error message.
+Drops `database` and returns `true`. On error, returns `nil` and the error message.
 
 ### database:getCollection(name)
-Returns a [Collection] object.
+Returns a new [Collection] object.
 
 ### database:getCollectionNames()
 Returns a list of the names of all collections in `database`. On error, returns `nil` and the error

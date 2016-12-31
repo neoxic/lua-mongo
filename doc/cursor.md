@@ -16,7 +16,7 @@ for value in cursor:iterator() do ... end
 
 will iterate over all values from the cursor.
 
-This method is equivalent to:
+This method is semantically equivalent to:
 
 ```Lua
 function cursor:iterator(handler)
@@ -35,7 +35,7 @@ elements to read. On error, returns `nil` and the error message.
 Iterates `cursor` and returns the next value from it or `nil` if there are no more elements to read.
 On error, exception is thrown.
 
-This method is equivalent to:
+This method is semantically equivalent to:
 
 ```Lua
 function cursor:value(handler)
@@ -49,6 +49,9 @@ function cursor:value(handler)
 	return nil
 end
 ```
+
+Note, however, that the real method unpacks the next value directly from the cursor's internal data
+buffer avoiding additional overhead of creating a temporary [BSON document] as in the example above.
 
 
 [BSON document]: bson.md

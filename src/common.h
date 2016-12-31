@@ -32,6 +32,7 @@
 
 #define TYPE_BINARY "mongo.Binary"
 #define TYPE_BSON "mongo.BSON"
+#define TYPE_BULKOPERATION "mongo.BulkOperation"
 #define TYPE_CLIENT "mongo.Client"
 #define TYPE_CURSOR "mongo.Cursor"
 #define TYPE_COLLECTION "mongo.Collection"
@@ -66,6 +67,7 @@ int newTimestamp(lua_State *L);
 void pushBSON(lua_State *L, const bson_t *bson, int hidx);
 void pushBSONField(lua_State *L, const bson_t *bson, const char *name);
 void pushBSONWithSteal(lua_State *L, bson_t *bson);
+void pushBulkOperation(lua_State *L, mongoc_bulk_operation_t *bulk, int pidx);
 void pushCollection(lua_State *L, mongoc_collection_t *collection, int pidx);
 void pushCursor(lua_State *L, mongoc_cursor_t *cursor, int pidx);
 void pushDatabase(lua_State *L, mongoc_database_t *database, int pidx);
@@ -82,6 +84,7 @@ bson_t *toBSON(lua_State *L, int idx);
 bson_oid_t *checkObjectID(lua_State *L, int idx);
 bson_oid_t *testObjectID(lua_State *L, int idx);
 
+mongoc_bulk_operation_t *checkBulkOperation(lua_State *L, int idx);
 mongoc_client_t *checkClient(lua_State *L, int idx);
 mongoc_collection_t *checkCollection(lua_State *L, int idx);
 mongoc_cursor_t *checkCursor(lua_State *L, int idx);
@@ -101,6 +104,8 @@ void pushHandle(lua_State *L, void *ptr, int pidx);
 
 void packParams(lua_State *L, int n);
 int unpackParams(lua_State *L, int idx);
+
+void checkStatus(lua_State *L, bool status, const bson_error_t *error);
 
 int commandError(lua_State *L, const bson_error_t *error);
 int commandStatus(lua_State *L, bool status, const bson_error_t *error);

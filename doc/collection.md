@@ -5,14 +5,23 @@ Methods
 -------
 
 ### collection:aggregate(pipeline, [options])
-Executes an aggregation `pipeline` with `options` on `collection` and returns a [Cursor] object.
+Executes an aggregation `pipeline` on `collection` and returns a [Cursor] object.
+
+### collection:createBulkOperation([ordered = true])
+Returns a new [Bulk operation].
+
+_Ordered_ bulk operations are batched and sent to the server in the order suitable for serial
+execution. The processing aborts when the first error is encountered.
+
+_Unordered_ bulk operations are batched and sent to the server in arbitrary order where they may
+be executed in parallel with any errors reported after all operations are attempted.
 
 ### collection:count([query], [options])
-Executes a count `query` with `options` on `collection` and returns the result. On error, returns
-`nil` and the error message.
+Executes a count `query` on `collection` and returns the result. On error, returns `nil` and the
+error message.
 
 ### collection:drop([options])
-Drops `collection` with `options` and returns `true`. On error, returns `nil` and the error message.
+Drops `collection` and returns `true`. On error, returns `nil` and the error message.
 
 ### collection:find(query, [options])
 Executes a find `query` with `options` on `collection` and returns a [Cursor] object.
@@ -40,9 +49,9 @@ and the error message. See also [Flags for remove] for information on `flags`.
 Saves `document` into `collection` and returns `true`. On error, returns `nil` and the error
 message. If the document has an `_id` field, it will be updated. Otherwise, it will be inserted.
 
-### collection:update(query, update, [flags])
-Updates documents in `collection` that match `query` and returns `true`. On error, returns `nil`
-and the error message. See also [Flags for update] for information on `flags`.
+### collection:update(query, document, [flags])
+Updates documents in `collection` that match `query` with `document` and returns `true`. On error,
+returns `nil` and the error message. See also [Flags for update] for information on `flags`.
 
 ### collection:validate([options])
 Validates `collection` and returns the result as a [BSON document]. On error, returns `nil` and
@@ -51,6 +60,7 @@ the error message.
 
 [BSON document]: bson.md
 [BSON type]: bsontype.md
+[Bulk operation]: bulkoperation.md
 [Cursor]: cursor.md
 [Flags for insert]: flags.md#flags-for-insert
 [Flags for remove]: flags.md#flags-for-remove

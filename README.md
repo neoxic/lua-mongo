@@ -3,7 +3,7 @@ MongoDB Driver for Lua
 
 [lua-mongo] is a binding to the [MongoDB C Driver] for Lua.
 
-* Unified API for MongoDB commands and CRUD operations in the [MongoDB C Driver].
+* Unified API for MongoDB CRUD and bulk write operations in the [MongoDB C Driver].
 
 * Support for custom data transformation handlers when converting to/from BSON documents.
 
@@ -99,6 +99,27 @@ print(value.name)
 -- Transparently include BSON documents in other documents
 collection:update(query2, { age = 60, backup = bson }, { upsert = true }) -- Update document
 collection:remove(query2) -- Remove document
+```
+
+Bulk write operations can be used to execute multiple insert, update, replace and remove operations
+together. Executing write operations in batches reduces the number of network round trips increasing
+write throughput. For example:
+
+```Lua
+local bulk = collection:createBulkOperation()
+
+-- Multiple insertions
+bulk:insert { a = 1 }
+bulk:insert { b = 2 }
+bulk:insert { c = 3 }
+
+-- Multiple modifications
+bulk:replaceOne({ a = 1 }, { b = 1 })
+bulk:updateMany('{}', '{ "$inc" : { "b" : 2 } }')
+bulk:removeOne { c = 3 }
+
+-- Execute all the queued operations
+assert(bulk:execute())
 ```
 
 The use of `__tobson` metamethods and BSON handlers gives full control over how Lua values are

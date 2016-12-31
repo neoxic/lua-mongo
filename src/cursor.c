@@ -31,7 +31,7 @@ static int iterate(lua_State *L, int hidx) {
 		return 1;
 	}
 	if (mongoc_cursor_error(cursor, &error)) {
-		if (hidx) luaL_error(L, "%s", error.message); /* Evaluation throws exception */
+		checkStatus(L, !hidx, &error); /* Evaluation throws exception */
 		return commandError(L, &error);
 	}
 	lua_pushnil(L);
