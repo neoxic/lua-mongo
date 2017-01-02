@@ -81,7 +81,7 @@ static int _iterator(lua_State *L) {
 }
 
 void pushCursor(lua_State *L, mongoc_cursor_t *cursor, int pidx) {
-	pushHandle(L, cursor, pidx);
+	pushHandle(L, cursor, -1, pidx);
 	if (pushType(L, TYPE_CURSOR, funcs)) {
 		lua_pushcfunction(L, iterator); /* Default iterator ... */
 		lua_pushcclosure(L, _iterator, 1); /* ... cached as upvalue 1 */

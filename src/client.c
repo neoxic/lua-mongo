@@ -38,7 +38,7 @@ static int _getCollection(lua_State *L) {
 	mongoc_client_t *client = checkClient(L, 1);
 	const char *dbname = luaL_checkstring(L, 2);
 	const char *cname = luaL_checkstring(L, 3);
-	pushCollection(L, mongoc_client_get_collection(client, dbname, cname), 1);
+	pushCollection(L, mongoc_client_get_collection(client, dbname, cname), false, 1);
 	return 1;
 }
 
@@ -81,7 +81,7 @@ static const luaL_Reg funcs[] = {
 int newClient(lua_State *L) {
 	mongoc_client_t *client = mongoc_client_new(luaL_checkstring(L, 1));
 	luaL_argcheck(L, client, 1, "invalid format");
-	pushHandle(L, client, 0);
+	pushHandle(L, client, 0, 0);
 	setType(L, TYPE_CLIENT, funcs);
 	return 1;
 }

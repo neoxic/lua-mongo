@@ -104,7 +104,7 @@ testV({ a = mongo.Regex('abc') }, '{ "a" : { "$regex" : "abc", "$options" : "" }
 testV({ a = mongo.Regex('abc', 'def') }, '{ "a" : { "$regex" : "abc", "$options" : "def" } }')
 testV({ a = mongo.Timestamp(4294967295, 4294967295) }, '{ "a" : { "$timestamp" : { "t" : 4294967295, "i" : 4294967295 } } }')
 
--- FIXME These tests fail because binary data differs for some unknown reason (a bug in libbson?)
+-- FIXME Follow up with bug report: https://jira.mongodb.org/browse/CDRIVER-1974
 -- testV({ a = mongo.Javascript('abc') }, '{ "a" : { "$code" : "abc" } }')
 -- testV({ a = mongo.Javascript('abc', { a = 1 }) }, '{ "$code" : "abc", "$scope" : { "a" : 1 } } }')
 

@@ -103,7 +103,7 @@ static const luaL_Reg funcs[] = {
 };
 
 void pushBulkOperation(lua_State *L, mongoc_bulk_operation_t *bulk, int pidx) {
-	pushHandle(L, bulk, pidx);
+	pushHandle(L, bulk, -1, pidx);
 	setType(L, TYPE_BULKOPERATION, funcs);
 }
 

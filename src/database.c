@@ -42,7 +42,7 @@ static int _drop(lua_State *L) {
 static int _getCollection(lua_State *L) {
 	mongoc_database_t *database = checkDatabase(L, 1);
 	const char *name = luaL_checkstring(L, 2);
-	pushCollection(L, mongoc_database_get_collection(database, name), 1);
+	pushCollection(L, mongoc_database_get_collection(database, name), false, 1);
 	return 1;
 }
 
@@ -97,7 +97,7 @@ static const luaL_Reg funcs[] = {
 };
 
 void pushDatabase(lua_State *L, mongoc_database_t *database, int pidx) {
-	pushHandle(L, database, pidx);
+	pushHandle(L, database, -1, pidx);
 	setType(L, TYPE_DATABASE, funcs);
 }
 

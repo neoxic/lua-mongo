@@ -45,6 +45,10 @@ generate it in your code and add to the document before calling this method.
 Removes documents in `collection` that match `query` and returns `true`. On error, returns `nil`
 and the error message. See also [Flags for remove] for information on `flags`.
 
+### collection:rename(dbname, cname, [force], [options])
+Renames `collection` on the server using new database name `dbname` and collection name `cname`.
+If `force` is `true`, an existing collection with the same name will be dropped first.
+
 ### collection:save(document)
 Saves `document` into `collection` and returns `true`. On error, returns `nil` and the error
 message. If the document has an `_id` field, it will be updated. Otherwise, it will be inserted.

@@ -68,7 +68,7 @@ void pushBSON(lua_State *L, const bson_t *bson, int hidx);
 void pushBSONField(lua_State *L, const bson_t *bson, const char *name);
 void pushBSONWithSteal(lua_State *L, bson_t *bson);
 void pushBulkOperation(lua_State *L, mongoc_bulk_operation_t *bulk, int pidx);
-void pushCollection(lua_State *L, mongoc_collection_t *collection, int pidx);
+void pushCollection(lua_State *L, mongoc_collection_t *collection, bool ref, int pidx);
 void pushCursor(lua_State *L, mongoc_cursor_t *cursor, int pidx);
 void pushDatabase(lua_State *L, mongoc_database_t *database, int pidx);
 void pushMaxKey(lua_State *L);
@@ -100,7 +100,8 @@ bool pushType(lua_State *L, const char *tname, const luaL_Reg *funcs);
 void setType(lua_State *L, const char *tname, const luaL_Reg *funcs);
 void unsetType(lua_State *L);
 
-void pushHandle(lua_State *L, void *ptr, int pidx);
+void pushHandle(lua_State *L, void *ptr, int mode, int pidx);
+int getHandleMode(lua_State *L, int idx);
 
 void packParams(lua_State *L, int n);
 int unpackParams(lua_State *L, int idx);

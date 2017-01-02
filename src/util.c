@@ -56,21 +56,36 @@ void unsetType(lua_State *L) {
 	lua_setmetatable(L, -2);
 }
 
-void pushHandle(lua_State *L, void *ptr, int pidx) {
+void pushHandle(lua_State *L, void *ptr, int mode, int pidx) {
 	BSON_ASSERT(ptr);
 	*(void **)lua_newuserdata(L, sizeof ptr) = ptr;
-	/* Save reference to root to make sure it doesn't get GCed */
-	if (pidx) lua_getuservalue(L, pidx); /* Get from parent */
-	else { /* Create new */
-#if LUA_VERSION_NUM >= 503
-		lua_pushvalue(L, -1);
-#else
-		lua_createtable(L, 1, 0);
+	if (mode < 0) lua_getuservalue(L, pidx); /* Inherit environment */
+	else { /* New environment */
+		lua_createtable(L, 3, 0);
 		lua_pushvalue(L, -2);
-		lua_rawseti(L, -2, 1);
-#endif
+		lua_rawseti(L, -2, 1); /* env[1]: handle */
+		lua_pushinteger(L, mode);
+		lua_rawseti(L, -2, 2); /* env[2]: mode */
+		if (pidx) {
+			lua_getuservalue(L, pidx);
+			lua_rawseti(L, -2, 3); /* env[3]: parent environment */
+		}
 	}
 	lua_setuservalue(L, -2);
+}
+
+int getHandleMode(lua_State *L, int idx) {
+	int res;
+	lua_getuservalue(L, idx);
+	lua_rawgeti(L, -1, 1); /* env[1]: handle */
+	if (!lua_rawequal(L, -1, idx)) {
+		lua_pop(L, 2);
+		return 0;
+	}
+	lua_rawgeti(L, -2, 2); /* env[2]: mode */
+	res = lua_tointeger(L, -1);
+	lua_pop(L, 3);
+	return res;
 }
 
 void packParams(lua_State *L, int n) {

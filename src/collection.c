@@ -98,6 +98,16 @@ static int _remove(lua_State *L) {
 	return commandStatus(L, mongoc_collection_remove(collection, flags, query, 0, &error), &error);
 }
 
+static int _rename(lua_State *L) {
+	mongoc_collection_t *collection = checkCollection(L, 1);
+	const char *dbname = luaL_checkstring(L, 2);
+	const char *cname = luaL_checkstring(L, 3);
+	bool force = lua_toboolean(L, 4);
+	bson_t *options = toBSON(L, 5);
+	bson_error_t error;
+	return commandStatus(L, mongoc_collection_rename_with_opts(collection, dbname, cname, force, options, &error), &error);
+}
+
 static int _save(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
 	bson_t *document = castBSON(L, 2);
@@ -123,7 +133,9 @@ static int _validate(lua_State *L) {
 }
 
 static int _gc(lua_State *L) {
-	mongoc_collection_destroy(checkCollection(L, 1));
+	mongoc_collection_t *collection = checkCollection(L, 1);
+	if (getHandleMode(L, 1)) return 0; /* Reference handle */
+	mongoc_collection_destroy(collection);
 	unsetType(L);
 	return 0;
 }
@@ -138,6 +150,7 @@ static const luaL_Reg funcs[] = {
 	{ "getName", _getName },
 	{ "insert", _insert },
 	{ "remove", _remove },
+	{ "rename", _rename },
 	{ "save", _save },
 	{ "update", _update },
 	{ "validate", _validate },
@@ -145,8 +158,8 @@ static const luaL_Reg funcs[] = {
 	{ 0, 0 }
 };
 
-void pushCollection(lua_State *L, mongoc_collection_t *collection, int pidx) {
-	pushHandle(L, collection, pidx);
+void pushCollection(lua_State *L, mongoc_collection_t *collection, bool ref, int pidx) {
+	pushHandle(L, collection, ref ? 1 : -1, pidx);
 	setType(L, TYPE_COLLECTION, funcs);
 }
 
