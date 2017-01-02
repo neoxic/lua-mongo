@@ -55,7 +55,7 @@ can be configured in `test/test.lua`.
 Getting started
 ---------------
 
-1. Preparing the playground:
+Preparing the playground:
 
 ```Lua
 local mongo = require 'mongo'
@@ -70,7 +70,7 @@ local query2 = mongo.BSON { _id = id }
 ```
 
 
-2. Basic features and MongoDB CRUD operations:
+Basic features and MongoDB CRUD operations:
 
 ```Lua
 -- Store document
@@ -107,7 +107,7 @@ collection:remove(query2) -- Remove document
 ```
 
 
-3. Bulk write operations can be used to execute multiple insert, update, replace and remove operations
+Bulk write operations can be used to execute multiple insert, update, replace and remove operations
 together. Executing write operations in batches reduces the number of network round trips increasing
 write throughput:
 
@@ -129,7 +129,7 @@ assert(bulk:execute())
 ```
 
 
-4. The use of `__tobson` metamethods and BSON handlers gives full control over how Lua values are
+The use of `__tobson` metamethods and BSON handlers gives full control over how Lua values are
 represented in BSON documents and vice versa. In particular, this API facilitates support for
 classes (tables with metatables) on their way to and/or from MongoDB:
 
