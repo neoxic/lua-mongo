@@ -104,7 +104,7 @@ assert(cursor:value().b == 1)
 assert(cursor:value().b == 1)
 
 -- Rename collection
-assert(collection:rename(test.dbname, tostring(mongo.ObjectID()))) -- Rename to arbitrary name
+assert(collection:rename(test.dbname, tostring(mongo.ObjectID()))) -- Rename with arbitrary name
 local newCollection = collection
 collection = client:getCollection(test.dbname, test.cname) -- Recreate a testing collection
 assert(collection:insert { a = 1 }) -- Insert something to create the actual storage

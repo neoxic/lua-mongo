@@ -55,7 +55,7 @@ can be configured in `test/test.lua`.
 Getting started
 ---------------
 
-Preparing the playground:
+1. Preparing the playground:
 
 ```Lua
 local mongo = require 'mongo'
@@ -69,7 +69,8 @@ local query1 = mongo.BSON '{ "age" : { "$gt" : 25 } }'
 local query2 = mongo.BSON { _id = id }
 ```
 
-Basic features and MongoDB CRUD operations:
+
+2. Basic features and MongoDB CRUD operations:
 
 ```Lua
 -- Store document
@@ -105,9 +106,10 @@ collection:update(query2, { age = 60, backup = bson }, { upsert = true }) -- Upd
 collection:remove(query2) -- Remove document
 ```
 
-Bulk write operations can be used to execute multiple insert, update, replace and remove operations
+
+3. Bulk write operations can be used to execute multiple insert, update, replace and remove operations
 together. Executing write operations in batches reduces the number of network round trips increasing
-write throughput. For example:
+write throughput:
 
 ```Lua
 local bulk = collection:createBulkOperation()
@@ -126,9 +128,10 @@ bulk:removeOne { c = 3 }
 assert(bulk:execute())
 ```
 
-The use of `__tobson` metamethods and BSON handlers gives full control over how Lua values are
+
+4. The use of `__tobson` metamethods and BSON handlers gives full control over how Lua values are
 represented in BSON documents and vice versa. In particular, this API facilitates support for
-classes (tables with metatables) on their way to and/or from MongoDB. For example:
+classes (tables with metatables) on their way to and/or from MongoDB:
 
 ```Lua
 local SimpleClass = {} -- Class metatable
@@ -186,8 +189,8 @@ for object in collection:find(query2):iterator(handler) do
 end
 ```
 
-Check out the [API Reference] for more information.
 
+Check out the [API Reference] for more information.
 See also the [MongoDB Manual] for detailed information about MongoDB commands and CRUD operations.
 
 
