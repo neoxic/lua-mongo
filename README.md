@@ -13,22 +13,22 @@ MongoDB Driver for Lua
   capacity without precision loss (when Lua allows it). Explicit casts are also available.
 
 
-Installing with LuaRocks
-------------------------
+Building and installing with LuaRocks
+-------------------------------------
 
-To install the latest release, run:
+To build and install, run:
+
+	luarocks make
+
+To install the latest release using [luarocks.org], run:
 
 	luarocks install lua-mongo
-
-To install the current development version, run:
-
-	luarocks install --server=http://luarocks.org/dev lua-mongo
 
 
 Building and installing with CMake
 ----------------------------------
 
-To build in the source directory, run:
+To build and install, run:
 
 	cmake .
 	make
@@ -196,6 +196,7 @@ See also the [MongoDB Manual] for detailed information about MongoDB commands an
 
 
 [lua-mongo]: https://github.com/neoxic/lua-mongo
+[luarocks.org]: https://luarocks.org
 [MongoDB C Driver]: http://mongoc.org
 [MongoDB Manual]: https://docs.mongodb.com/manual/
 [API Reference]: doc/main.md
