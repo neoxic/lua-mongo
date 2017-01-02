@@ -109,7 +109,7 @@ collection:remove(query2) -- Remove document
 
 Bulk write operations can be used to execute multiple insert, update, replace and remove operations
 together. Executing write operations in batches reduces the number of network round trips increasing
-write throughput:
+write throughput.
 
 ```Lua
 local bulk = collection:createBulkOperation()
@@ -131,7 +131,7 @@ assert(bulk:execute())
 
 The use of `__tobson` metamethods and BSON handlers gives full control over how Lua values are
 represented in BSON documents and vice versa. In particular, this API facilitates support for
-classes (tables with metatables) on their way to and/or from MongoDB:
+classes (tables with metatables) on their way to and/or from MongoDB.
 
 ```Lua
 local SimpleClass = {} -- Class metatable
