@@ -17,7 +17,7 @@ endif()
 
 find_package(PkgConfig)
 pkg_search_module(LUA REQUIRED ${lua_names})
-pkg_check_modules(LIBMONGOC REQUIRED libmongoc-1.0 libbson-1.0)
+pkg_check_modules(LIBMONGOC REQUIRED libmongoc-1.0>=1.5.3 libbson-1.0>=1.5.3)
 
 if(NOT LUA_FOUND)
 	message(FATAL_ERROR "Lua not found - set USE_LUA_VERSION to match your configuration")
@@ -30,7 +30,7 @@ if(NOT LUA_MODULE_PATH)
 	set(LUA_MODULE_PATH lib/lua/${lua_ver})
 endif()
 
-add_definitions(-Wall -Wextra -Wpedantic -Wundef -Wshadow -Wredundant-decls -fvisibility=hidden)
+add_definitions(-Wall -Wextra -Wpedantic -Wundef -Wshadow -Wredundant-decls)
 include_directories(${LUA_INCLUDE_DIRS} ${LIBMONGOC_INCLUDE_DIRS})
 link_directories(${LUA_LIBRARY_DIRS} ${LIBMONGOC_INCLUDE_DIRS})
 

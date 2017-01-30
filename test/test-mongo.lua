@@ -4,8 +4,8 @@ local client = mongo.Client(test.uri)
 
 -- Collection
 
-local collection = client:getCollection(test.dbname, test.cname)
-assert(collection:getName() == test.cname)
+local collection = client:getCollection(test.dbname, test.collname)
+assert(collection:getName() == test.collname)
 collection:drop()
 
 test.error(collection:insert({ ['$a'] = 123 })) -- Client-side error
@@ -25,52 +25,53 @@ assert(collection:count({}, { skip = 1, limit = 2 }) == 2) -- Options
 -- cursor:next()
 local cursor = collection:find {} -- Find all
 assert(cursor:isAlive())
-assert(cursor:next()) -- #1
-assert(cursor:next()) -- #2
-assert(cursor:next()) -- #3
-local b, e = cursor:next()
-assert(b == nil and e == nil) -- nil + no error
+assert(mongo.type(cursor:next()) == 'mongo.BSON') -- #1
+assert(mongo.type(cursor:next()) == 'mongo.BSON') -- #2
+assert(mongo.type(cursor:next()) == 'mongo.BSON') -- #3
+local r, e = cursor:next()
+assert(r == nil and e == nil) -- nil + no error
 assert(not cursor:isAlive())
-b, e = cursor:next()
-assert(b == nil and type(e) == 'string') -- nil + error
+r, e = cursor:next()
+assert(r == nil and type(e) == 'string') -- nil + error
 collectgarbage()
 
 -- cursor:value()
 cursor = collection:find { _id = 123 }
 assert(cursor:value()._id == 123)
 assert(cursor:value() == nil) -- No more items
-test.failure(cursor.value, cursor) -- Cursor exhausted
+test.failure(cursor.value, cursor) -- Exception is thrown
 cursor = collection:find { _id = 123 }
 assert(cursor:value(function (t) return { id = t._id } end).id == 123) -- With transformation
 collectgarbage()
 
 -- cursor:iterator()
-local f, c = collection:find('{ "_id" : { "$gt" : 123 } }', { sort = { _id = -1 } }):iterator() -- _id > 123, desc order
-local v1 = assert(f(c))
-local v2 = assert(f(c))
+local i, s = collection:find('{ "_id" : { "$gt" : 123 } }', { sort = { _id = -1 } }):iterator() -- _id > 123, desc order
+local v1 = assert(i(s))
+local v2 = assert(i(s))
 assert(v1._id == 789)
 assert(v2._id == 456)
-assert(f(c) == nil) -- No more items
-test.failure(f, c) -- Cursor exhausted
-f, c = collection:find({ _id = 123 }):iterator(function (t) return { id = t._id } end) -- With transformation
-assert(f(c).id == 123)
+assert(i(s) == nil) -- No more items
+test.failure(i, s) -- Exception is thrown
+i, s = collection:find({ _id = 123 }):iterator(function (t) return { id = t._id } end) -- With transformation
+assert(i(s).id == 123)
 collectgarbage()
 
 assert(collection:remove({}, { single = true })) -- Flags
 assert(collection:count() == 2)
 assert(collection:remove { _id = 123 })
 assert(collection:remove { _id = 123 }) -- Remove reports 'true' even if not found
-assert(collection:find({ _id = 123 }):value() == nil) -- Not found
+assert(collection:findOne({ _id = 123 }) == nil) -- Not found
 
 assert(collection:update({ _id = 123 }, { a = 'abc' }, { upsert = true })) -- inSERT
 assert(collection:update({ _id = 123 }, { a = 'def' }, { upsert = true })) -- UPdate
-assert(collection:find({ _id = 123 }):value().a == 'def')
+assert(collection:findOne({ _id = 123 }):value().a == 'def')
 
 assert(collection:findAndModify({ _id = 123 }, { update = { a = 'abc' } }):find('a') == 'def') -- Old value
-assert(collection:findAndModify({ _id = 'abc' }, { remove = true }) == mongo.Null) -- Not found
+assert(collection:findAndModify({ _id = 'abc' }, { remove = true }) == nil) -- Not found
 
 assert(collection:aggregate('[ { "$group" : { "_id" : "$a", "count" : { "$sum" : 1 } } } ]'):value().count == 1)
 
+assert(collection:stats():find('ok'))
 assert(collection:validate({ full = true }):find('valid'))
 
 -- Bulk operation
@@ -106,9 +107,9 @@ assert(cursor:value().b == 1)
 -- Rename collection
 assert(collection:rename(test.dbname, tostring(mongo.ObjectID()))) -- Rename with arbitrary name
 local newCollection = collection
-collection = client:getCollection(test.dbname, test.cname) -- Recreate a testing collection
+collection = client:getCollection(test.dbname, test.collname) -- Recreate a testing collection
 assert(collection:insert { a = 1 }) -- Insert something to create the actual storage
-assert(newCollection:rename(test.dbname, test.cname, true)) -- Rename back with force
+assert(newCollection:rename(test.dbname, test.collname, true)) -- Rename back with force
 newCollection = nil
 
 collection = nil
@@ -121,13 +122,13 @@ local database = client:getDatabase(test.dbname)
 assert(database:getName() == test.dbname)
 
 assert(database:removeAllUsers())
-assert(database:addUser('test', 'test'))
-test.error(database:addUser('test', 'test'))
-assert(database:removeUser('test'))
-test.error(database:removeUser('test'))
+assert(database:addUser(test.dbname, ''))
+test.error(database:addUser(test.dbname, ''))
+assert(database:removeUser(test.dbname))
+test.error(database:removeUser(test.dbname))
 
-test.value(assert(database:getCollectionNames()), test.cname)
-assert(database:hasCollection(test.cname))
+test.value(assert(database:getCollectionNames()), test.collname)
+assert(database:hasCollection(test.collname))
 
 database = nil
 collectgarbage()
@@ -147,9 +148,9 @@ assert(c2:getDefaultDatabase():getName() == 'bbb')
 test.value(assert(client:getDatabaseNames()), test.dbname)
 
 -- client:command()
-assert(mongo.type(assert(client:command(test.dbname, { find = test.cname }))) == 'mongo.Cursor') -- client:command() returns cursor
-assert(mongo.type(assert(client:command(test.dbname, { validate = test.cname }))) == 'mongo.BSON') -- client:command() returns BSON
-test.error(client:command('abc', { INVALID_COMMAND = test.cname }))
+assert(mongo.type(assert(client:command(test.dbname, { find = test.collname }))) == 'mongo.Cursor') -- client:command() returns cursor
+assert(mongo.type(assert(client:command(test.dbname, { validate = test.collname }))) == 'mongo.BSON') -- client:command() returns BSON
+test.error(client:command('abc', { INVALID_COMMAND = test.collname }))
 
 -- Cleanup
 assert(client:getDatabase(test.dbname):drop())

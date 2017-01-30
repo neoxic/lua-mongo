@@ -13,6 +13,14 @@ MongoDB Driver for Lua
   capacity without precision loss (when Lua allows it). Explicit casts are also available.
 
 
+Dependencies
+------------
+
+lua >= 5.1 (or luajit)
+libmongoc >= 1.5.3
+libbson >= 1.5.3
+
+
 Building and installing with LuaRocks
 -------------------------------------
 
@@ -77,7 +85,7 @@ Basic features and MongoDB CRUD operations:
 collection:save { _id = id, name = 'John Smith', age = 50 }
 
 -- Fetch document
-local document = collection:find(query1):value()
+local document = collection:findOne(query1):value()
 print(document.name)
 
 -- Iterate in a for-loop
@@ -93,8 +101,7 @@ collection:insert '{ "string" : "abc" }'
 print(collection:count({}, { skip = 1, limit = 2 }))
 
 -- Access to BSON where needed
-local cursor = collection:find(query1)
-local bson = cursor:next() -- Fetch BSON document
+local bson = collection:findOne(query1)
 print(bson) -- BSON is implicitly converted to JSON
 
 -- Explicit BSON to Lua conversion
@@ -154,15 +161,15 @@ function SimpleClass:__tobson() -- Called when object is packed into BSON
 	}
 end
 
--- A root '__tobson' metamethod may return a table or a BSON document.
--- A nested '__tobson' metamethod may return a Lua value, a BSON type or a BSON document.
+-- A root '__tobson' metamethod may return a table or BSON document.
+-- A nested '__tobson' metamethod may return a Lua value, BSON type or BSON document.
 
 -- BSON handler
 local function handler(document)
 	return SimpleObject(document._id, (document.binary:unpack()))
 end
 
--- Anything callable can serve as a BSON handler. For instance, it can be a table or a userdata
+-- Anything callable can serve as a BSON handler. For instance, it can be a table or userdata
 -- with a '__call' metamethod.
 
 -- Note that the same handler will be called for each nested document. Thus, the handler should
@@ -180,7 +187,7 @@ print(object)
 collection:save(object)
 
 -- Restore object
-local object = collection:find(query2):value(handler)
+local object = collection:findOne(query2):value(handler)
 print(object)
 
 -- Restore while iterating in a for-loop

@@ -4,6 +4,22 @@ BSON document
 Methods
 -------
 
+### bson:append(key, value)
+Appends a pair of `key` => `value` to `bson`.
+
+```Lua
+local bson = mongo.BSON {}
+bson:append('a', 1)
+print(bson)
+bson:append('b', bson)
+print(bson)
+```
+Output:
+```
+{ "a" : 1 }
+{ "a" : 1, "b" : { "a" : 1 } }
+```
+
 ### bson:concat(value)
 Appends the contents of `value` (a BSON document or something convertible to it) to `bson`.
 
@@ -24,9 +40,9 @@ Output:
 ### bson:data()
 Returns the contents of `bson`.
 
-### bson:find(name)
-Finds a field `name` in `bson` and returns it. The name follows standard MongoDB dot notation to
-recurse into subdocuments.
+### bson:find(key)
+Returns the value matching `key` in `bson` or `nil` if nothing was found. A field name may contain
+dots to recurse into subdocuments.
 
 ```Lua
 local bson = mongo.BSON { a = { b = 1 } }

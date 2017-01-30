@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Arseny Vakhrushev <arseny.vakhrushev@gmail.com>
+ * Copyright (C) 2016-2017 Arseny Vakhrushev <arseny.vakhrushev@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -57,7 +57,7 @@ void unsetType(lua_State *L) {
 }
 
 void pushHandle(lua_State *L, void *ptr, int mode, int pidx) {
-	BSON_ASSERT(ptr);
+	check(L, ptr);
 	*(void **)lua_newuserdata(L, sizeof ptr) = ptr;
 	if (mode < 0) lua_getuservalue(L, pidx); /* Inherit environment */
 	else { /* New environment */
@@ -108,7 +108,7 @@ void checkStatus(lua_State *L, bool status, const bson_error_t *error) {
 
 int commandError(lua_State *L, const bson_error_t *error) {
 	lua_pushnil(L);
-	if (!error->domain && !error->code) return 1; /* No actual error */
+	if (!error->domain || !error->code || !error->message[0]) return 1; /* No actual error */
 	lua_pushstring(L, error->message);
 	return 2;
 }
@@ -119,15 +119,10 @@ int commandStatus(lua_State *L, bool status, const bson_error_t *error) {
 	return 1;
 }
 
-int commandReply(lua_State *L, bool status, bson_t *reply, const char *field, const bson_error_t *error) {
+int commandReply(lua_State *L, bool status, bson_t *reply, const bson_error_t *error) {
 	if (!status) {
 		bson_destroy(reply);
 		return commandError(L, error);
-	}
-	if (field) {
-		pushBSONField(L, reply, field);
-		bson_destroy(reply);
-		return 1;
 	}
 	pushBSONWithSteal(L, reply);
 	return 1;

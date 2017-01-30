@@ -22,73 +22,52 @@
 
 #include "common.h"
 
-static int _isAlive(lua_State *L) {
-	lua_pushboolean(L, mongoc_cursor_is_alive(checkCursor(L, 1)));
-	return 1;
-}
-
 static int _next(lua_State *L) {
-	return iterateCursor(L, checkCursor(L, 1), 0);
-}
-
-static int _value(lua_State *L) {
-	return iterateCursor(L, checkCursor(L, 1), 2);
-}
-
-static int _gc(lua_State *L) {
-	mongoc_cursor_destroy(checkCursor(L, 1));
-	unsetType(L);
-	return 0;
-}
-
-static const luaL_Reg funcs[] = {
-	{ "isAlive", _isAlive },
-	{ "next", _next },
-	{ "value", _value },
-	{ "__gc", _gc },
-	{ 0, 0 }
-};
-
-static int iterator(lua_State *L) {
-	return iterateCursor(L, checkCursor(L, 1), lua_upvalueindex(1));
-}
-
-static int _iterator(lua_State *L) {
-	checkCursor(L, 1);
-	if (lua_isnoneornil(L, 2)) lua_pushvalue(L, lua_upvalueindex(1)); /* Default iterator */
-	else {
-		lua_pushvalue(L, 2);
-		lua_pushcclosure(L, iterator, 1); /* Iterator with handler */
-	}
-	lua_pushvalue(L, 1); /* State */
-	return 2;
-}
-
-void pushCursor(lua_State *L, mongoc_cursor_t *cursor, int pidx) {
-	pushHandle(L, cursor, -1, pidx);
-	if (pushType(L, TYPE_CURSOR, funcs)) {
-		lua_pushcfunction(L, iterator); /* Default iterator ... */
-		lua_pushcclosure(L, _iterator, 1); /* ... cached as upvalue 1 */
-		lua_setfield(L, -2, "iterator");
-	}
-	lua_setmetatable(L, -2);
-}
-
-int iterateCursor(lua_State *L, mongoc_cursor_t *cursor, int hidx) {
-	const bson_t *bson;
+	mongoc_gridfs_file_list_t *list = checkGridFSFileList(L, 1);
+	mongoc_gridfs_file_t *file;
 	bson_error_t error;
-	if (mongoc_cursor_next(cursor, &bson)) {
-		pushBSON(L, bson, hidx);
+	if ((file = mongoc_gridfs_file_list_next(list))) {
+		pushGridFSFile(L, file, 1);
 		return 1;
 	}
-	if (mongoc_cursor_error(cursor, &error)) {
-		checkStatus(L, !hidx, &error); /* Throw exception if unpacking */
+	if (mongoc_gridfs_file_list_error(list, &error)) {
+		checkStatus(L, !lua_toboolean(L, lua_upvalueindex(1)), &error); /* Throw exception in iterator mode */
 		return commandError(L, &error);
 	}
 	lua_pushnil(L);
 	return 1;
 }
 
-mongoc_cursor_t *checkCursor(lua_State *L, int idx) {
-	return *(mongoc_cursor_t **)luaL_checkudata(L, idx, TYPE_CURSOR);
+static int _gc(lua_State *L) {
+	mongoc_gridfs_file_list_destroy(checkGridFSFileList(L, 1));
+	unsetType(L);
+	return 0;
+}
+
+static const luaL_Reg funcs[] = {
+	{ "next", _next },
+	{ "__gc", _gc },
+	{ 0, 0 }
+};
+
+static int _iterator(lua_State *L) {
+	checkGridFSFileList(L, 1);
+	lua_pushvalue(L, lua_upvalueindex(1)); /* Iterator */
+	lua_pushvalue(L, 1); /* State */
+	return 2;
+}
+
+void pushGridFSFileList(lua_State *L, mongoc_gridfs_file_list_t *list, int pidx) {
+	pushHandle(L, list, -1, pidx);
+	if (pushType(L, TYPE_GRIDFSFILELIST, funcs)) {
+		lua_pushboolean(L, 1); /* Iterator mode on */
+		lua_pushcclosure(L, _next, 1); /* Iterator ... */
+		lua_pushcclosure(L, _iterator, 1); /* ... cached as upvalue 1 */
+		lua_setfield(L, -2, "iterator");
+	}
+	lua_setmetatable(L, -2);
+}
+
+mongoc_gridfs_file_list_t *checkGridFSFileList(lua_State *L, int idx) {
+	return *(mongoc_gridfs_file_list_t **)luaL_checkudata(L, idx, TYPE_GRIDFSFILELIST);
 }

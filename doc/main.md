@@ -10,16 +10,18 @@ Functions
 ---------
 
 ### mongo.type(value)
-Returns the type name of `value`.
+Returns the _lua-mongo_ type name of `value`.
 
 ```Lua
 print(mongo.type(mongo.Int32(123)))
 print(mongo.type(mongo.Null))
+print(mongo.type(123))
 ```
 Output:
 ```
 mongo.Int32
 mongo.Null
+nil
 ```
 
 
@@ -33,9 +35,8 @@ Returns an instance of [BSON Binary][BSON type].
 Returns an instance of [BSON document] cast from `value` that may take one of the following forms:
 - a [BSON document] in which case this method does nothing;
 - a JSON string;
-- a table;
-- a table/userdata with a `__tobson` metamethod that returns a table or a [BSON document]. This
-  metamethod will also be called for nested values.
+- a table without a metatable;
+- a table or userdata with a `__tobson` metamethod that returns a table, [BSON type] or [BSON document].
 
 ### mongo.Client(uri)
 Returns a new [Client] object. See also [MongoDB Connection String URI Format] for information on `uri`.

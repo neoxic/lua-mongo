@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Arseny Vakhrushev <arseny.vakhrushev@gmail.com>
+ * Copyright (C) 2016-2017 Arseny Vakhrushev <arseny.vakhrushev@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,7 @@ static int _command(lua_State *L) {
 	bson_t reply;
 	bson_error_t error;
 	bool status = mongoc_client_command_simple(client, dbname, command, 0, &reply, &error);
-	if (!bson_has_field(&reply, "cursor")) return commandReply(L, status, &reply, 0, &error);
+	if (!bson_has_field(&reply, "cursor")) return commandReply(L, status, &reply, &error);
 	pushCursor(L, mongoc_cursor_new_from_command_reply(client, &reply, 0), 1);
 	return 1;
 }
@@ -37,15 +37,15 @@ static int _command(lua_State *L) {
 static int _getCollection(lua_State *L) {
 	mongoc_client_t *client = checkClient(L, 1);
 	const char *dbname = luaL_checkstring(L, 2);
-	const char *cname = luaL_checkstring(L, 3);
-	pushCollection(L, mongoc_client_get_collection(client, dbname, cname), false, 1);
+	const char *collname = luaL_checkstring(L, 3);
+	pushCollection(L, mongoc_client_get_collection(client, dbname, collname), false, 1);
 	return 1;
 }
 
 static int _getDatabase(lua_State *L) {
 	mongoc_client_t *client = checkClient(L, 1);
-	const char *name = luaL_checkstring(L, 2);
-	pushDatabase(L, mongoc_client_get_database(client, name), 1);
+	const char *dbname = luaL_checkstring(L, 2);
+	pushDatabase(L, mongoc_client_get_database(client, dbname), 1);
 	return 1;
 }
 
@@ -57,8 +57,19 @@ static int _getDatabaseNames(lua_State *L) {
 
 static int _getDefaultDatabase(lua_State *L) {
 	mongoc_database_t *database = mongoc_client_get_default_database(checkClient(L, 1));
-	if (!database) luaL_error(L, "default database is not configured");
+	luaL_argcheck(L, database, 1, "default database is not configured");
 	pushDatabase(L, database, 1);
+	return 1;
+}
+
+static int _getGridFS(lua_State *L) {
+	mongoc_client_t *client = checkClient(L, 1);
+	const char *dbname = luaL_checkstring(L, 2);
+	const char *prefix = lua_tostring(L, 3);
+	bson_error_t error;
+	mongoc_gridfs_t *gridfs = mongoc_client_get_gridfs(client, dbname, prefix, &error);
+	if (!gridfs) return commandError(L, &error);
+	pushGridFS(L, gridfs, 1);
 	return 1;
 }
 
@@ -74,6 +85,7 @@ static const luaL_Reg funcs[] = {
 	{ "getDatabase", _getDatabase },
 	{ "getDatabaseNames", _getDatabaseNames },
 	{ "getDefaultDatabase", _getDefaultDatabase },
+	{ "getGridFS", _getGridFS },
 	{ "__gc", _gc },
 	{ 0, 0 }
 };

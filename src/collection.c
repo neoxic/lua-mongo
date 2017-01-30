@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Arseny Vakhrushev <arseny.vakhrushev@gmail.com>
+ * Copyright (C) 2016-2017 Arseny Vakhrushev <arseny.vakhrushev@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,9 +42,9 @@ static int _count(lua_State *L) {
 	bson_t *query = toBSON(L, 2);
 	bson_t *options = toBSON(L, 3);
 	bson_error_t error;
-	int64_t result = mongoc_collection_count_with_opts(collection, MONGOC_QUERY_NONE, query, 0, 0, options, 0, &error);
-	if (result == -1) return commandError(L, &error);
-	pushInt64(L, result);
+	int64_t n = mongoc_collection_count_with_opts(collection, MONGOC_QUERY_NONE, query, 0, 0, options, 0, &error);
+	if (n == -1) return commandError(L, &error);
+	pushInt64(L, n);
 	return 1;
 }
 
@@ -67,14 +67,26 @@ static int _findAndModify(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
 	bson_t *query = castBSON(L, 2);
 	bson_t *options = castBSON(L, 3);
-	bool status;
 	bson_t reply;
 	bson_error_t error;
+	int nres = 1;
 	mongoc_find_and_modify_opts_t *opts = mongoc_find_and_modify_opts_new();
 	mongoc_find_and_modify_opts_append(opts, options);
-	status = mongoc_collection_find_and_modify_with_opts(collection, query, opts, &reply, &error);
+	if (!mongoc_collection_find_and_modify_with_opts(collection, query, opts, &reply, &error)) nres = commandError(L, &error);
+	else pushBSONField(L, &reply, "value", false);
 	mongoc_find_and_modify_opts_destroy(opts);
-	return commandReply(L, status, &reply, "value", &error);
+	bson_destroy(&reply);
+	return nres;
+}
+
+static int _findOne(lua_State *L) {
+	mongoc_collection_t *collection = checkCollection(L, 1);
+	bson_t *query = castBSON(L, 2);
+	bson_t *options = toBSON(L, 3);
+	mongoc_cursor_t *cursor = mongoc_collection_find_with_opts(collection, query, options, 0);
+	int nres = iterateCursor(L, cursor, 0);
+	mongoc_cursor_destroy(cursor);
+	return nres;
 }
 
 static int _getName(lua_State *L) {
@@ -101,11 +113,11 @@ static int _remove(lua_State *L) {
 static int _rename(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
 	const char *dbname = luaL_checkstring(L, 2);
-	const char *cname = luaL_checkstring(L, 3);
+	const char *collname = luaL_checkstring(L, 3);
 	bool force = lua_toboolean(L, 4);
 	bson_t *options = toBSON(L, 5);
 	bson_error_t error;
-	return commandStatus(L, mongoc_collection_rename_with_opts(collection, dbname, cname, force, options, &error), &error);
+	return commandStatus(L, mongoc_collection_rename_with_opts(collection, dbname, collname, force, options, &error), &error);
 }
 
 static int _save(lua_State *L) {
@@ -113,6 +125,14 @@ static int _save(lua_State *L) {
 	bson_t *document = castBSON(L, 2);
 	bson_error_t error;
 	return commandStatus(L, mongoc_collection_save(collection, document, 0, &error), &error);
+}
+
+static int _stats(lua_State *L) {
+	mongoc_collection_t *collection = checkCollection(L, 1);
+	bson_t *options = toBSON(L, 2);
+	bson_t reply;
+	bson_error_t error;
+	return commandReply(L, mongoc_collection_stats(collection, options, &reply, &error), &reply, &error);
 }
 
 static int _update(lua_State *L) {
@@ -129,7 +149,7 @@ static int _validate(lua_State *L) {
 	bson_t *options = toBSON(L, 2);
 	bson_t reply;
 	bson_error_t error;
-	return commandReply(L, mongoc_collection_validate(collection, options, &reply, &error), &reply, 0, &error);
+	return commandReply(L, mongoc_collection_validate(collection, options, &reply, &error), &reply, &error);
 }
 
 static int _gc(lua_State *L) {
@@ -147,11 +167,13 @@ static const luaL_Reg funcs[] = {
 	{ "drop", _drop },
 	{ "find", _find },
 	{ "findAndModify", _findAndModify },
+	{ "findOne", _findOne },
 	{ "getName", _getName },
 	{ "insert", _insert },
 	{ "remove", _remove },
 	{ "rename", _rename },
 	{ "save", _save },
+	{ "stats", _stats },
 	{ "update", _update },
 	{ "validate", _validate },
 	{ "__gc", _gc },

@@ -29,10 +29,10 @@ end
 
 ### cursor:next()
 Iterates `cursor` and returns the next [BSON document] from it or `nil` if there are no more
-elements to read. On error, returns `nil` and the error message.
+documents to read. On error, returns `nil` and the error message.
 
 ### cursor:value([handler])
-Iterates `cursor` and returns the next value from it or `nil` if there are no more elements to read.
+Iterates `cursor` and returns the next value from it or `nil` if there are no more documents to read.
 On error, exception is thrown.
 
 This method is semantically equivalent to:
@@ -50,8 +50,7 @@ function cursor:value(handler)
 end
 ```
 
-Note, however, that the real method unpacks the next value directly from the cursor's internal data
-buffer avoiding additional overhead of creating a temporary [BSON document] as in the example above.
+except that it avoids creating a temporary [BSON document].
 
 
 [BSON document]: bson.md

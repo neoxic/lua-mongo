@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Arseny Vakhrushev <arseny.vakhrushev@gmail.com>
+ * Copyright (C) 2016-2017 Arseny Vakhrushev <arseny.vakhrushev@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,12 +24,12 @@
 
 static int _addUser(lua_State *L) {
 	mongoc_database_t *database = checkDatabase(L, 1);
-	const char *name = luaL_checkstring(L, 2);
+	const char *username = luaL_checkstring(L, 2);
 	const char *password = luaL_checkstring(L, 3);
 	bson_t *roles = toBSON(L, 4);
 	bson_t *extra = toBSON(L, 5);
 	bson_error_t error;
-	return commandStatus(L, mongoc_database_add_user(database, name, password, roles, extra, &error), &error);
+	return commandStatus(L, mongoc_database_add_user(database, username, password, roles, extra, &error), &error);
 }
 
 static int _drop(lua_State *L) {
@@ -41,8 +41,8 @@ static int _drop(lua_State *L) {
 
 static int _getCollection(lua_State *L) {
 	mongoc_database_t *database = checkDatabase(L, 1);
-	const char *name = luaL_checkstring(L, 2);
-	pushCollection(L, mongoc_database_get_collection(database, name), false, 1);
+	const char *collname = luaL_checkstring(L, 2);
+	pushCollection(L, mongoc_database_get_collection(database, collname), false, 1);
 	return 1;
 }
 
@@ -59,9 +59,9 @@ static int _getName(lua_State *L) {
 
 static int _hasCollection(lua_State *L) {
 	mongoc_database_t *database = checkDatabase(L, 1);
-	const char *name = luaL_checkstring(L, 2);
+	const char *collname = luaL_checkstring(L, 2);
 	bson_error_t error;
-	return commandStatus(L, mongoc_database_has_collection(database, name, &error), &error);
+	return commandStatus(L, mongoc_database_has_collection(database, collname, &error), &error);
 }
 
 static int _removeAllUsers(lua_State *L) {
@@ -72,9 +72,9 @@ static int _removeAllUsers(lua_State *L) {
 
 static int _removeUser(lua_State *L) {
 	mongoc_database_t *database = checkDatabase(L, 1);
-	const char *name = luaL_checkstring(L, 2);
+	const char *username = luaL_checkstring(L, 2);
 	bson_error_t error;
-	return commandStatus(L, mongoc_database_remove_user(database, name, &error), &error);
+	return commandStatus(L, mongoc_database_remove_user(database, username, &error), &error);
 }
 
 static int _gc(lua_State *L) {

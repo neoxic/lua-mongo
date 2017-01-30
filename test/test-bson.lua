@@ -4,13 +4,20 @@ local BSON = mongo.BSON
 local testInt64 = math.maxinteger and math.maxinteger == 9223372036854775807
 
 local function testV(v1, v2, h)
-	local b1 = BSON(v1)
-	local b2 = BSON(v2)
+	local a = v1.a
+	local b1, b2 = BSON(v1), BSON(v2)
 	-- print(b1, b2)
 	assert(b1 == b2) -- Compare with overloaded equality operator
 	assert(b1:data() == b2:data()) -- Compare binary data
 	assert(tostring(b1) == tostring(b2)) -- Compare as strings
 	test.equal(b1:value(h), b2:value(h)) -- Compare as values
+	if a then -- Test nested value
+		local a_ = b1:find('a')
+		b1, b2 = BSON {}, BSON {}
+		b1:append('a', a)
+		b2:append('a', a_)
+		test.equal(b1:value(h), b2:value(h))
+	end
 	collectgarbage()
 end
 
@@ -39,12 +46,10 @@ testV(b1, '{ "a" : 1, "b" : 2, "b" : 2 }')
 test.failure(b1.concat, b1) -- Self unexpected
 
 -- bson:find()
-local b = BSON { a = 1, b = { c = mongo.Null } }
+local b = BSON { a = { b = mongo.Null } }
 assert(b:find('') == nil)
 assert(b:find('abc') == nil)
-assert(b:find('a') == 1)
-testV(b:find('b'), '{ "c" : null }')
-assert(b:find('b.c') == mongo.Null)
+assert(b:find('a.b') == mongo.Null)
 
 
 -- Arrays
@@ -70,7 +75,12 @@ testX(a1)
 testX(a2)
 
 
--- Numeric values
+-- Values
+
+testV({ a = true }, '{ "a" : true }')
+testV({ a = 'abc' }, '{ "a" : "abc" }')
+testV({ a = { true, 123, 'abc' } }, '{ "a" : [ true, 123, "abc" ] }')
+testV({ a = { b = 1 } }, '{ "a" : { "b" : 1 } }')
 
 testV({ a = 2147483647 }, '{ "a" : 2147483647 }') -- Max Int32
 testV({ a = -2147483648 }, '{ "a" : -2147483648 }') -- Min Int32
@@ -79,6 +89,8 @@ testV({ a = -1.7976931348623157e+308 }, '{ "a" : -1.7976931348623157e+308 }') --
 if testInt64 then
 	testV({ a = 9223372036854775807 }, '{ "a" : { "$numberLong" : "9223372036854775807" } }') -- Max Int64
 	testV({ a = -9223372036854775808 }, '{ "a" : { "$numberLong" : "-9223372036854775808" } }') -- Min Int64
+else
+	print 'Max Int64 testing skipped on 32-bit system!'
 end
 
 
@@ -97,16 +109,15 @@ else -- DateTime as Double
 	testV({ a = mongo.DateTime(9007199254740991) }, '{ "a" : { "$date": { "$numberLong" : "9007199254740991" } } }')
 	testV({ a = mongo.DateTime(-9007199254740992) }, '{ "a" : { "$date": { "$numberLong" : "-9007199254740992" } } }')
 end
-testV({ a = mongo.MaxKey }, '{ "a" : { "$maxKey" : 1 } }')
-testV({ a = mongo.MinKey }, '{ "a" : { "$minKey" : 1 } }')
-testV({ a = mongo.Null }, '{ "a" : null }')
-testV({ a = mongo.Regex('abc') }, '{ "a" : { "$regex" : "abc", "$options" : "" } }')
-testV({ a = mongo.Regex('abc', 'def') }, '{ "a" : { "$regex" : "abc", "$options" : "def" } }')
-testV({ a = mongo.Timestamp(4294967295, 4294967295) }, '{ "a" : { "$timestamp" : { "t" : 4294967295, "i" : 4294967295 } } }')
-
 -- FIXME Follow up with bug report: https://jira.mongodb.org/browse/CDRIVER-1974
 -- testV({ a = mongo.Javascript('abc') }, '{ "a" : { "$code" : "abc" } }')
 -- testV({ a = mongo.Javascript('abc', { a = 1 }) }, '{ "$code" : "abc", "$scope" : { "a" : 1 } } }')
+testV({ a = mongo.Regex('abc') }, '{ "a" : { "$regex" : "abc", "$options" : "" } }')
+testV({ a = mongo.Regex('abc', 'def') }, '{ "a" : { "$regex" : "abc", "$options" : "def" } }')
+testV({ a = mongo.Timestamp(4294967295, 4294967295) }, '{ "a" : { "$timestamp" : { "t" : 4294967295, "i" : 4294967295 } } }')
+testV({ a = mongo.MaxKey }, '{ "a" : { "$maxKey" : 1 } }')
+testV({ a = mongo.MinKey }, '{ "a" : { "$minKey" : 1 } }')
+testV({ a = mongo.Null }, '{ "a" : null }')
 
 
 -- Handlers
@@ -123,7 +134,7 @@ testX({ a = obj }, h2) -- Nested transition
 
 -- Errors
 
-test.failure(mongo.type, setmetatable({}, {})) -- Invalid object for 'mongo.type'
+testF(setmetatable({}, {})) -- Table with metatable
 testF(setmetatable({}, { __tobson = function (t) return { t = t } end })) -- Recursion in '__tobson'
 testF(setmetatable({}, { __tobson = function (t) return 'abc' end })) -- Root '__tobson' should return table or BSON
 testF(setmetatable({}, { __tobson = function (t) t() end })) -- Run-time error in root '__tobson'
@@ -131,8 +142,8 @@ testF { a = setmetatable({}, { __tobson = function (t) t() end }) } -- Run-time 
 
 local t = {}
 t.t = t
+testF(t) -- Circular reference
 local f = function () end
-testF { a = t } -- Circular reference
 testF { a = f } -- Invalid value
 testF { [f] = 1 } -- Invalid key
 testF '' -- Empty JSON

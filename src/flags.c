@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Arseny Vakhrushev <arseny.vakhrushev@gmail.com>
+ * Copyright (C) 2016-2017 Arseny Vakhrushev <arseny.vakhrushev@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -61,7 +61,7 @@ static int toFlags(lua_State *L, int idx, const Flag flags[]) {
 				break;
 			}
 		}
-		if (!name) luaL_error(L, "invalid flag name '%s'", key);
+		argfcheck(L, name, idx, "invalid flag '%s'", key);
 	}
 	return val;
 }

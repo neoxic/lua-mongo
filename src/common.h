@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Arseny Vakhrushev <arseny.vakhrushev@gmail.com>
+ * Copyright (C) 2016-2017 Arseny Vakhrushev <arseny.vakhrushev@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,8 +27,12 @@
 #include <mongoc.h>
 #include <bson.h>
 
+#ifndef _WIN32
+#pragma GCC visibility push(hidden)
+#endif
+
 #define MODNAME "lua-mongo"
-#define VERSION "0.2.1"
+#define VERSION "0.3.0-dev"
 
 #define TYPE_BINARY "mongo.Binary"
 #define TYPE_BSON "mongo.BSON"
@@ -39,6 +43,9 @@
 #define TYPE_DATABASE "mongo.Database"
 #define TYPE_DATETIME "mongo.DateTime"
 #define TYPE_DOUBLE "mongo.Double"
+#define TYPE_GRIDFS "mongo.GridFS"
+#define TYPE_GRIDFSFILE "mongo.GridFSFile"
+#define TYPE_GRIDFSFILELIST "mongo.GridFSFileList"
 #define TYPE_INT32 "mongo.Int32"
 #define TYPE_INT64 "mongo.Int64"
 #define TYPE_JAVASCRIPT "mongo.Javascript"
@@ -65,21 +72,29 @@ int newRegex(lua_State *L);
 int newTimestamp(lua_State *L);
 
 void pushBSON(lua_State *L, const bson_t *bson, int hidx);
-void pushBSONField(lua_State *L, const bson_t *bson, const char *name);
 void pushBSONWithSteal(lua_State *L, bson_t *bson);
+void pushBSONValue(lua_State *L, const bson_value_t *val);
+void pushBSONField(lua_State *L, const bson_t *bson, const char *key, bool any);
 void pushBulkOperation(lua_State *L, mongoc_bulk_operation_t *bulk, int pidx);
 void pushCollection(lua_State *L, mongoc_collection_t *collection, bool ref, int pidx);
 void pushCursor(lua_State *L, mongoc_cursor_t *cursor, int pidx);
 void pushDatabase(lua_State *L, mongoc_database_t *database, int pidx);
+void pushGridFS(lua_State *L, mongoc_gridfs_t *gridfs, int pidx);
+void pushGridFSFile(lua_State *L, mongoc_gridfs_file_t *file, int pidx);
+void pushGridFSFileList(lua_State *L, mongoc_gridfs_file_list_t *list, int pidx);
 void pushMaxKey(lua_State *L);
 void pushMinKey(lua_State *L);
 void pushNull(lua_State *L);
 void pushObjectID(lua_State *L, const bson_oid_t *oid);
 
+int iterateCursor(lua_State *L, mongoc_cursor_t *cursor, int hidx);
+
 bson_t *checkBSON(lua_State *L, int idx);
 bson_t *testBSON(lua_State *L, int idx);
 bson_t *castBSON(lua_State *L, int idx);
 bson_t *toBSON(lua_State *L, int idx);
+
+void initBSONValue(lua_State *L, int idx, bson_value_t *val);
 
 bson_oid_t *checkObjectID(lua_State *L, int idx);
 bson_oid_t *testObjectID(lua_State *L, int idx);
@@ -89,12 +104,15 @@ mongoc_client_t *checkClient(lua_State *L, int idx);
 mongoc_collection_t *checkCollection(lua_State *L, int idx);
 mongoc_cursor_t *checkCursor(lua_State *L, int idx);
 mongoc_database_t *checkDatabase(lua_State *L, int idx);
+mongoc_gridfs_t *checkGridFS(lua_State *L, int idx);
+mongoc_gridfs_file_t *checkGridFSFile(lua_State *L, int idx);
+mongoc_gridfs_file_list_t *checkGridFSFileList(lua_State *L, int idx);
 
 int toInsertFlags(lua_State *L, int idx);
 int toRemoveFlags(lua_State *L, int idx);
 int toUpdateFlags(lua_State *L, int idx);
 
-/* Helpers */
+/* Utilities */
 
 bool pushType(lua_State *L, const char *tname, const luaL_Reg *funcs);
 void setType(lua_State *L, const char *tname, const luaL_Reg *funcs);
@@ -110,10 +128,12 @@ void checkStatus(lua_State *L, bool status, const bson_error_t *error);
 
 int commandError(lua_State *L, const bson_error_t *error);
 int commandStatus(lua_State *L, bool status, const bson_error_t *error);
-int commandReply(lua_State *L, bool status, bson_t *reply, const char *field, const bson_error_t *error);
+int commandReply(lua_State *L, bool status, bson_t *reply, const bson_error_t *error);
 int commandStrVec(lua_State *L, char **strv, const bson_error_t *error);
 
 #define check(L, cond) (void)((cond) || luaL_error(L, "precondition failed: %s at %s:%d", #cond, __FILE__, __LINE__))
+#define argferror(L, idx, ...) (lua_pushfstring(L, __VA_ARGS__), luaL_argerror(L, idx, lua_tostring(L, -1)))
+#define argfcheck(L, cond, idx, ...) (void)((cond) || argferror(L, idx, __VA_ARGS__))
 
 #if LUA_VERSION_NUM >= 503 && LUA_MAXINTEGER >= INT64_MAX
 #define pushInt64 lua_pushinteger
@@ -142,4 +162,8 @@ int commandStrVec(lua_State *L, char **strv, const bson_error_t *error);
 #define lua_rawgetp(L, idx, ptr) (lua_pushlightuserdata(L, ptr), lua_rawget(L, idx))
 #define lua_rawsetp(L, idx, ptr) (lua_pushlightuserdata(L, ptr), lua_insert(L, -2), lua_rawset(L, idx))
 void *luaL_testudata(lua_State* L, int idx, const char *tname);
+#endif
+
+#ifndef _WIN32
+#pragma GCC visibility pop
 #endif

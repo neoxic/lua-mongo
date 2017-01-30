@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Arseny Vakhrushev <arseny.vakhrushev@gmail.com>
+ * Copyright (C) 2016-2017 Arseny Vakhrushev <arseny.vakhrushev@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@ static int _execute(lua_State *L) {
 	mongoc_bulk_operation_t *bulk = checkBulkOperation(L, 1);
 	bson_t reply;
 	bson_error_t error;
-	return commandReply(L, mongoc_bulk_operation_execute(bulk, &reply, &error), &reply, 0, &error);
+	return commandReply(L, mongoc_bulk_operation_execute(bulk, &reply, &error), &reply, &error);
 }
 
 static int _insert(lua_State *L) {

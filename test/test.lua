@@ -1,7 +1,8 @@
 local test = {
 	uri = 'mongodb://127.0.0.1',
 	dbname = 'lua-mongo-test',
-	cname = 'test',
+	collname = 'test',
+	filename = 'lua-mongo-test-file',
 }
 
 local function equal(v1, v2)

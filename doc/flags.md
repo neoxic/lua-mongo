@@ -13,7 +13,7 @@ local flags = {
 Flags for _insert_
 ------------------
 
-| Name            | Translation                     |
+| Flag            | Translation                     |
 |-----------------|---------------------------------|
 | continueOnError | MONGOC_INSERT_CONTINUE_ON_ERROR |
 | noValidate      | MONGOC_INSERT_NO_VALIDATE       |
@@ -24,7 +24,7 @@ Refer to http://mongoc.org/libmongoc/current/mongoc_insert_flags_t.html for more
 Flags for _remove_
 ------------------
 
-| Name   | Translation                 |
+| Flag   | Translation                 |
 |--------|-----------------------------|
 | single | MONGOC_REMOVE_SINGLE_REMOVE |
 
@@ -34,7 +34,7 @@ Refer to http://mongoc.org/libmongoc/current/mongoc_remove_flags_t.html for more
 Flags for _update_
 ------------------
 
-| Name       | Translation                |
+| Flag       | Translation                |
 |------------|----------------------------|
 | upsert     | MONGOC_UPDATE_UPSERT       |
 | multi      | MONGOC_UPDATE_MULTI_UPDATE |
