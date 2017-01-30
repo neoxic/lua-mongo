@@ -36,6 +36,7 @@ build = {
 				'src/flags.c',
 				'src/gridfs.c',
 				'src/gridfsfile.c',
+				'src/gridfsfilelist.c',
 				'src/main.c',
 				'src/objectid.c',
 				'src/util.c',
