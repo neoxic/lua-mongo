@@ -28,13 +28,13 @@
 #define EXPORT __attribute__((visibility("default")))
 #endif
 
-static int _type(lua_State *L) {
+static int m_type(lua_State *L) {
 	if (!luaL_getmetafield(L, 1, "__name")) lua_pushnil(L);
 	return 1;
 }
 
 static const luaL_Reg funcs[] = {
-	{ "type", _type },
+	{ "type", m_type },
 	{ "Binary", newBinary },
 	{ "BSON", newBSON },
 	{ "Client", newClient },

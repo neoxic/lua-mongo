@@ -22,21 +22,21 @@
 
 #include "common.h"
 
-static int _execute(lua_State *L) {
+static int m_execute(lua_State *L) {
 	mongoc_bulk_operation_t *bulk = checkBulkOperation(L, 1);
 	bson_t reply;
 	bson_error_t error;
 	return commandReply(L, mongoc_bulk_operation_execute(bulk, &reply, &error), &reply, &error);
 }
 
-static int _insert(lua_State *L) {
+static int m_insert(lua_State *L) {
 	mongoc_bulk_operation_t *bulk = checkBulkOperation(L, 1);
 	bson_t *document = castBSON(L, 2);
 	mongoc_bulk_operation_insert(bulk, document);
 	return 0;
 }
 
-static int _removeMany(lua_State *L) {
+static int m_removeMany(lua_State *L) {
 	mongoc_bulk_operation_t *bulk = checkBulkOperation(L, 1);
 	bson_t *query = castBSON(L, 2);
 	bson_t *options = toBSON(L, 3);
@@ -45,7 +45,7 @@ static int _removeMany(lua_State *L) {
 	return 0;
 }
 
-static int _removeOne(lua_State *L) {
+static int m_removeOne(lua_State *L) {
 	mongoc_bulk_operation_t *bulk = checkBulkOperation(L, 1);
 	bson_t *query = castBSON(L, 2);
 	bson_t *options = toBSON(L, 3);
@@ -54,7 +54,7 @@ static int _removeOne(lua_State *L) {
 	return 0;
 }
 
-static int _replaceOne(lua_State *L) {
+static int m_replaceOne(lua_State *L) {
 	mongoc_bulk_operation_t *bulk = checkBulkOperation(L, 1);
 	bson_t *query = castBSON(L, 2);
 	bson_t *document = castBSON(L, 3);
@@ -64,7 +64,7 @@ static int _replaceOne(lua_State *L) {
 	return 0;
 }
 
-static int _updateMany(lua_State *L) {
+static int m_updateMany(lua_State *L) {
 	mongoc_bulk_operation_t *bulk = checkBulkOperation(L, 1);
 	bson_t *query = castBSON(L, 2);
 	bson_t *document = castBSON(L, 3);
@@ -74,7 +74,7 @@ static int _updateMany(lua_State *L) {
 	return 0;
 }
 
-static int _updateOne(lua_State *L) {
+static int m_updateOne(lua_State *L) {
 	mongoc_bulk_operation_t *bulk = checkBulkOperation(L, 1);
 	bson_t *query = castBSON(L, 2);
 	bson_t *document = castBSON(L, 3);
@@ -84,21 +84,21 @@ static int _updateOne(lua_State *L) {
 	return 0;
 }
 
-static int _gc(lua_State *L) {
+static int m__gc(lua_State *L) {
 	mongoc_bulk_operation_destroy(checkBulkOperation(L, 1));
 	unsetType(L);
 	return 0;
 }
 
 static const luaL_Reg funcs[] = {
-	{ "execute", _execute },
-	{ "insert", _insert },
-	{ "removeMany", _removeMany },
-	{ "removeOne", _removeOne },
-	{ "replaceOne", _replaceOne },
-	{ "updateMany", _updateMany },
-	{ "updateOne", _updateOne },
-	{ "__gc", _gc },
+	{ "execute", m_execute },
+	{ "insert", m_insert },
+	{ "removeMany", m_removeMany },
+	{ "removeOne", m_removeOne },
+	{ "replaceOne", m_replaceOne },
+	{ "updateMany", m_updateMany },
+	{ "updateOne", m_updateOne },
+	{ "__gc", m__gc },
 	{ 0, 0 }
 };
 

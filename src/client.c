@@ -22,7 +22,7 @@
 
 #include "common.h"
 
-static int _command(lua_State *L) {
+static int m_command(lua_State *L) {
 	mongoc_client_t *client = checkClient(L, 1);
 	const char *dbname = luaL_checkstring(L, 2);
 	bson_t *command = castBSON(L, 3);
@@ -34,7 +34,7 @@ static int _command(lua_State *L) {
 	return 1;
 }
 
-static int _getCollection(lua_State *L) {
+static int m_getCollection(lua_State *L) {
 	mongoc_client_t *client = checkClient(L, 1);
 	const char *dbname = luaL_checkstring(L, 2);
 	const char *collname = luaL_checkstring(L, 3);
@@ -42,27 +42,27 @@ static int _getCollection(lua_State *L) {
 	return 1;
 }
 
-static int _getDatabase(lua_State *L) {
+static int m_getDatabase(lua_State *L) {
 	mongoc_client_t *client = checkClient(L, 1);
 	const char *dbname = luaL_checkstring(L, 2);
 	pushDatabase(L, mongoc_client_get_database(client, dbname), 1);
 	return 1;
 }
 
-static int _getDatabaseNames(lua_State *L) {
+static int m_getDatabaseNames(lua_State *L) {
 	mongoc_client_t *client = checkClient(L, 1);
 	bson_error_t error;
 	return commandStrVec(L, mongoc_client_get_database_names(client, &error), &error);
 }
 
-static int _getDefaultDatabase(lua_State *L) {
+static int m_getDefaultDatabase(lua_State *L) {
 	mongoc_database_t *database = mongoc_client_get_default_database(checkClient(L, 1));
 	luaL_argcheck(L, database, 1, "default database is not configured");
 	pushDatabase(L, database, 1);
 	return 1;
 }
 
-static int _getGridFS(lua_State *L) {
+static int m_getGridFS(lua_State *L) {
 	mongoc_client_t *client = checkClient(L, 1);
 	const char *dbname = luaL_checkstring(L, 2);
 	const char *prefix = lua_tostring(L, 3);
@@ -73,20 +73,20 @@ static int _getGridFS(lua_State *L) {
 	return 1;
 }
 
-static int _gc(lua_State *L) {
+static int m__gc(lua_State *L) {
 	mongoc_client_destroy(checkClient(L, 1));
 	unsetType(L);
 	return 0;
 }
 
 static const luaL_Reg funcs[] = {
-	{ "command", _command },
-	{ "getCollection", _getCollection },
-	{ "getDatabase", _getDatabase },
-	{ "getDatabaseNames", _getDatabaseNames },
-	{ "getDefaultDatabase", _getDefaultDatabase },
-	{ "getGridFS", _getGridFS },
-	{ "__gc", _gc },
+	{ "command", m_command },
+	{ "getCollection", m_getCollection },
+	{ "getDatabase", m_getDatabase },
+	{ "getDatabaseNames", m_getDatabaseNames },
+	{ "getDefaultDatabase", m_getDefaultDatabase },
+	{ "getGridFS", m_getGridFS },
+	{ "__gc", m__gc },
 	{ 0, 0 }
 };
 

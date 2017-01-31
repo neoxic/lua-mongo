@@ -42,7 +42,7 @@ static void setFileOpts(lua_State *L, int idx, mongoc_gridfs_file_opt_t *opts) {
 	opts->metadata = toBSON(L, ++top);
 }
 
-static int _createFile(lua_State *L) {
+static int m_createFile(lua_State *L) {
 	mongoc_gridfs_t *gridfs = checkGridFS(L, 1);
 	mongoc_gridfs_file_opt_t opts;
 	setFileOpts(L, 2, &opts);
@@ -50,7 +50,7 @@ static int _createFile(lua_State *L) {
 	return 1;
 }
 
-static int _createFileFrom(lua_State *L) {
+static int m_createFileFrom(lua_State *L) {
 	mongoc_gridfs_t *gridfs = checkGridFS(L, 1);
 	const char *filename = luaL_checkstring(L, 2);
 	mongoc_gridfs_file_opt_t opts;
@@ -68,13 +68,13 @@ error:
 	return 2;
 }
 
-static int _drop(lua_State *L) {
+static int m_drop(lua_State *L) {
 	mongoc_gridfs_t *gridfs = checkGridFS(L, 1);
 	bson_error_t error;
 	return commandStatus(L, mongoc_gridfs_drop(gridfs, &error), &error);
 }
 
-static int _find(lua_State *L) {
+static int m_find(lua_State *L) {
 	mongoc_gridfs_t *gridfs = checkGridFS(L, 1);
 	bson_t *query = castBSON(L, 2);
 	bson_t *options = toBSON(L, 3);
@@ -82,7 +82,7 @@ static int _find(lua_State *L) {
 	return 1;
 }
 
-static int _findOne(lua_State *L) {
+static int m_findOne(lua_State *L) {
 	mongoc_gridfs_t *gridfs = checkGridFS(L, 1);
 	bson_t *query = castBSON(L, 2);
 	bson_t *options = toBSON(L, 3);
@@ -93,7 +93,7 @@ static int _findOne(lua_State *L) {
 	return 1;
 }
 
-static int _findOneByFilename(lua_State *L) {
+static int m_findOneByFilename(lua_State *L) {
 	mongoc_gridfs_t *gridfs = checkGridFS(L, 1);
 	const char *filename = luaL_checkstring(L, 2);
 	bson_error_t error;
@@ -103,40 +103,40 @@ static int _findOneByFilename(lua_State *L) {
 	return 1;
 }
 
-static int _getChunks(lua_State *L) {
+static int m_getChunks(lua_State *L) {
 	pushCollection(L, mongoc_gridfs_get_chunks(checkGridFS(L, 1)), true, 1);
 	return 1;
 }
 
-static int _getFiles(lua_State *L) {
+static int m_getFiles(lua_State *L) {
 	pushCollection(L, mongoc_gridfs_get_files(checkGridFS(L, 1)), true, 1);
 	return 1;
 }
 
-static int _removeByFilename(lua_State *L) {
+static int m_removeByFilename(lua_State *L) {
 	mongoc_gridfs_t *gridfs = checkGridFS(L, 1);
 	const char *filename = luaL_checkstring(L, 2);
 	bson_error_t error;
 	return commandStatus(L, mongoc_gridfs_remove_by_filename(gridfs, filename, &error), &error);
 }
 
-static int _gc(lua_State *L) {
+static int m__gc(lua_State *L) {
 	mongoc_gridfs_destroy(checkGridFS(L, 1));
 	unsetType(L);
 	return 0;
 }
 
 static const luaL_Reg funcs[] = {
-	{ "createFile", _createFile },
-	{ "createFileFrom", _createFileFrom },
-	{ "drop", _drop },
-	{ "find", _find },
-	{ "findOne", _findOne },
-	{ "findOneByFilename", _findOneByFilename },
-	{ "getChunks", _getChunks },
-	{ "getFiles", _getFiles },
-	{ "removeByFilename", _removeByFilename },
-	{ "__gc", _gc },
+	{ "createFile", m_createFile },
+	{ "createFileFrom", m_createFileFrom },
+	{ "drop", m_drop },
+	{ "find", m_find },
+	{ "findOne", m_findOne },
+	{ "findOneByFilename", m_findOneByFilename },
+	{ "getChunks", m_getChunks },
+	{ "getFiles", m_getFiles },
+	{ "removeByFilename", m_removeByFilename },
+	{ "__gc", m__gc },
 	{ 0, 0 }
 };
 

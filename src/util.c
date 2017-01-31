@@ -22,7 +22,7 @@
 
 #include "common.h"
 
-static int _tostring(lua_State *L) {
+static int m__tostring(lua_State *L) {
 	if (!luaL_getmetafield(L, 1, "__name")) return 0;
 	lua_pushfstring(L, "%s: %p", lua_tostring(L, -1), lua_topointer(L, 1));
 	return 1;
@@ -36,7 +36,7 @@ bool pushType(lua_State *L, const char *tname, const luaL_Reg *funcs) {
 	lua_setfield(L, -2, "__index"); /* mt.__index = mt */
 	lua_pushstring(L, tname);
 	lua_setfield(L, -2, "__name");
-	lua_pushcfunction(L, _tostring);
+	lua_pushcfunction(L, m__tostring);
 	lua_setfield(L, -2, "__tostring");
 #if LUA_VERSION_NUM >= 502
 	luaL_setfuncs(L, funcs, 0);

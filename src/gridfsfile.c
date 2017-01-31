@@ -31,52 +31,52 @@ static int fileError(lua_State *L, mongoc_gridfs_file_t *file) {
 	return 2;
 }
 
-static int _getAliases(lua_State *L) {
+static int m_getAliases(lua_State *L) {
 	pushBSON(L, mongoc_gridfs_file_get_aliases(checkGridFSFile(L, 1)), 0);
 	return 1;
 }
 
-static int _getChunkSize(lua_State *L) {
+static int m_getChunkSize(lua_State *L) {
 	pushInt32(L, mongoc_gridfs_file_get_chunk_size(checkGridFSFile(L, 1)));
 	return 1;
 }
 
-static int _getContentType(lua_State *L) {
+static int m_getContentType(lua_State *L) {
 	lua_pushstring(L, mongoc_gridfs_file_get_content_type(checkGridFSFile(L, 1)));
 	return 1;
 }
 
-static int _getFilename(lua_State *L) {
+static int m_getFilename(lua_State *L) {
 	lua_pushstring(L, mongoc_gridfs_file_get_filename(checkGridFSFile(L, 1)));
 	return 1;
 }
 
-static int _getId(lua_State *L) {
+static int m_getId(lua_State *L) {
 	pushBSONValue(L, mongoc_gridfs_file_get_id(checkGridFSFile(L, 1)));
 	return 1;
 }
 
-static int _getLength(lua_State *L) {
+static int m_getLength(lua_State *L) {
 	pushInt64(L, mongoc_gridfs_file_get_length(checkGridFSFile(L, 1)));
 	return 1;
 }
 
-static int _getMD5(lua_State *L) {
+static int m_getMD5(lua_State *L) {
 	lua_pushstring(L, mongoc_gridfs_file_get_md5(checkGridFSFile(L, 1)));
 	return 1;
 }
 
-static int _getMetadata(lua_State *L) {
+static int m_getMetadata(lua_State *L) {
 	pushBSON(L, mongoc_gridfs_file_get_metadata(checkGridFSFile(L, 1)), 0);
 	return 1;
 }
 
-static int _getUploadDate(lua_State *L) {
+static int m_getUploadDate(lua_State *L) {
 	pushInt64(L, mongoc_gridfs_file_get_upload_date(checkGridFSFile(L, 1)));
 	return 1;
 }
 
-static int _read(lua_State *L) {
+static int m_read(lua_State *L) {
 	mongoc_gridfs_file_t *file = checkGridFSFile(L, 1);
 	lua_Integer maxlen = luaL_checkinteger(L, 2);
 	lua_Integer buflen = LUAL_BUFFERSIZE;
@@ -100,20 +100,20 @@ static int _read(lua_State *L) {
 	return 1;
 }
 
-static int _remove(lua_State *L) {
+static int m_remove(lua_State *L) {
 	mongoc_gridfs_file_t *file = checkGridFSFile(L, 1);
 	bson_error_t error;
 	return commandStatus(L, mongoc_gridfs_file_remove(file, &error), &error);
 }
 
-static int _save(lua_State *L) {
+static int m_save(lua_State *L) {
 	mongoc_gridfs_file_t *file = checkGridFSFile(L, 1);
 	if (!mongoc_gridfs_file_save(file)) return fileError(L, file);
 	lua_pushboolean(L, 1);
 	return 1;
 }
 
-static int _seek(lua_State *L) {
+static int m_seek(lua_State *L) {
 	static const char *const whence[] = { "set", "cur", "end", 0 };
 	static const int mode[] = { SEEK_SET, SEEK_CUR, SEEK_END };
 	mongoc_gridfs_file_t *file = checkGridFSFile(L, 1);
@@ -123,28 +123,28 @@ static int _seek(lua_State *L) {
 	return 1;
 }
 
-static int _setAliases(lua_State *L) {
+static int m_setAliases(lua_State *L) {
 	mongoc_gridfs_file_t *file = checkGridFSFile(L, 1);
 	const bson_t *aliases = castBSON(L, 2);
 	mongoc_gridfs_file_set_aliases(file, aliases);
 	return 0;
 }
 
-static int _setContentType(lua_State *L) {
+static int m_setContentType(lua_State *L) {
 	mongoc_gridfs_file_t *file = checkGridFSFile(L, 1);
 	const char *contentType = luaL_checkstring(L, 2);
 	mongoc_gridfs_file_set_content_type(file, contentType);
 	return 0;
 }
 
-static int _setFilename(lua_State *L) {
+static int m_setFilename(lua_State *L) {
 	mongoc_gridfs_file_t *file = checkGridFSFile(L, 1);
 	const char *filename = luaL_checkstring(L, 2);
 	mongoc_gridfs_file_set_filename(file, filename);
 	return 0;
 }
 
-static int _setId(lua_State *L) {
+static int m_setId(lua_State *L) {
 	mongoc_gridfs_file_t *file = checkGridFSFile(L, 1);
 	bson_value_t value;
 	bool status;
@@ -156,26 +156,26 @@ static int _setId(lua_State *L) {
 	return 0;
 }
 
-static int _setMD5(lua_State *L) {
+static int m_setMD5(lua_State *L) {
 	mongoc_gridfs_file_t *file = checkGridFSFile(L, 1);
 	const char *md5 = luaL_checkstring(L, 2);
 	mongoc_gridfs_file_set_md5(file, md5);
 	return 0;
 }
 
-static int _setMetadata(lua_State *L) {
+static int m_setMetadata(lua_State *L) {
 	mongoc_gridfs_file_t *file = checkGridFSFile(L, 1);
 	const bson_t *metadata = castBSON(L, 2);
 	mongoc_gridfs_file_set_metadata(file, metadata);
 	return 0;
 }
 
-static int _tell(lua_State *L) {
+static int m_tell(lua_State *L) {
 	pushInt64(L, mongoc_gridfs_file_tell(checkGridFSFile(L, 1)));
 	return 1;
 }
 
-static int _write(lua_State *L) {
+static int m_write(lua_State *L) {
 	mongoc_gridfs_file_t *file = checkGridFSFile(L, 1);
 	size_t len;
 	const char *str = luaL_checklstring(L, 2, &len);
@@ -186,36 +186,36 @@ static int _write(lua_State *L) {
 	return 1;
 }
 
-static int _gc(lua_State *L) {
+static int m__gc(lua_State *L) {
 	mongoc_gridfs_file_destroy(checkGridFSFile(L, 1));
 	unsetType(L);
 	return 0;
 }
 
 static const luaL_Reg funcs[] = {
-	{ "getAliases", _getAliases },
-	{ "getChunkSize", _getChunkSize },
-	{ "getContentType", _getContentType },
-	{ "getFilename", _getFilename },
-	{ "getId", _getId },
-	{ "getLength", _getLength },
-	{ "getMD5", _getMD5 },
-	{ "getMetadata", _getMetadata },
-	{ "getUploadDate", _getUploadDate },
-	{ "read", _read },
-	{ "remove", _remove },
-	{ "save", _save },
-	{ "seek", _seek },
-	{ "setAliases", _setAliases },
-	{ "setContentType", _setContentType },
-	{ "setFilename", _setFilename },
-	{ "setId", _setId },
-	{ "setMD5", _setMD5 },
-	{ "setMetadata", _setMetadata },
-	{ "tell", _tell },
-	{ "write", _write },
-	{ "__len", _getLength },
-	{ "__gc", _gc },
+	{ "getAliases", m_getAliases },
+	{ "getChunkSize", m_getChunkSize },
+	{ "getContentType", m_getContentType },
+	{ "getFilename", m_getFilename },
+	{ "getId", m_getId },
+	{ "getLength", m_getLength },
+	{ "getMD5", m_getMD5 },
+	{ "getMetadata", m_getMetadata },
+	{ "getUploadDate", m_getUploadDate },
+	{ "read", m_read },
+	{ "remove", m_remove },
+	{ "save", m_save },
+	{ "seek", m_seek },
+	{ "setAliases", m_setAliases },
+	{ "setContentType", m_setContentType },
+	{ "setFilename", m_setFilename },
+	{ "setId", m_setId },
+	{ "setMD5", m_setMD5 },
+	{ "setMetadata", m_setMetadata },
+	{ "tell", m_tell },
+	{ "write", m_write },
+	{ "__len", m_getLength },
+	{ "__gc", m__gc },
 	{ 0, 0 }
 };
 

@@ -22,11 +22,11 @@
 
 #include "common.h"
 
-static int _unpack(lua_State *L) {
+static int m_unpack(lua_State *L) {
 	return lua_istable(L, 1) ? unpackParams(L, 1) : 0;
 }
 
-static int _tostring(lua_State *L) {
+static int m__tostring(lua_State *L) {
 	int i, n;
 	lua_settop(L, 1);
 	if (!lua_istable(L, 1) || !luaL_getmetafield(L, 1, "__name")) return 0;
@@ -48,8 +48,8 @@ static int _tostring(lua_State *L) {
 }
 
 static const luaL_Reg funcs[] = {
-	{ "unpack", _unpack },
-	{ "__tostring", _tostring },
+	{ "unpack", m_unpack },
+	{ "__tostring", m__tostring },
 	{ 0, 0 }
 };
 

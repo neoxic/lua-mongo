@@ -22,7 +22,7 @@
 
 #include "common.h"
 
-static int _next(lua_State *L) {
+static int m_next(lua_State *L) {
 	mongoc_gridfs_file_list_t *list = checkGridFSFileList(L, 1);
 	mongoc_gridfs_file_t *file;
 	bson_error_t error;
@@ -38,19 +38,19 @@ static int _next(lua_State *L) {
 	return 1;
 }
 
-static int _gc(lua_State *L) {
+static int m__gc(lua_State *L) {
 	mongoc_gridfs_file_list_destroy(checkGridFSFileList(L, 1));
 	unsetType(L);
 	return 0;
 }
 
 static const luaL_Reg funcs[] = {
-	{ "next", _next },
-	{ "__gc", _gc },
+	{ "next", m_next },
+	{ "__gc", m__gc },
 	{ 0, 0 }
 };
 
-static int _iterator(lua_State *L) {
+static int m_iterator(lua_State *L) {
 	checkGridFSFileList(L, 1);
 	lua_pushvalue(L, lua_upvalueindex(1)); /* Iterator */
 	lua_pushvalue(L, 1); /* State */
@@ -61,8 +61,8 @@ void pushGridFSFileList(lua_State *L, mongoc_gridfs_file_list_t *list, int pidx)
 	pushHandle(L, list, -1, pidx);
 	if (pushType(L, TYPE_GRIDFSFILELIST, funcs)) {
 		lua_pushboolean(L, 1); /* Iterator mode on */
-		lua_pushcclosure(L, _next, 1); /* Iterator ... */
-		lua_pushcclosure(L, _iterator, 1); /* ... cached as upvalue 1 */
+		lua_pushcclosure(L, m_next, 1); /* Iterator ... */
+		lua_pushcclosure(L, m_iterator, 1); /* ... cached as upvalue 1 */
 		lua_setfield(L, -2, "iterator");
 	}
 	lua_setmetatable(L, -2);

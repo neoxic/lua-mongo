@@ -22,30 +22,30 @@
 
 #include "common.h"
 
-static int _isAlive(lua_State *L) {
+static int m_isAlive(lua_State *L) {
 	lua_pushboolean(L, mongoc_cursor_is_alive(checkCursor(L, 1)));
 	return 1;
 }
 
-static int _next(lua_State *L) {
+static int m_next(lua_State *L) {
 	return iterateCursor(L, checkCursor(L, 1), 0);
 }
 
-static int _value(lua_State *L) {
+static int m_value(lua_State *L) {
 	return iterateCursor(L, checkCursor(L, 1), 2);
 }
 
-static int _gc(lua_State *L) {
+static int m__gc(lua_State *L) {
 	mongoc_cursor_destroy(checkCursor(L, 1));
 	unsetType(L);
 	return 0;
 }
 
 static const luaL_Reg funcs[] = {
-	{ "isAlive", _isAlive },
-	{ "next", _next },
-	{ "value", _value },
-	{ "__gc", _gc },
+	{ "isAlive", m_isAlive },
+	{ "next", m_next },
+	{ "value", m_value },
+	{ "__gc", m__gc },
 	{ 0, 0 }
 };
 
@@ -53,7 +53,7 @@ static int iterator(lua_State *L) {
 	return iterateCursor(L, checkCursor(L, 1), lua_upvalueindex(1));
 }
 
-static int _iterator(lua_State *L) {
+static int m_iterator(lua_State *L) {
 	checkCursor(L, 1);
 	if (lua_isnoneornil(L, 2)) lua_pushvalue(L, lua_upvalueindex(1)); /* Default iterator */
 	else {
@@ -68,7 +68,7 @@ void pushCursor(lua_State *L, mongoc_cursor_t *cursor, int pidx) {
 	pushHandle(L, cursor, -1, pidx);
 	if (pushType(L, TYPE_CURSOR, funcs)) {
 		lua_pushcfunction(L, iterator); /* Default iterator ... */
-		lua_pushcclosure(L, _iterator, 1); /* ... cached as upvalue 1 */
+		lua_pushcclosure(L, m_iterator, 1); /* ... cached as upvalue 1 */
 		lua_setfield(L, -2, "iterator");
 	}
 	lua_setmetatable(L, -2);

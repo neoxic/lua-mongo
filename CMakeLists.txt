@@ -17,7 +17,7 @@ endif()
 
 find_package(PkgConfig)
 pkg_search_module(LUA REQUIRED ${lua_names})
-pkg_check_modules(LIBMONGOC REQUIRED libmongoc-1.0>=1.5.3 libbson-1.0>=1.5.3)
+pkg_check_modules(LIBMONGOC REQUIRED libmongoc-1.0>=1.5.0 libbson-1.0>=1.5.0)
 
 if(NOT LUA_FOUND)
 	message(FATAL_ERROR "Lua not found - set USE_LUA_VERSION to match your configuration")

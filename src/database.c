@@ -22,7 +22,7 @@
 
 #include "common.h"
 
-static int _addUser(lua_State *L) {
+static int m_addUser(lua_State *L) {
 	mongoc_database_t *database = checkDatabase(L, 1);
 	const char *username = luaL_checkstring(L, 2);
 	const char *password = luaL_checkstring(L, 3);
@@ -32,67 +32,67 @@ static int _addUser(lua_State *L) {
 	return commandStatus(L, mongoc_database_add_user(database, username, password, roles, extra, &error), &error);
 }
 
-static int _drop(lua_State *L) {
+static int m_drop(lua_State *L) {
 	mongoc_database_t *database = checkDatabase(L, 1);
 	bson_t *options = toBSON(L, 2);
 	bson_error_t error;
 	return commandStatus(L, mongoc_database_drop_with_opts(database, options, &error), &error);
 }
 
-static int _getCollection(lua_State *L) {
+static int m_getCollection(lua_State *L) {
 	mongoc_database_t *database = checkDatabase(L, 1);
 	const char *collname = luaL_checkstring(L, 2);
 	pushCollection(L, mongoc_database_get_collection(database, collname), false, 1);
 	return 1;
 }
 
-static int _getCollectionNames(lua_State *L) {
+static int m_getCollectionNames(lua_State *L) {
 	mongoc_database_t *database = checkDatabase(L, 1);
 	bson_error_t error;
 	return commandStrVec(L, mongoc_database_get_collection_names(database, &error), &error);
 }
 
-static int _getName(lua_State *L) {
+static int m_getName(lua_State *L) {
 	lua_pushstring(L, mongoc_database_get_name(checkDatabase(L, 1)));
 	return 1;
 }
 
-static int _hasCollection(lua_State *L) {
+static int m_hasCollection(lua_State *L) {
 	mongoc_database_t *database = checkDatabase(L, 1);
 	const char *collname = luaL_checkstring(L, 2);
 	bson_error_t error;
 	return commandStatus(L, mongoc_database_has_collection(database, collname, &error), &error);
 }
 
-static int _removeAllUsers(lua_State *L) {
+static int m_removeAllUsers(lua_State *L) {
 	mongoc_database_t *database = checkDatabase(L, 1);
 	bson_error_t error;
 	return commandStatus(L, mongoc_database_remove_all_users(database, &error), &error);
 }
 
-static int _removeUser(lua_State *L) {
+static int m_removeUser(lua_State *L) {
 	mongoc_database_t *database = checkDatabase(L, 1);
 	const char *username = luaL_checkstring(L, 2);
 	bson_error_t error;
 	return commandStatus(L, mongoc_database_remove_user(database, username, &error), &error);
 }
 
-static int _gc(lua_State *L) {
+static int m__gc(lua_State *L) {
 	mongoc_database_destroy(checkDatabase(L, 1));
 	unsetType(L);
 	return 0;
 }
 
 static const luaL_Reg funcs[] = {
-	{ "addUser", _addUser },
-	{ "drop", _drop },
-	{ "getCollection", _getCollection },
-	{ "getCollectionNames", _getCollectionNames },
-	{ "getName", _getName },
-	{ "hasCollection", _hasCollection },
-	{ "removeAllUsers", _removeAllUsers },
-	{ "removeUser", _removeUser },
-	{ "__gc", _gc },
+	{ "addUser", m_addUser },
+	{ "drop", m_drop },
+	{ "getCollection", m_getCollection },
+	{ "getCollectionNames", m_getCollectionNames },
+	{ "getName", m_getName },
+	{ "hasCollection", m_hasCollection },
+	{ "removeAllUsers", m_removeAllUsers },
+	{ "removeUser", m_removeUser },
+	{ "__gc", m__gc },
 	{ 0, 0 }
 };
 

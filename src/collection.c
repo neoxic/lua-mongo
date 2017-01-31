@@ -22,7 +22,7 @@
 
 #include "common.h"
 
-static int _aggregate(lua_State *L) {
+static int m_aggregate(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
 	bson_t *pipeline = castBSON(L, 2);
 	bson_t *options = toBSON(L, 3);
@@ -30,14 +30,14 @@ static int _aggregate(lua_State *L) {
 	return 1;
 }
 
-static int _createBulkOperation(lua_State *L) {
+static int m_createBulkOperation(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
 	bool ordered = lua_isnone(L, 2) || lua_toboolean(L, 2); /* 'true' if omitted */
 	pushBulkOperation(L, mongoc_collection_create_bulk_operation(collection, ordered, 0), 1);
 	return 1;
 }
 
-static int _count(lua_State *L) {
+static int m_count(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
 	bson_t *query = toBSON(L, 2);
 	bson_t *options = toBSON(L, 3);
@@ -48,14 +48,14 @@ static int _count(lua_State *L) {
 	return 1;
 }
 
-static int _drop(lua_State *L) {
+static int m_drop(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
 	bson_t *options = toBSON(L, 2);
 	bson_error_t error;
 	return commandStatus(L, mongoc_collection_drop_with_opts(collection, options, &error), &error);
 }
 
-static int _find(lua_State *L) {
+static int m_find(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
 	bson_t *query = castBSON(L, 2);
 	bson_t *options = toBSON(L, 3);
@@ -63,7 +63,7 @@ static int _find(lua_State *L) {
 	return 1;
 }
 
-static int _findAndModify(lua_State *L) {
+static int m_findAndModify(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
 	bson_t *query = castBSON(L, 2);
 	bson_t *options = castBSON(L, 3);
@@ -79,7 +79,7 @@ static int _findAndModify(lua_State *L) {
 	return nres;
 }
 
-static int _findOne(lua_State *L) {
+static int m_findOne(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
 	bson_t *query = castBSON(L, 2);
 	bson_t *options = toBSON(L, 3);
@@ -89,12 +89,12 @@ static int _findOne(lua_State *L) {
 	return nres;
 }
 
-static int _getName(lua_State *L) {
+static int m_getName(lua_State *L) {
 	lua_pushstring(L, mongoc_collection_get_name(checkCollection(L, 1)));
 	return 1;
 }
 
-static int _insert(lua_State *L) {
+static int m_insert(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
 	bson_t *document = castBSON(L, 2);
 	int flags = toInsertFlags(L, 3);
@@ -102,7 +102,7 @@ static int _insert(lua_State *L) {
 	return commandStatus(L, mongoc_collection_insert(collection, flags, document, 0, &error), &error);
 }
 
-static int _remove(lua_State *L) {
+static int m_remove(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
 	bson_t *query = castBSON(L, 2);
 	int flags = toRemoveFlags(L, 3);
@@ -110,7 +110,7 @@ static int _remove(lua_State *L) {
 	return commandStatus(L, mongoc_collection_remove(collection, flags, query, 0, &error), &error);
 }
 
-static int _rename(lua_State *L) {
+static int m_rename(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
 	const char *dbname = luaL_checkstring(L, 2);
 	const char *collname = luaL_checkstring(L, 3);
@@ -120,14 +120,14 @@ static int _rename(lua_State *L) {
 	return commandStatus(L, mongoc_collection_rename_with_opts(collection, dbname, collname, force, options, &error), &error);
 }
 
-static int _save(lua_State *L) {
+static int m_save(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
 	bson_t *document = castBSON(L, 2);
 	bson_error_t error;
 	return commandStatus(L, mongoc_collection_save(collection, document, 0, &error), &error);
 }
 
-static int _stats(lua_State *L) {
+static int m_stats(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
 	bson_t *options = toBSON(L, 2);
 	bson_t reply;
@@ -135,7 +135,7 @@ static int _stats(lua_State *L) {
 	return commandReply(L, mongoc_collection_stats(collection, options, &reply, &error), &reply, &error);
 }
 
-static int _update(lua_State *L) {
+static int m_update(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
 	bson_t *query = castBSON(L, 2);
 	bson_t *update = castBSON(L, 3);
@@ -144,7 +144,7 @@ static int _update(lua_State *L) {
 	return commandStatus(L, mongoc_collection_update(collection, flags, query, update, 0, &error), &error);
 }
 
-static int _validate(lua_State *L) {
+static int m_validate(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
 	bson_t *options = toBSON(L, 2);
 	bson_t reply;
@@ -152,7 +152,7 @@ static int _validate(lua_State *L) {
 	return commandReply(L, mongoc_collection_validate(collection, options, &reply, &error), &reply, &error);
 }
 
-static int _gc(lua_State *L) {
+static int m__gc(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
 	if (getHandleMode(L, 1)) return 0; /* Reference handle */
 	mongoc_collection_destroy(collection);
@@ -161,22 +161,22 @@ static int _gc(lua_State *L) {
 }
 
 static const luaL_Reg funcs[] = {
-	{ "aggregate", _aggregate },
-	{ "createBulkOperation", _createBulkOperation },
-	{ "count", _count },
-	{ "drop", _drop },
-	{ "find", _find },
-	{ "findAndModify", _findAndModify },
-	{ "findOne", _findOne },
-	{ "getName", _getName },
-	{ "insert", _insert },
-	{ "remove", _remove },
-	{ "rename", _rename },
-	{ "save", _save },
-	{ "stats", _stats },
-	{ "update", _update },
-	{ "validate", _validate },
-	{ "__gc", _gc },
+	{ "aggregate", m_aggregate },
+	{ "createBulkOperation", m_createBulkOperation },
+	{ "count", m_count },
+	{ "drop", m_drop },
+	{ "find", m_find },
+	{ "findAndModify", m_findAndModify },
+	{ "findOne", m_findOne },
+	{ "getName", m_getName },
+	{ "insert", m_insert },
+	{ "remove", m_remove },
+	{ "rename", m_rename },
+	{ "save", m_save },
+	{ "stats", m_stats },
+	{ "update", m_update },
+	{ "validate", m_validate },
+	{ "__gc", m__gc },
 	{ 0, 0 }
 };
 

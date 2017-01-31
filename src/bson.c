@@ -25,7 +25,7 @@
 #define MAXSTACK 1000 /* Arbitrary stack size limit to check for recursion */
 #define isInt32(n) ((n) >= INT32_MIN && (n) <= INT32_MAX)
 
-static int _append(lua_State *L) {
+static int m_append(lua_State *L) {
 	bson_t *bson = checkBSON(L, 1);
 	size_t klen;
 	const char *key = luaL_checklstring(L, 2, &klen);
@@ -36,7 +36,7 @@ static int _append(lua_State *L) {
 	return 0;
 }
 
-static int _concat(lua_State *L) {
+static int m_concat(lua_State *L) {
 	bson_t *bson = checkBSON(L, 1);
 	bson_t *value = castBSON(L, 2);
 	luaL_argcheck(L, bson != value, 2, "self unexpected");
@@ -44,25 +44,25 @@ static int _concat(lua_State *L) {
 	return 0;
 }
 
-static int _data(lua_State *L) {
+static int m_data(lua_State *L) {
 	bson_t *bson = checkBSON(L, 1);
 	lua_pushlstring(L, (const char *)bson_get_data(bson), bson->len);
 	return 1;
 }
 
-static int _find(lua_State *L) {
+static int m_find(lua_State *L) {
 	bson_t *bson = checkBSON(L, 1);
 	const char *key = luaL_checkstring(L, 2);
 	pushBSONField(L, bson, key, true);
 	return 1;
 }
 
-static int _value(lua_State *L) {
+static int m_value(lua_State *L) {
 	pushBSON(L, checkBSON(L, 1), 2);
 	return 1;
 }
 
-static int _tostring(lua_State *L) {
+static int m__tostring(lua_State *L) {
 	size_t len;
 	char *str = bson_as_json(checkBSON(L, 1), &len);
 	lua_pushlstring(L, str, len);
@@ -70,32 +70,32 @@ static int _tostring(lua_State *L) {
 	return 1;
 }
 
-static int _len(lua_State *L) {
+static int m__len(lua_State *L) {
 	pushInt32(L, checkBSON(L, 1)->len);
 	return 1;
 }
 
-static int _eq(lua_State *L) {
+static int m__eq(lua_State *L) {
 	lua_pushboolean(L, bson_equal(checkBSON(L, 1), checkBSON(L, 2)));
 	return 1;
 }
 
-static int _gc(lua_State *L) {
+static int m__gc(lua_State *L) {
 	bson_destroy(checkBSON(L, 1));
 	unsetType(L);
 	return 0;
 }
 
 static const luaL_Reg funcs[] = {
-	{ "append", _append },
-	{ "concat", _concat },
-	{ "data", _data },
-	{ "find", _find },
-	{ "value", _value },
-	{ "__tostring", _tostring },
-	{ "__len", _len },
-	{ "__eq", _eq },
-	{ "__gc", _gc },
+	{ "append", m_append },
+	{ "concat", m_concat },
+	{ "data", m_data },
+	{ "find", m_find },
+	{ "value", m_value },
+	{ "__tostring", m__tostring },
+	{ "__len", m__len },
+	{ "__eq", m__eq },
+	{ "__gc", m__gc },
 	{ 0, 0 }
 };
 
