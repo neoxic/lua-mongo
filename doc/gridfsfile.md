@@ -32,7 +32,7 @@ Returns the metadata specified for `file` or `nil` if not set.
 Returns the upload date in milliseconds since the UNIX epoch specified for `file`.
 
 ### file:read(length)
-Reads up to `length` bytes from `file` and returns a string or `nil` if end-of-file was observed.
+Reads up to `length` bytes from `file` and returns a string or `nil` if end-of-file was encountered.
 On error, returns `nil` and the error message.
 
 ### file:remove()
