@@ -3,7 +3,7 @@ MongoDB Driver for Lua
 
 [lua-mongo] is a binding to the [MongoDB C Driver] for Lua.
 
-* Unified API for MongoDB commands and CRUD operations in the [MongoDB C Driver].
+* Unified API for MongoDB commands, CRUD operations and GridFS in the [MongoDB C Driver].
 
 * Support for custom data transformation handlers when converting to/from BSON documents.
 
@@ -16,9 +16,9 @@ MongoDB Driver for Lua
 Dependencies
 ------------
 
-lua >= 5.1 (or luajit)
-libmongoc >= 1.5.3
-libbson >= 1.5.3
++ lua >= 5.1 (or luajit)
++ libmongoc >= 1.5.0
++ libbson >= 1.5.0
 
 
 Building and installing with LuaRocks
@@ -78,7 +78,7 @@ local query2 = mongo.BSON { _id = id }
 ```
 
 
-Basic features and MongoDB CRUD operations:
+Basic features and operations:
 
 ```Lua
 -- Store document
