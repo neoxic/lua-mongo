@@ -24,8 +24,8 @@ assert(mongo.type(file:getId()) == 'mongo.ObjectID')
 assert(file:getLength() == 0)
 assert(file:getMD5() == nil)
 assert(file:getMetadata() == nil)
--- FIXME This fails on 32-bit system due to bug in mongoc_gridfs_file_get_upload_date(); bug report pending
--- assert(file:getUploadDate() > 0)
+-- FIXME Follow up with bug report: https://jira.mongodb.org/browse/CDRIVER-2028
+-- assert(file:getUploadDate() > 1486000000)
 
 file:setAliases '[ "a", "b" ]'
 file:setContentType('content-type1')
