@@ -43,7 +43,7 @@ Saves modifications to `file` to the server and returns `true`. On error, return
 error message.
 
 ### file:seek(offset, [whence])
-Sets the file position indicator for `file` to `offset` relative to `whence` (string) that can be
+Sets the file position indicator for `file` to `offset` relative to `whence` (a string) that can be
 one of the following:
 - `set`: position 0 (beginning of the file, the default);
 - `cur`: current position;
