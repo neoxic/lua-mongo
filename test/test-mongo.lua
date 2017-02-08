@@ -13,9 +13,8 @@ test.error(collection:insert({ ['$a'] = 123 }, { noValidate = true })) -- Server
 
 assert(collection:insert { _id = 123 })
 test.error(collection:insert { _id = 123 }) -- Duplicate key
-
-assert(collection:save { _id = 456 })
-assert(collection:save { _id = 789 })
+assert(collection:insert { _id = 456 })
+assert(collection:insert { _id = 789 })
 
 assert(collection:count() == 3)
 assert(collection:count('{ "_id" : 123 }') == 1)

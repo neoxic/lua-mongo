@@ -127,13 +127,6 @@ static int m_rename(lua_State *L) {
 	return commandStatus(L, mongoc_collection_rename_with_opts(collection, dbname, collname, force, options, &error), &error);
 }
 
-static int m_save(lua_State *L) {
-	mongoc_collection_t *collection = checkCollection(L, 1);
-	bson_t *document = castBSON(L, 2);
-	bson_error_t error;
-	return commandStatus(L, mongoc_collection_save(collection, document, 0, &error), &error);
-}
-
 static int m_stats(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
 	bson_t *options = toBSON(L, 2);
@@ -179,7 +172,6 @@ static const luaL_Reg funcs[] = {
 	{ "insert", m_insert },
 	{ "remove", m_remove },
 	{ "rename", m_rename },
-	{ "save", m_save },
 	{ "stats", m_stats },
 	{ "update", m_update },
 	{ "validate", m_validate },

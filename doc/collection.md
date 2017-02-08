@@ -66,10 +66,6 @@ and the error message. See also [Flags for remove] for information on `flags`.
 Renames `collection` on the server using new database name `dbname` and collection name `collname`.
 If `force` is `true`, an existing collection with the same name will be dropped first.
 
-### collection:save(document)
-Saves `document` into `collection` and returns `true`. On error, returns `nil` and the error
-message. If the document has an `_id` field, it will be updated. Otherwise, it will be inserted.
-
 ### collection:stats([options])
 Retrieves statistics about `collection` and returns the result as a [BSON document]. On error,
 returns `nil` and the error message.

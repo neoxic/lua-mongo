@@ -82,7 +82,7 @@ Basic features and operations:
 
 ```Lua
 -- Store document
-collection:save { _id = id, name = 'John Smith', age = 50 }
+collection:insert { _id = id, name = 'John Smith', age = 50 }
 
 -- Fetch document
 local document = collection:findOne(query1):value()
@@ -109,7 +109,7 @@ local value = bson:value()
 print(value.name)
 
 -- Transparently include BSON documents in other documents
-collection:update(query2, { age = 60, backup = bson }, { upsert = true }) -- Update document
+collection:update(query2, { age = 60, backup = bson }) -- Update document
 collection:remove(query2) -- Remove document
 ```
 
@@ -151,7 +151,7 @@ local function SimpleObject(id, name) -- Constructor
 end
 
 function SimpleClass:__tostring() -- Method
-	return ('%s -> %s'):format(self.id, self.name)
+	return tostring(self.id) .. ' --> ' .. self.name
 end
 
 function SimpleClass:__tobson() -- Called when object is packed into BSON
@@ -184,13 +184,13 @@ local object = bson:value(handler)
 print(object)
 
 -- Store object
-collection:save(object)
+collection:insert(object)
 
 -- Restore object
 local object = collection:findOne(query2):value(handler)
 print(object)
 
--- Restore while iterating in a for-loop
+-- Iterate objects in a for-loop
 for object in collection:find(query2):iterator(handler) do
 	print(object)
 end
