@@ -4,18 +4,17 @@ local BSON = mongo.BSON
 local testInt64 = math.maxinteger and math.maxinteger == 9223372036854775807
 
 local function testV(v1, v2, h)
-	local a = v1.a
+	local a1 = v1.a
 	local b1, b2 = BSON(v1), BSON(v2)
-	-- print(b1, b2)
 	assert(b1 == b2) -- Compare with overloaded equality operator
 	assert(b1:data() == b2:data()) -- Compare binary data
 	assert(tostring(b1) == tostring(b2)) -- Compare as strings
 	test.equal(b1:value(h), b2:value(h)) -- Compare as values
-	if a then -- Test nested value
-		local a_ = b1:find('a')
+	if a1 then -- Test nested value
+		local a2 = b1:find('a')
 		b1, b2 = BSON {}, BSON {}
-		b1:append('a', a)
-		b2:append('a', a_)
+		b1:append('a', a1)
+		b2:append('a', a2)
 		test.equal(b1:value(h), b2:value(h))
 	end
 	collectgarbage()
@@ -90,7 +89,7 @@ if testInt64 then
 	testV({ a = 9223372036854775807 }, '{ "a" : { "$numberLong" : "9223372036854775807" } }') -- Max Int64
 	testV({ a = -9223372036854775808 }, '{ "a" : { "$numberLong" : "-9223372036854775808" } }') -- Min Int64
 else
-	print 'Max Int64 testing skipped on 32-bit system!'
+	print 'Max Int64 testing skipped - no support on this system!'
 end
 
 
@@ -109,9 +108,8 @@ else -- DateTime as Double
 	testV({ a = mongo.DateTime(9007199254740991) }, '{ "a" : { "$date": { "$numberLong" : "9007199254740991" } } }')
 	testV({ a = mongo.DateTime(-9007199254740992) }, '{ "a" : { "$date": { "$numberLong" : "-9007199254740992" } } }')
 end
--- FIXME Follow up with bug report: https://jira.mongodb.org/browse/CDRIVER-1974
--- testV({ a = mongo.Javascript('abc') }, '{ "a" : { "$code" : "abc" } }')
--- testV({ a = mongo.Javascript('abc', { a = 1 }) }, '{ "$code" : "abc", "$scope" : { "a" : 1 } } }')
+testV({ a = mongo.Javascript('abc') }, '{ "a" : { "$code" : "abc" } }')
+testV({ a = mongo.Javascript('abc', { a = 1 }) }, '{ "a" : { "$code" : "abc", "$scope" : { "a" : 1 } } }')
 testV({ a = mongo.Regex('abc') }, '{ "a" : { "$regex" : "abc", "$options" : "" } }')
 testV({ a = mongo.Regex('abc', 'def') }, '{ "a" : { "$regex" : "abc", "$options" : "def" } }')
 testV({ a = mongo.Timestamp(4294967295, 4294967295) }, '{ "a" : { "$timestamp" : { "t" : 4294967295, "i" : 4294967295 } } }')
@@ -159,8 +157,6 @@ end
 testF { a = newBSONType(0x99) } -- Invalid type
 testF { a = newBSONType(0x05) } -- Binary: invalid string
 testF { a = newBSONType(0x0d) } -- Javascript: invalid string
-testF { a = newBSONType(0x0f) } -- Javascript w/ scope: invalid string
-testF { a = newBSONType(0x0f, 'abc') } -- Javascript w/ scope: invalid BSON
 
 
 -- ObjectID

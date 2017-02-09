@@ -139,15 +139,10 @@ static bool appendBSONType(lua_State *L, bson_type_t type, int idx, int *nerr, b
 			break;
 		case BSON_TYPE_CODE: {
 			const char *code = lua_tostring(L, top + 1);
-			if (!code) goto error;
-			bson_append_code(bson, key, klen, code);
-			break;
-		}
-		case BSON_TYPE_CODEWSCOPE: {
-			const char *code = lua_tostring(L, top + 1);
 			bson_t *scope = testBSON(L, top + 2);
-			if (!code || !scope) goto error;
-			bson_append_code_with_scope(bson, key, klen, code, scope);
+			if (!code) goto error;
+			if (scope) bson_append_code_with_scope(bson, key, klen, code, scope);
+			else bson_append_code(bson, key, klen, code);
 			break;
 		}
 		case BSON_TYPE_MAXKEY:
@@ -204,18 +199,12 @@ static void initBSONType(lua_State *L, bson_type_t type, int idx, bson_value_t *
 		case BSON_TYPE_CODE: {
 			size_t len;
 			const char *code = lua_tolstring(L, top + 1, &len);
+			bson_t *scope = testBSON(L, top + 2);
 			if (!code) goto error;
 			val->value.v_code.code_len = len;
 			val->value.v_code.code = bson_strndup(code, len);
-			break;
-		}
-		case BSON_TYPE_CODEWSCOPE: {
-			size_t len;
-			const char *code = lua_tolstring(L, top + 1, &len);
-			bson_t *scope = testBSON(L, top + 2);
-			if (!code || !scope) goto error;
-			val->value.v_codewscope.code_len = len;
-			val->value.v_codewscope.code = bson_strndup(code, len);
+			if (!scope) break;
+			val->value_type = BSON_TYPE_CODEWSCOPE;
 			memcpy(
 				val->value.v_codewscope.scope_data = bson_malloc(scope->len), bson_get_data(scope),
 				val->value.v_codewscope.scope_len = scope->len);

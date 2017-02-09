@@ -162,6 +162,5 @@ assert(chunks:count() == 0)
 assert(files:count() == 0)
 assert(gridfs:drop())
 
--- FIXME Follow up with bug report: https://jira.mongodb.org/browse/CDRIVER-2007
--- local c = mongo.Client 'mongodb://INVALID-URI'
--- test.error(c:getGridFS(test.dbname))
+local c = mongo.Client 'mongodb://INVALID-URI'
+test.error(c:getGridFS(test.dbname))

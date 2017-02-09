@@ -98,11 +98,10 @@ int newInt64(lua_State *L) {
 }
 
 int newJavascript(lua_State *L) {
-	bson_t *scope;
 	luaL_checkstring(L, 1);
-	scope = toBSON(L, 2);
+	toBSON(L, 2);
 	packParams(L, 2);
-	setBSONType(L, TYPE_JAVASCRIPT, scope ? BSON_TYPE_CODEWSCOPE : BSON_TYPE_CODE);
+	setBSONType(L, TYPE_JAVASCRIPT, BSON_TYPE_CODE);
 	return 1;
 }
 
