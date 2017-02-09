@@ -21,7 +21,7 @@ Output:
 ```
 
 ### bson:concat(value)
-Appends the contents of `value` (a BSON document or something convertible to it) to `bson`.
+Appends the contents of `value` (converted to a [BSON document]) to `bson`.
 
 ```Lua
 local bson1 = mongo.BSON { a = 1 }

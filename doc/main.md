@@ -32,7 +32,7 @@ Constructors
 Returns an instance of [BSON Binary][BSON type].
 
 ### mongo.BSON(value)
-Returns an instance of [BSON document] cast from `value` that may take one of the following forms:
+Returns an instance of [BSON document] converted from `value` that may take one of the following forms:
 - a [BSON document] in which case this method does nothing;
 - a JSON string;
 - a table without a metatable;
@@ -57,7 +57,7 @@ Returns an instance of [BSON Int64][BSON type]. This type can be used to overrid
 conversion where needed.
 
 ### mongo.Javascript(code, [scope])
-Returns an instance of [BSON Javascript][BSON type].
+Returns an instance of [BSON Javascript][BSON type] with `scope` (converted to a [BSON document]).
 
 ### mongo.ObjectID([value])
 Returns an instance of [BSON ObjectID]. If hexadecimal string `value` is provided, it is used

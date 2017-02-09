@@ -10,7 +10,7 @@ MongoDB Driver for Lua
 * Transparent conversion from Lua/JSON to BSON for convenience.
 
 * Automatic conversion of Lua numbers to/from BSON Int32, Int64 and Double types depending on their
-  capacity without precision loss (when Lua allows it). Explicit casts are also available.
+  capacity without precision loss (when Lua allows it). Manual conversion is also available.
 
 
 Dependencies
@@ -69,7 +69,7 @@ Preparing the playground:
 local mongo = require 'mongo'
 local client = mongo.Client 'mongodb://127.0.0.1'
 local collection = client:getCollection('lua-mongo-test', 'test')
-collection:drop()
+collection:drop() -- Clear collection
 
 -- Common variables
 local id = mongo.ObjectID()
