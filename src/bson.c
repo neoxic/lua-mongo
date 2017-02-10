@@ -236,10 +236,11 @@ static bool isInteger(lua_State *L, int idx, lua_Integer *val) {
 }
 
 static bool isArray(lua_State *L, int idx) {
+	bool res;
 	lua_Integer i;
 	lua_pushnil(L);
 	if (!lua_next(L, idx)) return true; /* Empty table */
-	bool res = lua_type(L, -2) == LUA_TNUMBER && isInteger(L, -2, &i) && i == 1;
+	res = lua_type(L, -2) == LUA_TNUMBER && isInteger(L, -2, &i) && i == 1;
 	lua_pop(L, 2);
 	return res;
 }

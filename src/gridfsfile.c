@@ -87,8 +87,8 @@ static int m_read(lua_State *L) {
 	luaL_buffinit(L, &b);
 	for ( ;; ) {
 		if (buflen > maxlen) buflen = maxlen; /* Read no more than needed */
-		iov.iov_base = luaL_prepbuffer(&b);
 		iov.iov_len = buflen;
+		iov.iov_base = luaL_prepbuffer(&b);
 		n = mongoc_gridfs_file_readv(file, &iov, 1, buflen, 0);
 		if (n <= 0) break;
 		luaL_addsize(&b, n);
@@ -179,8 +179,11 @@ static int m_write(lua_State *L) {
 	mongoc_gridfs_file_t *file = checkGridFSFile(L, 1);
 	size_t len;
 	const char *str = luaL_checklstring(L, 2, &len);
-	mongoc_iovec_t iov = { .iov_len = len, .iov_base = (char *)str };
-	lua_Integer n = mongoc_gridfs_file_writev(file, &iov, 1, 0);
+	mongoc_iovec_t iov;
+	lua_Integer n;
+	iov.iov_len = len;
+	iov.iov_base = (char *)str;
+	n = mongoc_gridfs_file_writev(file, &iov, 1, 0);
 	if (n == -1) return fileError(L, file);
 	lua_pushinteger(L, n);
 	return 1;

@@ -54,9 +54,10 @@ static int m_createFileFrom(lua_State *L) {
 	mongoc_gridfs_t *gridfs = checkGridFS(L, 1);
 	const char *filename = luaL_checkstring(L, 2);
 	mongoc_gridfs_file_opt_t opts;
-	setFileOpts(L, 3, &opts);
-	mongoc_stream_t *stream = mongoc_stream_file_new_for_path(filename, O_RDONLY, 0);
+	mongoc_stream_t *stream;
 	mongoc_gridfs_file_t *file;
+	setFileOpts(L, 3, &opts);
+	stream = mongoc_stream_file_new_for_path(filename, O_RDONLY, 0);
 	if (!stream) goto error;
 	file = mongoc_gridfs_create_file_from_stream(gridfs, stream, &opts);
 	if (!file) goto error;
