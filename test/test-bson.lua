@@ -58,7 +58,7 @@ local function a(n)
 	for i = 1, n do
 		t[#t + 1] = i
 	end
-	if n < 100 then
+	if n < 50 then
 		t[#t + 1] = a(n + 1)
 	end
 	return t

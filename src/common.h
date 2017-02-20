@@ -94,7 +94,7 @@ bson_t *testBSON(lua_State *L, int idx);
 bson_t *castBSON(lua_State *L, int idx);
 bson_t *toBSON(lua_State *L, int idx);
 
-void initBSONValue(lua_State *L, int idx, bson_value_t *val);
+void toBSONValue(lua_State *L, int idx, bson_value_t *val);
 
 bson_oid_t *checkObjectID(lua_State *L, int idx);
 bson_oid_t *testObjectID(lua_State *L, int idx);

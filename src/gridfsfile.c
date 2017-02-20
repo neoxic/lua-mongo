@@ -149,7 +149,7 @@ static int m_setId(lua_State *L) {
 	bson_value_t value;
 	bool status;
 	bson_error_t error;
-	initBSONValue(L, 2, &value);
+	toBSONValue(L, 2, &value);
 	status = mongoc_gridfs_file_set_id(file, &value, &error);
 	bson_value_destroy(&value);
 	checkStatus(L, status, &error);

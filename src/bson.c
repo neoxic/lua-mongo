@@ -30,7 +30,7 @@ static int m_append(lua_State *L) {
 	size_t klen;
 	const char *key = luaL_checklstring(L, 2, &klen);
 	bson_value_t value;
-	initBSONValue(L, 3, &value);
+	toBSONValue(L, 3, &value);
 	bson_append_value(bson, key, klen, &value);
 	bson_value_destroy(&value);
 	return 0;
@@ -162,7 +162,7 @@ static bool appendBSONType(lua_State *L, bson_type_t type, int idx, int *nerr, b
 	return true;
 }
 
-static void initBSONType(lua_State *L, bson_type_t type, int idx, bson_value_t *val) {
+static void toBSONType(lua_State *L, bson_type_t type, int idx, bson_value_t *val) {
 	int top = lua_gettop(L);
 	unpackParams(L, idx);
 	switch (val->value_type = type) {
@@ -253,7 +253,7 @@ static bool isBSONArray(const bson_t *bson) {
 static bool appendTable(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson, bool array);
 
 static bool appendValue(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson, const char *key, size_t klen) {
-	if (luaL_getmetafield(L, idx, "__tobson")) { /* Transform value with '__tobson' metamethod */
+	if (luaL_getmetafield(L, idx, "__tobson")) { /* Transform value */
 		lua_pushvalue(L, idx);
 		if (lua_pcall(L, 1, 1, 0)) return error(L, nerr, "%s", lua_tostring(L, -1));
 		lua_replace(L, idx);
@@ -469,7 +469,7 @@ static void unpackTable(lua_State *L, bson_iter_t *iter, int hidx, bool array) {
 		unpackValue(L, iter, hidx);
 		lua_rawset(L, -3);
 	}
-	if (lua_isnoneornil(L, hidx)) return; /* No handler */
+	if (lua_isnil(L, hidx)) return; /* No handler */
 	lua_pushvalue(L, hidx);
 	lua_insert(L, -2);
 	lua_call(L, 1, 1); /* Transform value */
@@ -605,7 +605,7 @@ bson_t *castBSON(lua_State *L, int idx) {
 		checkStatus(L, bson_init_from_json(bson, str, len, &error), &error);
 	} else { /* From value */
 		int nerr = 0;
-		if (luaL_callmeta(L, idx, "__tobson")) lua_replace(L, idx); /* Transform value with '__tobson' metamethod */
+		if (luaL_callmeta(L, idx, "__tobson")) lua_replace(L, idx); /* Transform value */
 		if ((bson = testBSON(L, idx))) return bson; /* Nothing to do */
 		luaL_argcheck(L, lua_istable(L, idx), idx, "string, table or " TYPE_BSON " expected");
 		bson = lua_newuserdata(L, sizeof *bson);
@@ -627,9 +627,9 @@ bson_t *toBSON(lua_State *L, int idx) {
 	return lua_isnoneornil(L, idx) ? 0 : castBSON(L, idx);
 }
 
-void initBSONValue(lua_State *L, int idx, bson_value_t *val) {
+void toBSONValue(lua_State *L, int idx, bson_value_t *val) {
 	luaL_checkany(L, idx);
-	if (luaL_callmeta(L, idx, "__tobson")) lua_replace(L, idx); /* Transform value with '__tobson' metamethod */
+	if (luaL_callmeta(L, idx, "__tobson")) lua_replace(L, idx); /* Transform value */
 	switch (lua_type(L, idx)) {
 		case LUA_TNIL:
 			val->value_type = BSON_TYPE_NULL;
@@ -667,7 +667,7 @@ void initBSONValue(lua_State *L, int idx, bson_value_t *val) {
 			bool array;
 			int nerr = 0;
 			if (luaL_getmetafield(L, idx, "__bsontype")) {
-				initBSONType(L, lua_tointeger(L, -1), idx, val);
+				toBSONType(L, lua_tointeger(L, -1), idx, val);
 				lua_pop(L, 1);
 				break;
 			}
