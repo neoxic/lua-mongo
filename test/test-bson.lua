@@ -66,19 +66,26 @@ end
 local a = { a = a(1) }
 local b = BSON(a)
 assert(b == BSON(b:value())) -- Nested arrays
+local a0 = { __array = 0 }
 local a1 = { __array = 3, 1, 2, 3 }
-local a2 = { a1 = a1 }
+local a0_ = { a0 = a0 }
+local a1_ = { a1 = a1 }
+testV(a0, '[  ]') -- Empty root array
 testV(a1, '[ 1, 2, 3 ]') -- Root array
-testV(a2, '{ "a1" : [ 1, 2, 3 ] }') -- Nested array
+testV(a0_, '{ "a0" : [  ] }') -- Empty nested array
+testV(a1_, '{ "a1" : [ 1, 2, 3 ] }') -- Nested array
+-- testX(a0) -- Empty root array is not transitive due to limitations of libbson
 testX(a1)
-testX(a2)
+testX(a0_)
+testX(a1_)
 
 
 -- Values
 
 testV({ a = true }, '{ "a" : true }')
 testV({ a = 'abc' }, '{ "a" : "abc" }')
-testV({ a = { __array = 7, nil, true, nil, 123, nil, 'abc', nil } }, '{ "a" : [ null, true, null, 123, null, "abc", null ] }')
+testV({ a = { __array = 6, nil, 1, nil, 2, nil } }, '{ "a" : [ null, 1, null, 2, null, null ] }') -- Extended array
+testV({ b = { __array = -1, 1, 2, 3 } }, '{ "b" : [  ] }') -- Truncated array
 testV({ a = { b = 1 } }, '{ "a" : { "b" : 1 } }')
 
 testV({ a = 2147483647 }, '{ "a" : 2147483647 }') -- Max Int32

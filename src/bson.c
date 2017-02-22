@@ -241,14 +241,17 @@ static bool isArray(const bson_t *bson) {
 }
 
 static lua_Integer getArrayLen(lua_State *L, int idx) {
-	lua_Integer res = -1;
+	lua_Integer len = -1;
 	lua_getfield(L, idx, "__array");
 	if (lua_toboolean(L, -1)) {
-		if (lua_isnumber(L, -1)) res = lua_tointeger(L, -1);
-		else res = lua_rawlen(L, idx);
+		if (!lua_isnumber(L, -1)) len = lua_rawlen(L, idx);
+		else {
+			len = lua_tointeger(L, -1);
+			if (len < 0) len = 0;
+		}
 	}
 	lua_pop(L, 1);
-	return res;
+	return len;
 }
 
 static bool appendTable(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson, lua_Integer len);

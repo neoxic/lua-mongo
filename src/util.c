@@ -75,7 +75,7 @@ void pushHandle(lua_State *L, void *ptr, int mode, int pidx) {
 }
 
 int getHandleMode(lua_State *L, int idx) {
-	int res;
+	int mode;
 	lua_getuservalue(L, idx);
 	lua_rawgeti(L, -1, 1); /* env[1]: handle */
 	if (!lua_rawequal(L, -1, idx)) {
@@ -83,9 +83,9 @@ int getHandleMode(lua_State *L, int idx) {
 		return 0;
 	}
 	lua_rawgeti(L, -2, 2); /* env[2]: mode */
-	res = lua_tointeger(L, -1);
+	mode = lua_tointeger(L, -1);
 	lua_pop(L, 3);
-	return res;
+	return mode;
 }
 
 void packParams(lua_State *L, int n) {
