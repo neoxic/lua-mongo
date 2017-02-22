@@ -36,7 +36,24 @@ Returns an instance of [BSON document] converted from `value` that may take one 
 - a [BSON document] in which case this method does nothing;
 - a JSON string;
 - a table without a metatable;
-- a table or userdata with a `__tobson` metamethod that returns a table, [BSON type] or [BSON document].
+- a table or userdata with a `__toBSON` metamethod that returns a table, [BSON type] or [BSON document].
+
+A table (root or nested) is converted to a _BSON array_ if it has an `__array` field whose value is
+true in terms of Lua, i.e. is neither `nil` nor `false`. The length of the resulting array can be
+adjusted by storing an integer value in the `__array` field. By default, it is assumed to be equal
+to the length of the table.
+
+```Lua
+print(mongo.BSON { a = { __array = true, 1, 2, 3 } })
+print(mongo.BSON { a = { __array = true, nil, 1, nil, 2, nil } })
+print(mongo.BSON { a = { __array = 3,    nil, 1, nil, 2, nil } })
+```
+Output:
+```
+{ "a" : [ 1, 2, 3 ] }
+{ "a" : [ null, 1 ] }
+{ "a" : [ null, 1, null ] }
+```
 
 ### mongo.Client(uri)
 Returns a new [Client] object. See also [MongoDB Connection String URI Format] for information on `uri`.

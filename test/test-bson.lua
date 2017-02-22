@@ -24,7 +24,6 @@ local function testX(v, h)
 	local b = BSON(v)
 	local v_ = b:value(h)
 	local b_ = BSON(v_)
-	-- print(b, b_)
 	assert(b == b_)
 	test.equal(v, v_)
 	collectgarbage()
@@ -42,7 +41,7 @@ b1:concat(b2)
 testV(b1, '{ "a" : 1, "b" : 2 }')
 b1:concat(b2)
 testV(b1, '{ "a" : 1, "b" : 2, "b" : 2 }')
-test.failure(b1.concat, b1) -- Self unexpected
+test.failure(b1.concat, b1) -- Invalid value
 
 -- bson:find()
 local b = BSON { a = { b = mongo.Null } }
@@ -54,7 +53,7 @@ assert(b:find('a.b') == mongo.Null)
 -- Arrays
 
 local function a(n)
-	local t = {}
+	local t = { __array = true }
 	for i = 1, n do
 		t[#t + 1] = i
 	end
@@ -65,8 +64,9 @@ local function a(n)
 end
 
 local a = { a = a(1) }
-assert(BSON(a) == BSON(BSON(a):value())) -- Nested arrays
-local a1 = { 1, 2, 3 }
+local b = BSON(a)
+assert(b == BSON(b:value())) -- Nested arrays
+local a1 = { __array = 3, 1, 2, 3 }
 local a2 = { a1 = a1 }
 testV(a1, '[ 1, 2, 3 ]') -- Root array
 testV(a2, '{ "a1" : [ 1, 2, 3 ] }') -- Nested array
@@ -78,7 +78,7 @@ testX(a2)
 
 testV({ a = true }, '{ "a" : true }')
 testV({ a = 'abc' }, '{ "a" : "abc" }')
-testV({ a = { true, 123, 'abc' } }, '{ "a" : [ true, 123, "abc" ] }')
+testV({ a = { __array = 7, nil, true, nil, 123, nil, 'abc', nil } }, '{ "a" : [ null, true, null, 123, null, "abc", null ] }')
 testV({ a = { b = 1 } }, '{ "a" : { "b" : 1 } }')
 
 testV({ a = 2147483647 }, '{ "a" : 2147483647 }') -- Max Int32
@@ -120,7 +120,7 @@ testV({ a = mongo.Null }, '{ "a" : null }')
 
 -- Handlers
 
-local mt = { __tobson = function (t) return { bin = mongo.Binary(t.str) } end }
+local mt = { __toBSON = function (t) return { bin = mongo.Binary(t.str) } end }
 local obj = setmetatable({ str = 'abc' }, mt)
 local h1 = function (t) return setmetatable({ str = t.bin:unpack() }, mt) end
 local h2 = function (t) return t.a and t or h1(t) end
@@ -133,10 +133,10 @@ testX({ a = obj }, h2) -- Nested transition
 -- Errors
 
 testF(setmetatable({}, {})) -- Table with metatable
-testF(setmetatable({}, { __tobson = function (t) return { t = t } end })) -- Recursion in '__tobson'
-testF(setmetatable({}, { __tobson = function (t) return 'abc' end })) -- Root '__tobson' should return table or BSON
-testF(setmetatable({}, { __tobson = function (t) t() end })) -- Run-time error in root '__tobson'
-testF { a = setmetatable({}, { __tobson = function (t) t() end }) } -- Run-time error in nested '__tobson'
+testF(setmetatable({}, { __toBSON = function (t) return { t = t } end })) -- Recursion in '__toBSON'
+testF(setmetatable({}, { __toBSON = function (t) return 'abc' end })) -- Root '__toBSON' should return table or BSON
+testF(setmetatable({}, { __toBSON = function (t) t() end })) -- Run-time error in root '__toBSON'
+testF { a = setmetatable({}, { __toBSON = function (t) t() end }) } -- Run-time error in nested '__toBSON'
 
 local t = {}
 t.t = t
@@ -146,12 +146,10 @@ testF { a = f } -- Invalid value
 testF { [f] = 1 } -- Invalid key
 testF '' -- Empty JSON
 testF 'abc' -- Invalid JSON
-testF { 1, nil, 2 } -- Invalid array keys
-testF { a = 1, 2 } -- Mixed keys in array
-testF { a = 1, [2.1] = 2 } -- Mixed keys in document
+testF { __array = false, 1, 2, 3 } -- Not an array
 
 local function newBSONType(n, ...)
-	return setmetatable({ ... }, { __bsontype = n })
+	return setmetatable({ ... }, { __type = n })
 end
 
 testF { a = newBSONType(0x99) } -- Invalid type

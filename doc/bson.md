@@ -58,15 +58,24 @@ nil
 ```
 
 ### bson:value([handler])
-Converts `bson` into a Lua value and returns it. If `handler` is provided, it is called for
-every nested document. The result of the call is then used to replace the original value.
+Converts `bson` into a table and returns it. If `handler` is provided, it is called for every
+nested document; the result of the call is then used as a substitute for the original value.
+
+When a _BSON array_ is restored, its length is stored in the `__array` field of the resulting table.
 
 ```Lua
-local bson = mongo.BSON { a = { 1, 2 }, b = 3 }
+local bson = mongo.BSON { a = 1, b = { __array = true, 2, 3 } }
 local function sum(t)
 	local r = 0
-	for k, v in pairs(t) do
-		r = r + v
+	local n = t.__array
+	if n then
+		for i = 1, n do
+			r = r + t[i]
+		end
+	else
+		for k, v in pairs(t) do
+			r = r + v
+		end
 	end
 	return r
 end

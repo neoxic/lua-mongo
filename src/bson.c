@@ -39,7 +39,7 @@ static int m_append(lua_State *L) {
 static int m_concat(lua_State *L) {
 	bson_t *bson = checkBSON(L, 1);
 	bson_t *value = castBSON(L, 2);
-	luaL_argcheck(L, bson != value, 2, "self unexpected");
+	luaL_argcheck(L, bson != value, 2, "invalid value");
 	bson_concat(bson, value);
 	return 0;
 }
@@ -235,25 +235,26 @@ static bool isInteger(lua_State *L, int idx, lua_Integer *val) {
 	return true;
 }
 
-static bool isArray(lua_State *L, int idx) {
-	bool res;
-	lua_Integer i;
-	lua_pushnil(L);
-	if (!lua_next(L, idx)) return true; /* Empty table */
-	res = lua_type(L, -2) == LUA_TNUMBER && isInteger(L, -2, &i) && i == 1;
-	lua_pop(L, 2);
-	return res;
-}
-
-static bool isBSONArray(const bson_t *bson) {
+static bool isArray(const bson_t *bson) {
 	bson_iter_t iter;
 	return bson_iter_init(&iter, bson) && bson_iter_next(&iter) && !strcmp(bson_iter_key(&iter), "0");
 }
 
-static bool appendTable(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson, bool array);
+static lua_Integer getArrayLen(lua_State *L, int idx) {
+	lua_Integer res = -1;
+	lua_getfield(L, idx, "__array");
+	if (lua_toboolean(L, -1)) {
+		if (lua_isnumber(L, -1)) res = lua_tointeger(L, -1);
+		else res = lua_rawlen(L, idx);
+	}
+	lua_pop(L, 1);
+	return res;
+}
+
+static bool appendTable(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson, lua_Integer len);
 
 static bool appendValue(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson, const char *key, size_t klen) {
-	if (luaL_getmetafield(L, idx, "__tobson")) { /* Transform value */
+	if (luaL_getmetafield(L, idx, "__toBSON")) { /* Transform value */
 		lua_pushvalue(L, idx);
 		if (lua_pcall(L, 1, 1, 0)) return error(L, nerr, "%s", lua_tostring(L, -1));
 		lua_replace(L, idx);
@@ -282,20 +283,21 @@ static bool appendValue(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson
 			break;
 		}
 		case LUA_TTABLE: {
+			lua_Integer len;
 			bson_t doc;
-			bool array;
-			if (luaL_getmetafield(L, idx, "__bsontype")) {
+			if (luaL_getmetafield(L, idx, "__type")) {
 				if (!appendBSONType(L, lua_tointeger(L, -1), idx, nerr, bson, key, klen)) return false;
 				lua_pop(L, 1);
 				break;
 			}
-			if ((array = isArray(L, idx))) {
+			len = getArrayLen(L, idx);
+			if (len >= 0) {
 				bson_append_array_begin(bson, key, klen, &doc);
-				if (!appendTable(L, idx, ridx, nerr, &doc, array)) return false;
+				if (!appendTable(L, idx, ridx, nerr, &doc, len)) return false;
 				bson_append_array_end(bson, &doc);
 			} else {
 				bson_append_document_begin(bson, key, klen, &doc);
-				if (!appendTable(L, idx, ridx, nerr, &doc, array)) return false;
+				if (!appendTable(L, idx, ridx, nerr, &doc, len)) return false;
 				bson_append_document_end(bson, &doc);
 			}
 			break;
@@ -304,7 +306,7 @@ static bool appendValue(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson
 			bson_t *doc;
 			bson_oid_t *oid;
 			if ((doc = testBSON(L, idx))) {
-				if (isBSONArray(doc)) bson_append_array(bson, key, klen, doc);
+				if (isArray(doc)) bson_append_array(bson, key, klen, doc);
 				else bson_append_document(bson, key, klen, doc);
 				break;
 			}
@@ -315,16 +317,14 @@ static bool appendValue(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson
 			/* Fall through */
 		}
 		default:
-			return error(L, nerr, "%s unexpected", luaL_typename(L, idx));
+			return error(L, nerr, "invalid value (a %s)", luaL_typename(L, idx));
 	}
 	return true;
 }
 
-static bool appendTable(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson, bool array) {
-	char buf[64];
+static bool appendTable(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson, lua_Integer len) {
 	const char *key;
 	size_t klen;
-	lua_Integer i, n = 0;
 	int top = lua_gettop(L);
 	if (top >= MAXSTACK) return error(L, nerr, "recursion detected");
 	if (lua_getmetatable(L, idx)) return error(L, nerr, "table with metatable unexpected");
@@ -336,22 +336,21 @@ static bool appendTable(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson
 	lua_rawset(L, ridx);
 	lua_settop(L, top);
 	lua_checkstack(L, LUA_MINSTACK);
-	for (lua_pushnil(L); lua_next(L, idx); lua_pop(L, 1)) {
-		switch (lua_type(L, top + 1)) {
-			case LUA_TNUMBER:
-				if (!array) goto error;
-				if (!isInteger(L, top + 1, &i) || --i != n++ || !isInt32(i)) return error(L, nerr, "array keys must be sequential");
-				klen = bson_uint32_to_string(i, &key, buf, sizeof buf);
-				break;
-			case LUA_TSTRING:
-				if (array) goto error;
-				key = lua_tolstring(L, top + 1, &klen);
-				break;
-			default:
-			error:
-				return error(L, nerr, "%s unexpected as %s key", luaL_typename(L, top + 1), array ? "array" : "document");
+	if (len >= 0) { /* As array */
+		char buf[64];
+		lua_Integer i;
+		for (i = 0; i < len; ++i) {
+			lua_rawgeti(L, idx, i + 1);
+			klen = bson_uint32_to_string(i, &key, buf, sizeof buf);
+			if (!appendValue(L, top + 1, ridx, nerr, bson, key, klen)) return error(L, nerr, "[%d] => ", i + 1);
+			lua_pop(L, 1);
 		}
-		if (!appendValue(L, top + 2, ridx, nerr, bson, key, klen)) return error(L, nerr, "[\"%s\"] => ", key);
+	} else { /* As document */
+		for (lua_pushnil(L); lua_next(L, idx); lua_pop(L, 1)) {
+			if (lua_type(L, top + 1) != LUA_TSTRING) return error(L, nerr, "invalid key (a %s)", luaL_typename(L, top + 1));
+			key = lua_tolstring(L, top + 1, &klen);
+			if (!appendValue(L, top + 2, ridx, nerr, bson, key, klen)) return error(L, nerr, "[\"%s\"] => ", key);
+		}
 	}
 	lua_pushvalue(L, idx);
 	lua_pushnil(L);
@@ -460,14 +459,18 @@ static void unpackValue(lua_State *L, bson_iter_t *iter, int hidx) {
 }
 
 static void unpackTable(lua_State *L, bson_iter_t *iter, int hidx, bool array) {
-	lua_Integer i = 0;
+	lua_Integer n = 0;
 	lua_newtable(L);
 	luaL_checkstack(L, LUA_MINSTACK, "too many nested documents");
 	while (bson_iter_next(iter)) {
-		if (array) lua_pushinteger(L, ++i);
+		if (array) lua_pushinteger(L, ++n);
 		else lua_pushstring(L, bson_iter_key(iter));
 		unpackValue(L, iter, hidx);
 		lua_rawset(L, -3);
+	}
+	if (array) {
+		lua_pushinteger(L, n);
+		lua_setfield(L, -2, "__array");
 	}
 	if (lua_isnil(L, hidx)) return; /* No handler */
 	lua_pushvalue(L, hidx);
@@ -490,7 +493,7 @@ void pushBSON(lua_State *L, const bson_t *bson, int hidx) {
 		bson_iter_t iter;
 		check(L, bson_iter_init(&iter, bson));
 		lua_pushvalue(L, hidx); /* Ensure handler index is valid */
-		unpackTable(L, &iter, lua_gettop(L), isBSONArray(bson));
+		unpackTable(L, &iter, lua_gettop(L), isArray(bson));
 		lua_replace(L, -2);
 	}
 }
@@ -605,13 +608,13 @@ bson_t *castBSON(lua_State *L, int idx) {
 		checkStatus(L, bson_init_from_json(bson, str, len, &error), &error);
 	} else { /* From value */
 		int nerr = 0;
-		if (luaL_callmeta(L, idx, "__tobson")) lua_replace(L, idx); /* Transform value */
+		if (luaL_callmeta(L, idx, "__toBSON")) lua_replace(L, idx); /* Transform value */
 		if ((bson = testBSON(L, idx))) return bson; /* Nothing to do */
 		luaL_argcheck(L, lua_istable(L, idx), idx, "string, table or " TYPE_BSON " expected");
 		bson = lua_newuserdata(L, sizeof *bson);
 		bson_init(bson);
 		lua_newtable(L);
-		if (!appendTable(L, idx, lua_gettop(L), &nerr, bson, isArray(L, idx))) {
+		if (!appendTable(L, idx, lua_gettop(L), &nerr, bson, getArrayLen(L, idx))) {
 			bson_destroy(bson);
 			lua_concat(L, nerr);
 			luaL_argerror(L, idx, lua_tostring(L, -1));
@@ -629,7 +632,7 @@ bson_t *toBSON(lua_State *L, int idx) {
 
 void toBSONValue(lua_State *L, int idx, bson_value_t *val) {
 	luaL_checkany(L, idx);
-	if (luaL_callmeta(L, idx, "__tobson")) lua_replace(L, idx); /* Transform value */
+	if (luaL_callmeta(L, idx, "__toBSON")) lua_replace(L, idx); /* Transform value */
 	switch (lua_type(L, idx)) {
 		case LUA_TNIL:
 			val->value_type = BSON_TYPE_NULL;
@@ -663,23 +666,24 @@ void toBSONValue(lua_State *L, int idx, bson_value_t *val) {
 			break;
 		}
 		case LUA_TTABLE: {
+			lua_Integer len;
 			bson_t bson;
-			bool array;
 			int nerr = 0;
-			if (luaL_getmetafield(L, idx, "__bsontype")) {
+			if (luaL_getmetafield(L, idx, "__type")) {
 				toBSONType(L, lua_tointeger(L, -1), idx, val);
 				lua_pop(L, 1);
 				break;
 			}
+			len = getArrayLen(L, idx);
 			bson_init(&bson);
 			lua_newtable(L);
-			if (!appendTable(L, idx, lua_gettop(L), &nerr, &bson, array = isArray(L, idx))) {
+			if (!appendTable(L, idx, lua_gettop(L), &nerr, &bson, len)) {
 				bson_destroy(&bson);
 				lua_concat(L, nerr);
 				luaL_argerror(L, idx, lua_tostring(L, -1));
 			}
 			lua_pop(L, 1);
-			val->value_type = array ? BSON_TYPE_ARRAY : BSON_TYPE_DOCUMENT;
+			val->value_type = len >= 0 ? BSON_TYPE_ARRAY : BSON_TYPE_DOCUMENT;
 			val->value.v_doc.data = bson_destroy_with_steal(&bson, true, &val->value.v_doc.data_len);
 			break;
 		}
@@ -687,7 +691,7 @@ void toBSONValue(lua_State *L, int idx, bson_value_t *val) {
 			bson_t *bson;
 			bson_oid_t *oid;
 			if ((bson = testBSON(L, idx))) {
-				val->value_type = isBSONArray(bson) ? BSON_TYPE_ARRAY : BSON_TYPE_DOCUMENT;
+				val->value_type = isArray(bson) ? BSON_TYPE_ARRAY : BSON_TYPE_DOCUMENT;
 				memcpy(
 					val->value.v_doc.data = bson_malloc(bson->len), bson_get_data(bson),
 					val->value.v_doc.data_len = bson->len);
@@ -701,6 +705,6 @@ void toBSONValue(lua_State *L, int idx, bson_value_t *val) {
 			/* Fall through */
 		}
 		default:
-			argferror(L, idx, "%s unexpected", luaL_typename(L, idx));
+			argferror(L, idx, "invalid value (a %s)", luaL_typename(L, idx));
 	}
 }

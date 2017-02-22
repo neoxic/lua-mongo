@@ -136,9 +136,9 @@ assert(bulk:execute())
 ```
 
 
-The use of `__tobson` metamethods and BSON handlers gives full control over how Lua values are
+The use of `__toBSON` metamethods and BSON handlers gives full control over how Lua values are
 represented in BSON documents and vice versa. In particular, this API facilitates support for
-classes (tables with metatables) on their way to and/or from MongoDB.
+Lua classes (tables with metatables) on their way to and/or from MongoDB.
 
 ```Lua
 local SimpleClass = {} -- Class metatable
@@ -154,15 +154,15 @@ function SimpleClass:__tostring() -- Method
 	return tostring(self.id) .. ' --> ' .. self.name
 end
 
-function SimpleClass:__tobson() -- Called when object is packed into BSON
+function SimpleClass:__toBSON() -- Called when object is packed into BSON
 	return {
 		_id = self.id,
 		binary = mongo.Binary(self.name), -- Store 'name' as BSON Binary for example
 	}
 end
 
--- A root '__tobson' metamethod may return a table or BSON document.
--- A nested '__tobson' metamethod may return a Lua value, BSON type or BSON document.
+-- A root '__toBSON' metamethod may return a table or BSON document.
+-- A nested '__toBSON' metamethod may return a value, BSON type or BSON document.
 
 -- BSON handler
 local function handler(document)
