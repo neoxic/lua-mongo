@@ -294,7 +294,7 @@ static bool appendValue(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson
 				break;
 			}
 			len = getArrayLen(L, idx);
-			if (len >= 0) {
+			if (len != -1) {
 				bson_append_array_begin(bson, key, klen, &doc);
 				if (!appendTable(L, idx, ridx, nerr, &doc, len)) return false;
 				bson_append_array_end(bson, &doc);
@@ -339,7 +339,7 @@ static bool appendTable(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson
 	lua_rawset(L, ridx);
 	lua_settop(L, top);
 	lua_checkstack(L, LUA_MINSTACK);
-	if (len >= 0) { /* As array */
+	if (len != -1) { /* As array */
 		char buf[64];
 		lua_Integer i;
 		for (i = 0; i < len; ++i) {
@@ -686,7 +686,7 @@ void toBSONValue(lua_State *L, int idx, bson_value_t *val) {
 				luaL_argerror(L, idx, lua_tostring(L, -1));
 			}
 			lua_pop(L, 1);
-			val->value_type = len >= 0 ? BSON_TYPE_ARRAY : BSON_TYPE_DOCUMENT;
+			val->value_type = len != -1 ? BSON_TYPE_ARRAY : BSON_TYPE_DOCUMENT;
 			val->value.v_doc.data = bson_destroy_with_steal(&bson, true, &val->value.v_doc.data_len);
 			break;
 		}
