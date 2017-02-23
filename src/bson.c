@@ -227,8 +227,8 @@ static bool isInteger(lua_State *L, int idx, lua_Integer *val) {
 	lua_Integer n = lua_tointegerx(L, idx, &res);
 #else
 	lua_Number d = lua_tonumber(L, idx);
-	lua_Integer n = (lua_Integer)d;
-	bool res = d == (lua_Number)n;
+	lua_Integer n = d;
+	bool res = n == d;
 #endif
 	if (!res) return false;
 	*val = n;
@@ -240,7 +240,7 @@ static bool isArray(const bson_t *bson) {
 	return bson_iter_init(&iter, bson) && bson_iter_next(&iter) && !strcmp(bson_iter_key(&iter), "0");
 }
 
-static lua_Integer getArrayLen(lua_State *L, int idx) {
+static lua_Integer getArrayLength(lua_State *L, int idx) {
 	lua_Integer len = -1;
 	lua_getfield(L, idx, "__array");
 	if (lua_toboolean(L, -1)) {
@@ -293,7 +293,7 @@ static bool appendValue(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson
 				lua_pop(L, 1);
 				break;
 			}
-			len = getArrayLen(L, idx);
+			len = getArrayLength(L, idx);
 			if (len != -1) {
 				bson_append_array_begin(bson, key, klen, &doc);
 				if (!appendTable(L, idx, ridx, nerr, &doc, len)) return false;
@@ -320,7 +320,7 @@ static bool appendValue(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson
 			/* Fall through */
 		}
 		default:
-			return error(L, nerr, "invalid value (a %s)", luaL_typename(L, idx));
+			return error(L, nerr, "%s unexpected", luaL_typename(L, idx));
 	}
 	return true;
 }
@@ -350,7 +350,7 @@ static bool appendTable(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson
 		}
 	} else { /* As document */
 		for (lua_pushnil(L); lua_next(L, idx); lua_pop(L, 1)) {
-			if (lua_type(L, top + 1) != LUA_TSTRING) return error(L, nerr, "invalid key (a %s)", luaL_typename(L, top + 1));
+			if (lua_type(L, top + 1) != LUA_TSTRING) return error(L, nerr, "%s unexpected as a document key", luaL_typename(L, top + 1));
 			key = lua_tolstring(L, top + 1, &klen);
 			if (!appendValue(L, top + 2, ridx, nerr, bson, key, klen)) return error(L, nerr, "[\"%s\"] => ", key);
 		}
@@ -462,17 +462,17 @@ static void unpackValue(lua_State *L, bson_iter_t *iter, int hidx) {
 }
 
 static void unpackTable(lua_State *L, bson_iter_t *iter, int hidx, bool array) {
-	lua_Integer n = 0;
+	lua_Integer len = 0;
 	lua_newtable(L);
 	luaL_checkstack(L, LUA_MINSTACK, "too many nested documents");
 	while (bson_iter_next(iter)) {
-		if (array) lua_pushinteger(L, ++n);
+		if (array) lua_pushinteger(L, ++len);
 		else lua_pushstring(L, bson_iter_key(iter));
 		unpackValue(L, iter, hidx);
 		lua_rawset(L, -3);
 	}
 	if (array) {
-		lua_pushinteger(L, n);
+		lua_pushinteger(L, len);
 		lua_setfield(L, -2, "__array");
 	}
 	if (lua_isnil(L, hidx)) return; /* No handler */
@@ -617,7 +617,7 @@ bson_t *castBSON(lua_State *L, int idx) {
 		bson = lua_newuserdata(L, sizeof *bson);
 		bson_init(bson);
 		lua_newtable(L);
-		if (!appendTable(L, idx, lua_gettop(L), &nerr, bson, getArrayLen(L, idx))) {
+		if (!appendTable(L, idx, lua_gettop(L), &nerr, bson, getArrayLength(L, idx))) {
 			bson_destroy(bson);
 			lua_concat(L, nerr);
 			luaL_argerror(L, idx, lua_tostring(L, -1));
@@ -677,7 +677,7 @@ void toBSONValue(lua_State *L, int idx, bson_value_t *val) {
 				lua_pop(L, 1);
 				break;
 			}
-			len = getArrayLen(L, idx);
+			len = getArrayLength(L, idx);
 			bson_init(&bson);
 			lua_newtable(L);
 			if (!appendTable(L, idx, lua_gettop(L), &nerr, &bson, len)) {
@@ -708,6 +708,6 @@ void toBSONValue(lua_State *L, int idx, bson_value_t *val) {
 			/* Fall through */
 		}
 		default:
-			argferror(L, idx, "invalid value (a %s)", luaL_typename(L, idx));
+			argferror(L, idx, "%s unexpected", luaL_typename(L, idx));
 	}
 }
