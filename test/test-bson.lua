@@ -41,7 +41,7 @@ b1:concat(b2)
 testV(b1, '{ "a" : 1, "b" : 2 }')
 b1:concat(b2)
 testV(b1, '{ "a" : 1, "b" : 2, "b" : 2 }')
-test.failure(b1.concat, b1) -- Invalid value
+test.failure(b1.concat, b1) -- Invalid argument
 
 -- bson:find()
 local b = BSON { a = { b = mongo.Null } }

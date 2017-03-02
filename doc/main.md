@@ -32,16 +32,15 @@ Constructors
 Returns an instance of [BSON Binary][BSON type].
 
 ### mongo.BSON(value)
-Returns an instance of [BSON document] converted from `value` that may take one of the following forms:
+Returns an instance of [BSON document] converted from `value` in one of the following forms:
 - a [BSON document] in which case this method does nothing;
 - a JSON string;
-- a table without a metatable;
+- a table (without a metatable);
 - a table or userdata with a `__toBSON` metamethod that returns a table, [BSON type] or [BSON document].
 
-A table (root or nested) is converted to a _BSON array_ if it has an `__array` field whose value is
-true in terms of Lua, i.e. is neither `nil` nor `false`. The length of the resulting array can be
-adjusted by storing an integer value in the `__array` field. By default, it is assumed to be equal
-to the length of the table.
+A table (root or nested) is converted to an _array_ if it has an `__array` field whose value is true
+in terms of Lua, i.e. is neither `nil` nor `false`. The length of the resulting array can be adjusted
+by storing an integer value in the `__array` field. By default, it is equal to the length of the table.
 
 ```Lua
 print(mongo.BSON { a = { __array = true, 1, 2, 3 } })

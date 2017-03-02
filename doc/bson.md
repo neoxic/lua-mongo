@@ -61,7 +61,7 @@ nil
 Converts `bson` into a table and returns it. If `handler` is provided, it is called for every
 nested document; the result of the call is then used as a substitute for the original value.
 
-When a _BSON array_ is restored, its length is stored in the `__array` field of the resulting table.
+When an _array_ is restored, its length is stored in the `__array` field of the resulting table.
 
 ```Lua
 local bson = mongo.BSON { a = 1, b = { __array = true, 2, 3 } }
