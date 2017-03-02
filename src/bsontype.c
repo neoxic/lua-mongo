@@ -76,6 +76,15 @@ int newDateTime(lua_State *L) {
 	return 1;
 }
 
+int newDecimal128(lua_State *L) {
+	const char *str = luaL_checkstring(L, 1);
+	bson_decimal128_t dec;
+	luaL_argcheck(L, bson_decimal128_from_string(str, &dec), 1, "invalid format");
+	packParams(L, 1);
+	setBSONType(L, TYPE_DECIMAL128, BSON_TYPE_DECIMAL128);
+	return 1;
+}
+
 int newDouble(lua_State *L) {
 	luaL_checknumber(L, 1);
 	packParams(L, 1);

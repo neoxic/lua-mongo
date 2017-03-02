@@ -42,6 +42,7 @@
 #define TYPE_CURSOR "mongo.Cursor"
 #define TYPE_DATABASE "mongo.Database"
 #define TYPE_DATETIME "mongo.DateTime"
+#define TYPE_DECIMAL128 "mongo.Decimal128"
 #define TYPE_DOUBLE "mongo.Double"
 #define TYPE_GRIDFS "mongo.GridFS"
 #define TYPE_GRIDFSFILE "mongo.GridFSFile"
@@ -56,13 +57,14 @@
 #define TYPE_REGEX "mongo.Regex"
 #define TYPE_TIMESTAMP "mongo.Timestamp"
 
-extern char NEW_BINARY, NEW_DATETIME, NEW_JAVASCRIPT, NEW_REGEX, NEW_TIMESTAMP;
+extern char NEW_BINARY, NEW_DATETIME, NEW_DECIMAL128, NEW_JAVASCRIPT, NEW_REGEX, NEW_TIMESTAMP;
 extern char GLOBAL_MAXKEY, GLOBAL_MINKEY, GLOBAL_NULL;
 
 int newBinary(lua_State *L);
 int newBSON(lua_State *L);
 int newClient(lua_State *L);
 int newDateTime(lua_State *L);
+int newDecimal128(lua_State *L);
 int newDouble(lua_State *L);
 int newInt32(lua_State *L);
 int newInt64(lua_State *L);

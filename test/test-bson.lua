@@ -106,6 +106,7 @@ testV({ a = BSON { b = 1 } }, '{ "a" : { "b" : 1 } }') -- Nested document
 testV({ a = mongo.Int32(1234) }, '{ "a" : 1234 }')
 testV({ a = mongo.Int64(1234) }, '{ "a" : { "$numberLong" : "1234" } }')
 testV({ a = mongo.Double(10) }, '{ "a" : 10.0 }')
+testV({ a = mongo.Decimal128('-10.123') }, '{ "a" : { "$numberDecimal" : "-10.123" } }')
 testV({ a = mongo.Binary('abc') }, '{ "a" : { "$binary" : "YWJj", "$type" : "0" } }')
 testV({ a = mongo.Binary('abc', 0x80) }, '{ "a" : { "$binary" : "YWJj", "$type" : "80" } }')
 if testInt64 then -- DateTime as Int64
@@ -162,6 +163,9 @@ end
 testF { a = newBSONType(0x99) } -- Invalid type
 testF { a = newBSONType(0x05) } -- Binary: invalid string
 testF { a = newBSONType(0x0d) } -- Javascript: invalid string
+testF { a = newBSONType(0x13) } -- Decimal128: invalid string
+testF { a = newBSONType(0x13, 'abc') } -- Decimal128: invalid format
+test.failure(mongo.Decimal128, 'abc') -- Invalid format
 
 
 -- ObjectID

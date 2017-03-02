@@ -39,7 +39,7 @@ static int m_append(lua_State *L) {
 static int m_concat(lua_State *L) {
 	bson_t *bson = checkBSON(L, 1);
 	bson_t *value = castBSON(L, 2);
-	luaL_argcheck(L, bson != value, 2, "invalid value");
+	luaL_argcheck(L, bson != value, 2, "invalid argument");
 	bson_concat(bson, value);
 	return 0;
 }
@@ -121,6 +121,13 @@ static bool appendBSONType(lua_State *L, bson_type_t type, int idx, int *nerr, b
 		case BSON_TYPE_DOUBLE:
 			bson_append_double(bson, key, klen, lua_tonumber(L, top + 1));
 			break;
+		case BSON_TYPE_DECIMAL128: {
+			const char *str = lua_tostring(L, top + 1);
+			bson_decimal128_t dec;
+			if (!str || !bson_decimal128_from_string(str, &dec)) goto error;
+			bson_append_decimal128(bson, key, klen, &dec);
+			break;
+		}
 		case BSON_TYPE_BINARY: {
 			size_t len;
 			const char *str = lua_tolstring(L, top + 1, &len);
@@ -175,6 +182,11 @@ static void toBSONType(lua_State *L, bson_type_t type, int idx, bson_value_t *va
 		case BSON_TYPE_DOUBLE:
 			val->value.v_double = lua_tonumber(L, top + 1);
 			break;
+		case BSON_TYPE_DECIMAL128: {
+			const char *str = lua_tostring(L, top + 1);
+			if (!str || !bson_decimal128_from_string(str, &val->value.v_decimal128)) goto error;
+			break;
+		}
 		case BSON_TYPE_BINARY: {
 			size_t len;
 			const char *str = lua_tolstring(L, top + 1, &len);
@@ -393,6 +405,16 @@ static void unpackValue(lua_State *L, bson_iter_t *iter, int hidx) {
 		case BSON_TYPE_OID:
 			pushObjectID(L, bson_iter_oid(iter));
 			break;
+		case BSON_TYPE_DECIMAL128: {
+			bson_decimal128_t dec;
+			char buf[BSON_DECIMAL128_STRING];
+			check(L, bson_iter_decimal128(iter, &dec));
+			bson_decimal128_to_string(&dec, buf);
+			lua_rawgetp(L, LUA_REGISTRYINDEX, &NEW_DECIMAL128);
+			lua_pushstring(L, buf);
+			lua_call(L, 1, 1);
+			break;
+		}
 		case BSON_TYPE_BINARY: {
 			bson_subtype_t subtype;
 			uint32_t len;
@@ -532,6 +554,14 @@ void pushBSONValue(lua_State *L, const bson_value_t *val) {
 		case BSON_TYPE_OID:
 			pushObjectID(L, &val->value.v_oid);
 			break;
+		case BSON_TYPE_DECIMAL128: {
+			char buf[BSON_DECIMAL128_STRING];
+			bson_decimal128_to_string(&val->value.v_decimal128, buf);
+			lua_rawgetp(L, LUA_REGISTRYINDEX, &NEW_DECIMAL128);
+			lua_pushstring(L, buf);
+			lua_call(L, 1, 1);
+			break;
+		}
 		case BSON_TYPE_BINARY:
 			lua_rawgetp(L, LUA_REGISTRYINDEX, &NEW_BINARY);
 			lua_pushlstring(L, (const char *)val->value.v_binary.data, val->value.v_binary.data_len);

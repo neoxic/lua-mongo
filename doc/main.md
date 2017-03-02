@@ -61,6 +61,9 @@ Returns a new [Client] object. See also [MongoDB Connection String URI Format] f
 ### mongo.DateTime(milliseconds)
 Returns an instance of [BSON DateTime][BSON type].
 
+### mongo.Decimal128(value)
+Returns an instance of [BSON Decimal128][BSON type].
+
 ### mongo.Double(number)
 Returns an instance of [BSON Double][BSON type]. This type can be used to override automatic number
 conversion where needed.
