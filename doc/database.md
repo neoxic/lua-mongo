@@ -25,10 +25,10 @@ Checks if a collection `collname` exists on the server within `database`. Return
 collection exists or `nil` if it does not exist. On error, returns `nil` and the error message.
 
 ### database:removeAllUsers()
-Removes all users from `database`. On error, returns `nil` and the error message.
+Removes all users from `database` and returns `true`. On error, returns `nil` and the error message.
 
 ### database:removeUser(username)
-Removes a user from `database`. On error, returns `nil` and the error message.
+Removes a user from `database` and returns `true`. On error, returns `nil` and the error message.
 
 
 [Collection]: collection.md

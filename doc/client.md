@@ -26,6 +26,8 @@ Creates a MongoDB GridFS instance in database `dbname` and returns a correspondi
 On error, returns `nil` and the error message.
 
 
+[BSON document]: bson.md
 [Collection]: collection.md
+[Cursor]: cursor.md
 [Database]: database.md
 [GridFS]: gridfs.md

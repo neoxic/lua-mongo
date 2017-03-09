@@ -25,3 +25,6 @@ Updates documents that match `query` with `document` as part of the `bulk` opera
 
 ### bulk:updateOne(query, document, [options])
 Updates a single document that match `query` with `document` as part of the `bulk` operation.
+
+
+[BSON document]: bson.md
