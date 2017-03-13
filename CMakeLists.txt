@@ -49,10 +49,6 @@ find_program(LUA_COMMAND NAMES ${lua_names})
 file(GLOB tests test/test-*.lua)
 foreach(test ${tests})
 	string(REGEX REPLACE "^.*(test-[^/\\]+\\.lua)$" "\\1" name ${test})
-	add_test(
-		NAME ${name}
-		COMMAND ${CMAKE_COMMAND} -E env
-			LUA_PATH=${CMAKE_CURRENT_SOURCE_DIR}/test/?.lua
-			${LUA_COMMAND} -l mongo ${test}
-	)
+	add_test(${name} ${LUA_COMMAND} -l mongo ${test})
+	set_tests_properties(${name} PROPERTIES ENVIRONMENT "LUA_PATH=${CMAKE_CURRENT_SOURCE_DIR}/test/?.lua")
 endforeach()
