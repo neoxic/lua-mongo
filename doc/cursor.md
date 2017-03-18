@@ -20,10 +20,10 @@ This method is semantically equivalent to:
 
 ```Lua
 function cursor:iterator(handler)
-	return function (cursor)
-		return cursor:value(handler)
-	end,
-	cursor
+    return function (cursor)
+        return cursor:value(handler)
+    end,
+    cursor
 end
 ```
 
@@ -39,14 +39,14 @@ This method is semantically equivalent to:
 
 ```Lua
 function cursor:value(handler)
-	local bson, err = cursor:next()
-	if bson then
-		return bson:value(handler)
-	end
-	if err then
-		error(err)
-	end
-	return nil
+    local bson, err = cursor:next()
+    if bson then
+        return bson:value(handler)
+    end
+    if err then
+        error(err)
+    end
+    return nil
 end
 ```
 

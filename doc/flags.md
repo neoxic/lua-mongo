@@ -5,8 +5,8 @@ Flags are tables with flag names as string keys and flag settings as boolean val
 
 ```Lua
 local flags = {
-	flag1 = true,
-	flag2 = false,
+    flag1 = true,
+    flag2 = false,
 }
 ```
 

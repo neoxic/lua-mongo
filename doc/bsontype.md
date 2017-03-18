@@ -13,7 +13,7 @@ print(binary:unpack())
 ```
 Output:
 ```
-abc	128
+abc 128
 ```
 
 
