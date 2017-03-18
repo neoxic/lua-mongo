@@ -40,6 +40,7 @@ This method is semantically equivalent to:
 function collection:findOne(query, options)
     options = options or {}
     options.limit = 1
+    options.singleBatch = true
     local cursor = collection:find(query, options)
     return cursor:next()
 end

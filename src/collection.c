@@ -87,8 +87,9 @@ static int m_findOne(lua_State *L) {
 	mongoc_cursor_t *cursor;
 	int nres;
 	bson_init(&opts);
-	if (options) bson_copy_to_excluding_noinit(options, &opts, "limit", (char *)0);
+	if (options) bson_copy_to_excluding_noinit(options, &opts, "limit", "singleBatch", (char *)0);
 	BSON_APPEND_INT32(&opts, "limit", 1);
+	BSON_APPEND_BOOL(&opts, "singleBatch", true);
 	cursor = mongoc_collection_find_with_opts(collection, query, &opts, 0);
 	nres = iterateCursor(L, cursor, 0);
 	mongoc_cursor_destroy(cursor);
