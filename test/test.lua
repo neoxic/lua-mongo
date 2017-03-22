@@ -38,7 +38,7 @@ function test.key(t, x)
 			return
 		end
 	end
-	error('key not found!')
+	error 'key not found!'
 end
 
 function test.value(t, x)
@@ -47,10 +47,10 @@ function test.value(t, x)
 			return
 		end
 	end
-	error('value not found!')
+	error 'value not found!'
 end
 
-function test.error(s, e)
+function test.status(s, e)
 	assert(not s, 'status is ok!')
 	assert(type(e) == 'string', 'error is not string!')
 end

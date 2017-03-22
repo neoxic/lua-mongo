@@ -129,7 +129,7 @@ collectgarbage()
 assert(file:remove())
 
 -- gridfs:createFileFrom()
-test.error(gridfs:createFileFrom('NON-EXISTENT-FILE'))
+test.status(gridfs:createFileFrom('NON-EXISTENT-FILE'))
 local f = io.open(test.filename, 'w')
 if f then
 	f:write(data)
@@ -153,8 +153,8 @@ assert(gridfs:findOne { _id = 123 })
 assert(gridfs:findOneByFilename('myfile1'))
 
 -- FIXME Follow up with bug report: https://jira.mongodb.org/browse/CDRIVER-2006
--- test.error(gridfs:findOne { filename = 'myfile2' })
--- test.error(gridfs:findOneByFilename('myfile2'))
+-- test.status(gridfs:findOne { filename = 'myfile2' })
+-- test.status(gridfs:findOneByFilename('myfile2'))
 
 assert(gridfs:removeByFilename('myfile1'))
 
@@ -163,4 +163,4 @@ assert(files:count() == 0)
 assert(gridfs:drop())
 
 local c = mongo.Client 'mongodb://INVALID-URI'
-test.error(c:getGridFS(test.dbname))
+test.status(c:getGridFS(test.dbname))
