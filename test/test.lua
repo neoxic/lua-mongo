@@ -50,7 +50,7 @@ function test.value(t, x)
 	error 'value not found!'
 end
 
-function test.status(s, e)
+function test.error(s, e)
 	assert(not s, 'status is ok!')
 	assert(type(e) == 'string', 'error is not string!')
 end

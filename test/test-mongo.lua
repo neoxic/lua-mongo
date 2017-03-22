@@ -8,11 +8,11 @@ local collection = client:getCollection(test.dbname, test.collname)
 assert(collection:getName() == test.collname)
 collection:drop()
 
-test.status(collection:insert({ ['$a'] = 123 })) -- Client-side error
-test.status(collection:insert({ ['$a'] = 123 }, { noValidate = true })) -- Server-side error
+test.error(collection:insert({ ['$a'] = 123 })) -- Client-side error
+test.error(collection:insert({ ['$a'] = 123 }, { noValidate = true })) -- Server-side error
 
 assert(collection:insert { _id = 123 })
-test.status(collection:insert { _id = 123 }) -- Duplicate key
+test.error(collection:insert { _id = 123 }) -- Duplicate key
 assert(collection:insert { _id = 456 })
 assert(collection:insert { _id = 789 })
 
@@ -81,7 +81,7 @@ local function bulkInsert(ordered, n)
 		bulk:insert { _id = id }
 		bulk:insert { _id = id }
 	end
-	test.status(bulk:execute()) -- Errors about duplicate keys
+	test.error(bulk:execute()) -- Errors about duplicate keys
 	return collection:count()
 end
 assert(bulkInsert(false, 3) == 3) -- Unordered insert
@@ -122,9 +122,9 @@ assert(database:getName() == test.dbname)
 
 assert(database:removeAllUsers())
 assert(database:addUser(test.dbname, ''))
-test.status(database:addUser(test.dbname, ''))
+test.error(database:addUser(test.dbname, ''))
 assert(database:removeUser(test.dbname))
-test.status(database:removeUser(test.dbname))
+test.error(database:removeUser(test.dbname))
 
 test.value(assert(database:getCollectionNames()), test.collname)
 assert(database:hasCollection(test.collname))
@@ -149,7 +149,7 @@ test.value(assert(client:getDatabaseNames()), test.dbname)
 -- client:command()
 assert(mongo.type(assert(client:command(test.dbname, { find = test.collname }))) == 'mongo.Cursor') -- client:command() returns cursor
 assert(mongo.type(assert(client:command(test.dbname, { validate = test.collname }))) == 'mongo.BSON') -- client:command() returns BSON
-test.status(client:command('abc', { INVALID_COMMAND = test.collname }))
+test.error(client:command('abc', { INVALID_COMMAND = test.collname }))
 
 -- Cleanup
 assert(client:getDatabase(test.dbname):drop())
