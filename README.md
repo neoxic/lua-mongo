@@ -132,7 +132,7 @@ bulk:updateMany('{}', '{ "$inc" : { "b" : 2 } }')
 bulk:removeOne { c = 3 }
 
 -- Execute all the queued operations
-assert(bulk:execute())
+bulk:execute()
 ```
 
 
