@@ -85,7 +85,7 @@ static int m_read(lua_State *L) {
 	ssize_t n;
 	luaL_argcheck(L, maxlen > 0, 2, "must be positive");
 	luaL_buffinit(L, &b);
-	for ( ;; ) {
+	for (;;) {
 		if (buflen > maxlen) buflen = maxlen; /* Read no more than needed */
 		iov.iov_len = buflen;
 		iov.iov_base = luaL_prepbuffer(&b);
