@@ -24,8 +24,7 @@ assert(mongo.type(file:getId()) == 'mongo.ObjectID')
 assert(file:getLength() == 0)
 assert(file:getMD5() == nil)
 assert(file:getMetadata() == nil)
--- FIXME Follow up with bug report: https://jira.mongodb.org/browse/CDRIVER-2028
--- assert(file:getUploadDate() > 1486000000)
+assert(file:getUploadDate() > 1486000000)
 
 file:setAliases '[ "a", "b" ]'
 file:setContentType('content-type1')
@@ -150,12 +149,9 @@ collectgarbage()
 -- GridFS
 
 assert(gridfs:findOne { _id = 123 })
+assert(gridfs:findOne { filename = 'myfile2' } == nil)
 assert(gridfs:findOneByFilename('myfile1'))
-
--- FIXME Follow up with bug report: https://jira.mongodb.org/browse/CDRIVER-2006
--- test.error(gridfs:findOne { filename = 'myfile2' })
--- test.error(gridfs:findOneByFilename('myfile2'))
-
+assert(gridfs:findOneByFilename('myfile2') == nil)
 assert(gridfs:removeByFilename('myfile1'))
 
 assert(chunks:count() == 0)

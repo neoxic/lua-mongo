@@ -329,8 +329,7 @@ static bool appendValue(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson
 				bson_append_oid(bson, key, klen, oid);
 				break;
 			}
-			/* Fall through */
-		}
+		} /* Fall through */
 		default:
 			return error(L, nerr, "%s unexpected", luaL_typename(L, idx));
 	}
@@ -735,8 +734,7 @@ void toBSONValue(lua_State *L, int idx, bson_value_t *val) {
 				bson_oid_copy(oid, &val->value.v_oid);
 				break;
 			}
-			/* Fall through */
-		}
+		} /* Fall through */
 		default:
 			argferror(L, idx, "%s unexpected", luaL_typename(L, idx));
 	}

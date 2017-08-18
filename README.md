@@ -17,8 +17,7 @@ Dependencies
 ------------
 
 + lua >= 5.1 (or luajit)
-+ libmongoc >= 1.5.0
-+ libbson >= 1.5.0
++ libmongoc >= 1.7.0
 
 
 Building and installing with LuaRocks

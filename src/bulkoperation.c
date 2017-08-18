@@ -32,7 +32,9 @@ static int m_execute(lua_State *L) {
 static int m_insert(lua_State *L) {
 	mongoc_bulk_operation_t *bulk = checkBulkOperation(L, 1);
 	bson_t *document = castBSON(L, 2);
-	mongoc_bulk_operation_insert(bulk, document);
+	bson_t *options = toBSON(L, 3);
+	bson_error_t error;
+	checkStatus(L, mongoc_bulk_operation_insert_with_opts(bulk, document, options, &error), &error);
 	return 0;
 }
 

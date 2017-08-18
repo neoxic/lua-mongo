@@ -8,7 +8,7 @@ Methods
 Executes all operations queued into the `bulk` operation and returns the result as a [BSON document].
 On error, returns `nil` and the error message. This method must be called only once.
 
-### bulk:insert(document)
+### bulk:insert(document, [options])
 Inserts `document` as part of the `bulk` operation.
 
 ### bulk:removeMany(query, [options])
