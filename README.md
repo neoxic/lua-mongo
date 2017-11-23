@@ -101,7 +101,7 @@ print(collection:count({}, { skip = 1, limit = 2 }))
 
 -- Access to BSON where needed
 local bson = collection:findOne(query1)
-print(bson) -- BSON is implicitly converted to JSON
+print(bson) -- BSON is converted to JSON using tostring()
 
 -- Explicit BSON to Lua conversion
 local value = bson:value()
