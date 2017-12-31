@@ -30,9 +30,9 @@ if(NOT LUA_MODULE_PATH)
 	set(LUA_MODULE_PATH lib/lua/${lua_ver})
 endif()
 
-#add_definitions(-Wall -Wextra -Wpedantic -Wundef -Wshadow -Wredundant-decls)
 include_directories(${MONGOC_INCLUDE_DIRS} ${LUA_INCLUDE_DIRS})
 link_directories(${MONGOC_INCLUDE_DIRS})
+add_definitions(-Wall -Wextra -Wpedantic -Wundef -Wshadow -Wredundant-decls -Wstrict-prototypes -Wmissing-prototypes)
 
 file(GLOB srcs src/*.c)
 add_library(mongo SHARED ${srcs})

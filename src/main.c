@@ -28,6 +28,8 @@
 #define EXPORT __attribute__((visibility("default")))
 #endif
 
+EXPORT int luaopen_mongo(lua_State *L);
+
 static int m_type(lua_State *L) {
 	if (!luaL_getmetafield(L, 1, "__name")) lua_pushnil(L);
 	return 1;
@@ -53,7 +55,7 @@ static const luaL_Reg funcs[] = {
 char NEW_BINARY, NEW_DATETIME, NEW_DECIMAL128, NEW_JAVASCRIPT, NEW_REGEX, NEW_TIMESTAMP;
 char GLOBAL_MAXKEY, GLOBAL_MINKEY, GLOBAL_NULL;
 
-EXPORT int luaopen_mongo(lua_State *L) {
+int luaopen_mongo(lua_State *L) {
 #if LUA_VERSION_NUM >= 502
 	luaL_newlib(L, funcs);
 #else
