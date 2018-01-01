@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 project(lua-mongo)
 
 set(USE_LUA_VERSION "" CACHE STRING "Build against Lua version 'X.Y' (or 'JIT' for LuaJIT).")
@@ -39,6 +39,7 @@ add_library(mongo SHARED ${srcs})
 target_link_libraries(mongo ${MONGOC_LIBRARIES})
 set_target_properties(mongo PROPERTIES PREFIX "")
 if(APPLE)
+	target_link_libraries(mongo "-undefined dynamic_lookup")
 	set_target_properties(mongo PROPERTIES SUFFIX ".so")
 endif()
 
