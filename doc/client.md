@@ -14,7 +14,7 @@ Returns a new [Collection] object with database name `dbname` and collection nam
 ### client:getDatabase(dbname)
 Returns a new [Database] object.
 
-### client:getDatabaseNames()
+### client:getDatabaseNames([options])
 Returns a list of the names of all databases on the server. On error, returns `nil` and the error
 message.
 

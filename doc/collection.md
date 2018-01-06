@@ -7,8 +7,9 @@ Methods
 ### collection:aggregate(pipeline, [options])
 Executes an aggregation `pipeline` on `collection` and returns a [Cursor] object.
 
-### collection:createBulkOperation([ordered = true])
-Returns a new [Bulk operation].
+### collection:createBulkOperation([options])
+Returns a new [Bulk operation]. By default, the operation is _ordered_ (see below). To explicitly
+denote the type of the operation, set the `ordered` field in `options` to either `false` or `true`.
 
 _Ordered_ bulk operations are batched and sent to the server in the order suitable for serial
 execution. The processing aborts when the first error is encountered.

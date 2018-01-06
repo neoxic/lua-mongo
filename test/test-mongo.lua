@@ -76,7 +76,7 @@ assert(collection:validate({ full = true }):find('valid'))
 -- Bulk operation
 local function bulkInsert(ordered, n)
 	collection:drop()
-	local bulk = collection:createBulkOperation(ordered)
+	local bulk = collection:createBulkOperation { ordered = ordered }
 	for id = 1, n do
 		bulk:insert { _id = id }
 		bulk:insert { _id = id }

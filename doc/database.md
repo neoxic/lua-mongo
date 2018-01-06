@@ -13,7 +13,7 @@ Drops `database` and returns `true`. On error, returns `nil` and the error messa
 ### database:getCollection(collname)
 Returns a new [Collection] object.
 
-### database:getCollectionNames()
+### database:getCollectionNames([options])
 Returns a list of the names of all collections in `database`. On error, returns `nil` and the error
 message.
 

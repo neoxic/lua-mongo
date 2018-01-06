@@ -48,8 +48,9 @@ static int m_getCollection(lua_State *L) {
 
 static int m_getCollectionNames(lua_State *L) {
 	mongoc_database_t *database = checkDatabase(L, 1);
+	bson_t *options = toBSON(L, 2);
 	bson_error_t error;
-	return commandStrVec(L, mongoc_database_get_collection_names(database, &error), &error);
+	return commandStrVec(L, mongoc_database_get_collection_names_with_opts(database, options, &error), &error);
 }
 
 static int m_getName(lua_State *L) {

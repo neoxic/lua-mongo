@@ -51,8 +51,9 @@ static int m_getDatabase(lua_State *L) {
 
 static int m_getDatabaseNames(lua_State *L) {
 	mongoc_client_t *client = checkClient(L, 1);
+	bson_t *options = toBSON(L, 2);
 	bson_error_t error;
-	return commandStrVec(L, mongoc_client_get_database_names(client, &error), &error);
+	return commandStrVec(L, mongoc_client_get_database_names_with_opts(client, options, &error), &error);
 }
 
 static int m_getDefaultDatabase(lua_State *L) {
