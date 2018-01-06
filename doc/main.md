@@ -60,10 +60,9 @@ Output:
 { "a" : 1, "b" : 2, "c" : 3 }
 ```
 
-A table (root or nested) is converted to an _array_ if it has an `__array` field whose value is true
-in terms of Lua, i.e. is neither `nil` nor `false`. The length of the resulting array can be adjusted
-by storing an integer value in the `__array` field. Otherwise, it is equal to the length of the table
-in terms of Lua, i.e. the __#__ operator.
+A table (root or nested) is converted to an _array_ if it has an `__array` field whose value is
+neither `nil` nor `false`. The length of the resulting array can be adjusted by storing an integer
+value in the `__array` field. Otherwise, it is assumed to be equal to the raw length of the table.
 
 ```Lua
 print(mongo.BSON { a = { __array = true, 1, 2, 3 } })
