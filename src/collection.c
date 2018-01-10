@@ -32,7 +32,12 @@ static int m_aggregate(lua_State *L) {
 
 static int m_createBulkOperation(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
-	bson_t *options = toBSON(L, 2);
+	bson_t *options;
+	if (lua_isboolean(L, 2)) { /* TODO remove in version 2.x */
+		lua_pushfstring(L, "{\"ordered\":%s}", lua_toboolean(L, 2) ? "true" : "false");
+		lua_replace(L, 2);
+	}
+	options = toBSON(L, 2);
 	pushBulkOperation(L, mongoc_collection_create_bulk_operation_with_opts(collection, options), 1);
 	return 1;
 }
