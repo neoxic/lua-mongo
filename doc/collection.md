@@ -39,11 +39,11 @@ This method is semantically equivalent to:
 
 ```Lua
 function collection:findOne(query, options)
-	options = options or {}
-	options.limit = 1
-	options.singleBatch = true
-	local cursor = collection:find(query, options)
-	return cursor:next()
+    options = options or {}
+    options.limit = 1
+    options.singleBatch = true
+    local cursor = collection:find(query, options)
+    return cursor:next()
 end
 ```
 
