@@ -66,18 +66,18 @@ When an _array_ is restored, its length is stored in the `__array` field of the 
 ```Lua
 local bson = mongo.BSON { a = 1, b = { __array = true, 2, 3 } }
 local function sum(t)
-    local r = 0
-    local n = t.__array
-    if n then
-        for i = 1, n do
-            r = r + t[i]
-        end
-    else
-        for k, v in pairs(t) do
-            r = r + v
-        end
-    end
-    return r
+	local r = 0
+	local n = t.__array
+	if n then
+		for i = 1, n do
+			r = r + t[i]
+		end
+	else
+		for k, v in pairs(t) do
+			r = r + v
+		end
+	end
+	return r
 end
 print(type(bson:value()))
 print(bson:value(sum))

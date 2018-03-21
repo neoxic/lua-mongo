@@ -25,11 +25,11 @@ Building and installing with LuaRocks
 
 To build and install, run:
 
-    luarocks make
+	luarocks make
 
 To install the latest release using [luarocks.org], run:
 
-    luarocks install lua-mongo
+	luarocks install lua-mongo
 
 
 Building and installing with CMake
@@ -37,23 +37,23 @@ Building and installing with CMake
 
 To build and install, run:
 
-    cmake .
-    make
-    make install
+	cmake .
+	make
+	make install
 
 To build against a specific Lua version, set the `USE_LUA_VERSION` variable. For example:
 
-    cmake -D USE_LUA_VERSION=5.1 .
+	cmake -D USE_LUA_VERSION=5.1 .
 
 or for LuaJIT:
 
-    cmake -D USE_LUA_VERSION=jit .
+	cmake -D USE_LUA_VERSION=jit .
 
 To build in a separate directory, replace `.` with a path to the source.
 
 To check your build, run:
 
-    make test
+	make test
 
 A local MongoDB server at `mongodb://127.0.0.1` will be used for testing by default. Test settings
 can be configured in `test/test.lua`.
@@ -89,7 +89,7 @@ print(document.name)
 
 -- Iterate in a for-loop
 for document in collection:find(query1):iterator() do
-    print(document.name)
+	print(document.name)
 end
 
 -- Implicit Lua/JSON to BSON conversion where BSON is required
@@ -143,22 +143,22 @@ Lua classes (tables with metatables) on their way to and/or from MongoDB.
 local TestClass = {} -- Class metatable
 
 local function TestObject(id, name) -- Constructor
-    local object = {
-        id = id,
-        name = name,
-    }
-    return setmetatable(object, TestClass)
+	local object = {
+		id = id,
+		name = name,
+	}
+	return setmetatable(object, TestClass)
 end
 
 function TestClass:__tostring() -- Method
-    return tostring(self.id) .. ' --> ' .. self.name
+	return tostring(self.id) .. ' --> ' .. self.name
 end
 
 function TestClass:__toBSON() -- Called when object is serialized into BSON
-    return {
-        _id = self.id,
-        binary = mongo.Binary(self.name), -- Store 'name' as BSON Binary for example
-    }
+	return {
+		_id = self.id,
+		binary = mongo.Binary(self.name), -- Store 'name' as BSON Binary for example
+	}
 end
 
 -- A root '__toBSON' metamethod may return a table or BSON document.
@@ -166,9 +166,9 @@ end
 
 -- BSON handler
 local function handler(document)
-    local id = document._id
-    local name = document.binary:unpack() -- Restore 'name' from BSON Binary
-    return TestObject(id, name)
+	local id = document._id
+	local name = document.binary:unpack() -- Restore 'name' from BSON Binary
+	return TestObject(id, name)
 end
 
 -- Anything callable can serve as a BSON handler. For instance, it can be a table or userdata
@@ -194,7 +194,7 @@ print(object)
 
 -- Iterate objects in a for-loop
 for object in collection:find(query2):iterator(handler) do
-    print(object)
+	print(object)
 end
 ```
 
