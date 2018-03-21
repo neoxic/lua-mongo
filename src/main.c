@@ -22,7 +22,7 @@
 
 #include "common.h"
 
-#if defined _WIN32 || defined __CYGWIN__
+#ifdef _WIN32
 #define EXPORT __declspec(dllexport)
 #else
 #define EXPORT __attribute__((visibility("default")))
@@ -59,7 +59,7 @@ int luaopen_mongo(lua_State *L) {
 #if LUA_VERSION_NUM >= 502
 	luaL_newlib(L, funcs);
 #else
-	luaL_register(L, "mongo", funcs);
+	luaL_register(L, lua_tostring(L, 1), funcs);
 #endif
 	lua_pushliteral(L, MODNAME);
 	lua_setfield(L, -2, "_NAME");

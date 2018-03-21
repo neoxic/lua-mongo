@@ -23,7 +23,7 @@
 #include "common.h"
 
 #define MAXSTACK 1000 /* Arbitrary stack size limit to check for recursion */
-#define isInt32(n) ((n) >= INT32_MIN && (n) <= INT32_MAX)
+#define isInt32(i) ((i) >= INT32_MIN && (i) <= INT32_MAX)
 
 static int m_append(lua_State *L) {
 	bson_t *bson = checkBSON(L, 1);
@@ -39,7 +39,7 @@ static int m_append(lua_State *L) {
 static int m_concat(lua_State *L) {
 	bson_t *bson = checkBSON(L, 1);
 	bson_t *value = castBSON(L, 2);
-	luaL_argcheck(L, bson != value, 2, "invalid argument");
+	luaL_argcheck(L, value != bson, 2, "invalid value");
 	bson_concat(bson, value);
 	return 0;
 }
@@ -234,16 +234,19 @@ static void toBSONType(lua_State *L, bson_type_t type, int idx, bson_value_t *va
 }
 
 static bool isInteger(lua_State *L, int idx, lua_Integer *val) {
+	lua_Integer i;
 #if LUA_VERSION_NUM >= 503
 	int res;
-	lua_Integer n = lua_tointegerx(L, idx, &res);
-#else
-	lua_Number d = lua_tonumber(L, idx);
-	lua_Integer n = d;
-	bool res = n == d;
-#endif
+	i = lua_tointegerx(L, idx, &res);
 	if (!res) return false;
-	*val = n;
+#else
+	lua_Number n;
+	if (!lua_isnumber(L, idx)) return false;
+	n = lua_tonumber(L, idx);
+	i = (lua_Integer)n;
+	if (i != n) return false;
+#endif
+	*val = i;
 	return true;
 }
 
@@ -271,7 +274,7 @@ static bool appendTable(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson
 static bool appendValue(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson, const char *key, size_t klen) {
 	if (luaL_getmetafield(L, idx, "__toBSON")) { /* Transform value */
 		lua_pushvalue(L, idx);
-		if (lua_pcall(L, 1, 1, 0)) return error(L, nerr, "%s", lua_tostring(L, -1));
+		if (lua_pcall(L, 1, 1, 0)) return error(L, nerr, "%s", lua_isstring(L, -1) ? lua_tostring(L, -1) : "(error object is not a string)");
 		lua_replace(L, idx);
 	}
 	switch (lua_type(L, idx)) {
@@ -282,10 +285,10 @@ static bool appendValue(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson
 			bson_append_bool(bson, key, klen, lua_toboolean(L, idx));
 			break;
 		case LUA_TNUMBER: {
-			lua_Integer n;
-			if (isInteger(L, idx, &n)) {
-				if (isInt32(n)) bson_append_int32(bson, key, klen, n);
-				else bson_append_int64(bson, key, klen, n);
+			lua_Integer i;
+			if (isInteger(L, idx, &i)) {
+				if (isInt32(i)) bson_append_int32(bson, key, klen, i);
+				else bson_append_int64(bson, key, klen, i);
 				break;
 			}
 			bson_append_double(bson, key, klen, lua_tonumber(L, idx));
@@ -349,7 +352,7 @@ static bool appendTable(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson
 	lua_pushboolean(L, 1);
 	lua_rawset(L, ridx);
 	lua_settop(L, top);
-	lua_checkstack(L, LUA_MINSTACK);
+	luaL_checkstack(L, LUA_MINSTACK, "too many nested values");
 	if (len != -1) { /* As array */
 		char buf[64];
 		lua_Integer i;
@@ -485,7 +488,7 @@ static void unpackValue(lua_State *L, bson_iter_t *iter, int hidx) {
 static void unpackTable(lua_State *L, bson_iter_t *iter, int hidx, bool array) {
 	lua_Integer len = 0;
 	lua_newtable(L);
-	luaL_checkstack(L, LUA_MINSTACK, "too many nested documents");
+	luaL_checkstack(L, LUA_MINSTACK, "too many nested values");
 	while (bson_iter_next(iter)) {
 		if (array) lua_pushinteger(L, ++len);
 		else lua_pushstring(L, bson_iter_key(iter));
@@ -674,14 +677,14 @@ void toBSONValue(lua_State *L, int idx, bson_value_t *val) {
 			val->value.v_bool = lua_toboolean(L, idx);
 			break;
 		case LUA_TNUMBER: {
-			lua_Integer n;
-			if (isInteger(L, idx, &n)) {
-				if (isInt32(n)) {
+			lua_Integer i;
+			if (isInteger(L, idx, &i)) {
+				if (isInt32(i)) {
 					val->value_type = BSON_TYPE_INT32;
-					val->value.v_int32 = n;
+					val->value.v_int32 = i;
 				} else {
 					val->value_type = BSON_TYPE_INT64;
-					val->value.v_int64 = n;
+					val->value.v_int64 = i;
 				}
 			} else {
 				val->value_type = BSON_TYPE_DOUBLE;

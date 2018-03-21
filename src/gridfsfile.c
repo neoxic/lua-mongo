@@ -118,8 +118,8 @@ static int m_seek(lua_State *L) {
 	static const int mode[] = { SEEK_SET, SEEK_CUR, SEEK_END };
 	mongoc_gridfs_file_t *file = checkGridFSFile(L, 1);
 	int64_t offset = checkInt64(L, 2);
-	int n = luaL_checkoption(L, 3, whence[0], whence);
-	lua_pushboolean(L, !mongoc_gridfs_file_seek(file, offset, mode[n]));
+	int i = luaL_checkoption(L, 3, whence[0], whence);
+	lua_pushboolean(L, !mongoc_gridfs_file_seek(file, offset, mode[i]));
 	return 1;
 }
 
@@ -180,12 +180,12 @@ static int m_write(lua_State *L) {
 	size_t len;
 	const char *str = luaL_checklstring(L, 2, &len);
 	mongoc_iovec_t iov;
-	lua_Integer n;
+	int64_t n;
 	iov.iov_len = len;
 	iov.iov_base = (char *)str;
 	n = mongoc_gridfs_file_writev(file, &iov, 1, 0);
 	if (n == -1) return fileError(L, file);
-	lua_pushinteger(L, n);
+	pushInt64(L, n);
 	return 1;
 }
 

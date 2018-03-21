@@ -29,7 +29,7 @@ static int m_unpack(lua_State *L) {
 static int m__tostring(lua_State *L) {
 	int i, n;
 	lua_settop(L, 1);
-	if (!lua_istable(L, 1) || !luaL_getmetafield(L, 1, "__name")) return 0;
+	luaL_argcheck(L, lua_istable(L, 1) && luaL_getmetafield(L, 1, "__name"), 1, "invalid object");
 	n = lua_rawlen(L, 1);
 	if (!n) return 1; /* Type name with no arguments */
 	luaL_checkstack(L, LUA_MINSTACK + n * 2, "too many parameters");

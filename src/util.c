@@ -23,17 +23,15 @@
 #include "common.h"
 
 static int m__tostring(lua_State *L) {
-	if (!luaL_getmetafield(L, 1, "__name")) return 0;
+	luaL_argcheck(L, luaL_getmetafield(L, 1, "__name"), 1, "invalid object");
 	lua_pushfstring(L, "%s: %p", lua_tostring(L, -1), lua_topointer(L, 1));
 	return 1;
 }
 
 bool pushType(lua_State *L, const char *tname, const luaL_Reg *funcs) {
 	if (!luaL_newmetatable(L, tname)) return false;
-	lua_newtable(L);
-	lua_setfield(L, -2, "__metatable"); /* Make metatable private */
 	lua_pushvalue(L, -1);
-	lua_setfield(L, -2, "__index"); /* mt.__index = mt */
+	lua_setfield(L, -2, "__index"); /* metatable.__index = metatable */
 	lua_pushstring(L, tname);
 	lua_setfield(L, -2, "__name");
 	lua_pushcfunction(L, m__tostring);
@@ -97,7 +95,7 @@ void packParams(lua_State *L, int n) {
 
 int unpackParams(lua_State *L, int idx) {
 	int i = 0, n = lua_rawlen(L, idx);
-	luaL_checkstack(L, n, "too many parameters");
+	luaL_checkstack(L, LUA_MINSTACK + n, "too many parameters");
 	while (i < n) lua_rawgeti(L, idx, ++i);
 	return n;
 }
