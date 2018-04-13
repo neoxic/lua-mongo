@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2017 Arseny Vakhrushev <arseny.vakhrushev@gmail.com>
+ * Copyright (C) 2016-2018 Arseny Vakhrushev <arseny.vakhrushev@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,10 +36,10 @@ bool pushType(lua_State *L, const char *tname, const luaL_Reg *funcs) {
 	lua_setfield(L, -2, "__name");
 	lua_pushcfunction(L, m__tostring);
 	lua_setfield(L, -2, "__tostring");
-#if LUA_VERSION_NUM >= 502
-	luaL_setfuncs(L, funcs, 0);
-#else
+#if LUA_VERSION_NUM < 502
 	luaL_register(L, 0, funcs);
+#else
+	luaL_setfuncs(L, funcs, 0);
 #endif
 	return true;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2017 Arseny Vakhrushev <arseny.vakhrushev@gmail.com>
+ * Copyright (C) 2016-2018 Arseny Vakhrushev <arseny.vakhrushev@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -235,16 +235,16 @@ static void toBSONType(lua_State *L, bson_type_t type, int idx, bson_value_t *va
 
 static bool isInteger(lua_State *L, int idx, lua_Integer *val) {
 	lua_Integer i;
-#if LUA_VERSION_NUM >= 503
-	int res;
-	i = lua_tointegerx(L, idx, &res);
-	if (!res) return false;
-#else
+#if LUA_VERSION_NUM < 503
 	lua_Number n;
 	if (!lua_isnumber(L, idx)) return false;
 	n = lua_tonumber(L, idx);
 	i = (lua_Integer)n;
 	if (i != n) return false;
+#else
+	int res;
+	i = lua_tointegerx(L, idx, &res);
+	if (!res) return false;
 #endif
 	*val = i;
 	return true;

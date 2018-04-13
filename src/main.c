@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2017 Arseny Vakhrushev <arseny.vakhrushev@gmail.com>
+ * Copyright (C) 2016-2018 Arseny Vakhrushev <arseny.vakhrushev@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,7 @@
 EXPORT int luaopen_mongo(lua_State *L);
 
 static int m_type(lua_State *L) {
+	luaL_checkany(L, 1);
 	if (!luaL_getmetafield(L, 1, "__name")) lua_pushnil(L);
 	return 1;
 }
@@ -56,10 +57,10 @@ char NEW_BINARY, NEW_DATETIME, NEW_DECIMAL128, NEW_JAVASCRIPT, NEW_REGEX, NEW_TI
 char GLOBAL_MAXKEY, GLOBAL_MINKEY, GLOBAL_NULL;
 
 int luaopen_mongo(lua_State *L) {
-#if LUA_VERSION_NUM >= 502
-	luaL_newlib(L, funcs);
-#else
+#if LUA_VERSION_NUM < 502
 	luaL_register(L, lua_tostring(L, 1), funcs);
+#else
+	luaL_newlib(L, funcs);
 #endif
 	lua_pushliteral(L, MODNAME);
 	lua_setfield(L, -2, "_NAME");

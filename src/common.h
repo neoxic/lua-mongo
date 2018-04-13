@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2017 Arseny Vakhrushev <arseny.vakhrushev@gmail.com>
+ * Copyright (C) 2016-2018 Arseny Vakhrushev <arseny.vakhrushev@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -138,29 +138,29 @@ int commandStrVec(lua_State *L, char **strv, const bson_error_t *error);
 #define argfcheck(L, cond, idx, ...) (void)((cond) || argferror(L, idx, __VA_ARGS__))
 
 #if LUA_VERSION_NUM >= 503 && LUA_MAXINTEGER >= INT64_MAX
-#define pushInt64 lua_pushinteger
-#define toInt64 lua_tointeger
-#define checkInt64 luaL_checkinteger
+#define pushInt64(L, n) lua_pushinteger(L, n)
+#define toInt64(L, idx) lua_tointeger(L, idx)
+#define checkInt64(L, idx) luaL_checkinteger(L, idx)
 #else
-#define pushInt64 lua_pushnumber
-#define toInt64 lua_tonumber
-#define checkInt64 luaL_checknumber
+#define pushInt64(L, n) lua_pushnumber(L, n)
+#define toInt64(L, idx) lua_tonumber(L, idx)
+#define checkInt64(L, idx) luaL_checknumber(L, idx)
 #endif
 
 #if LUA_VERSION_NUM >= 503 && LUA_MAXINTEGER >= INT32_MAX
-#define pushInt32 lua_pushinteger
-#define toInt32 lua_tointeger
-#define checkInt32 luaL_checkinteger
+#define pushInt32(L, n) lua_pushinteger(L, n)
+#define toInt32(L, idx) lua_tointeger(L, idx)
+#define checkInt32(L, idx) luaL_checkinteger(L, idx)
 #else
-#define pushInt32 lua_pushnumber
-#define toInt32 lua_tonumber
-#define checkInt32 luaL_checknumber
+#define pushInt32(L, n) lua_pushnumber(L, n)
+#define toInt32(L, idx) lua_tonumber(L, idx)
+#define checkInt32(L, idx) luaL_checknumber(L, idx)
 #endif
 
 #if LUA_VERSION_NUM < 502
-#define lua_rawlen lua_objlen
-#define lua_getuservalue lua_getfenv
-#define lua_setuservalue lua_setfenv
+#define lua_rawlen(L, idx) lua_objlen(L, idx)
+#define lua_getuservalue(L, idx) lua_getfenv(L, idx)
+#define lua_setuservalue(L, idx) lua_setfenv(L, idx)
 #define lua_rawgetp(L, idx, ptr) (lua_pushlightuserdata(L, ptr), lua_rawget(L, idx))
 #define lua_rawsetp(L, idx, ptr) (lua_pushlightuserdata(L, ptr), lua_insert(L, -2), lua_rawset(L, idx))
 void *luaL_testudata(lua_State* L, int idx, const char *tname);
