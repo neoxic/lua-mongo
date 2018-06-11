@@ -32,7 +32,7 @@
 #endif
 
 #define MODNAME "lua-mongo"
-#define VERSION "1.1.0"
+#define VERSION "1.2.0-dev"
 
 #define TYPE_BINARY "mongo.Binary"
 #define TYPE_BSON "mongo.BSON"
