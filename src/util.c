@@ -28,7 +28,7 @@ static int m__tostring(lua_State *L) {
 	return 1;
 }
 
-bool pushType(lua_State *L, const char *tname, const luaL_Reg *funcs) {
+bool newType(lua_State *L, const char *tname, const luaL_Reg *funcs) {
 	if (!luaL_newmetatable(L, tname)) return false;
 	lua_pushvalue(L, -1);
 	lua_setfield(L, -2, "__index"); /* metatable.__index = metatable */
@@ -45,7 +45,7 @@ bool pushType(lua_State *L, const char *tname, const luaL_Reg *funcs) {
 }
 
 void setType(lua_State *L, const char *tname, const luaL_Reg *funcs) {
-	pushType(L, tname, funcs);
+	newType(L, tname, funcs);
 	lua_setmetatable(L, -2);
 }
 

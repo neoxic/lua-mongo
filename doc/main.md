@@ -77,7 +77,7 @@ Output:
 ```
 
 ### mongo.Client(uri)
-Returns a new [Client] object. See also [MongoDB Connection String URI Format] for information on `uri`.
+Returns a new [Client] handle. See also [MongoDB Connection String URI Format] for information on `uri`.
 
 ### mongo.DateTime(milliseconds)
 Returns an instance of [BSON DateTime][BSON type].

@@ -59,7 +59,7 @@ static int m_iterator(lua_State *L) {
 
 void pushGridFSFileList(lua_State *L, mongoc_gridfs_file_list_t *list, int pidx) {
 	pushHandle(L, list, -1, pidx);
-	if (pushType(L, TYPE_GRIDFSFILELIST, funcs)) {
+	if (newType(L, TYPE_GRIDFSFILELIST, funcs)) {
 		lua_pushboolean(L, 1); /* Iterator mode on */
 		lua_pushcclosure(L, m_next, 1); /* Iterator ... */
 		lua_pushcclosure(L, m_iterator, 1); /* ... cached as upvalue 1 */

@@ -26,9 +26,10 @@ static int m_command(lua_State *L) {
 	mongoc_client_t *client = checkClient(L, 1);
 	const char *dbname = luaL_checkstring(L, 2);
 	bson_t *command = castBSON(L, 3);
+	bson_t *options = toBSON(L, 4);
 	bson_t reply;
 	bson_error_t error;
-	bool status = mongoc_client_command_simple(client, dbname, command, 0, &reply, &error);
+	bool status = mongoc_client_command_with_opts(client, dbname, command, 0, options, &reply, &error);
 	if (!bson_has_field(&reply, "cursor")) return commandReply(L, status, &reply, &error);
 	pushCursor(L, mongoc_cursor_new_from_command_reply(client, &reply, 0), 1);
 	return 1;

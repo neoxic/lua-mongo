@@ -116,7 +116,7 @@ int toUpdateFlags(lua_State *L, int idx);
 
 /* Utilities */
 
-bool pushType(lua_State *L, const char *tname, const luaL_Reg *funcs);
+bool newType(lua_State *L, const char *tname, const luaL_Reg *funcs);
 void setType(lua_State *L, const char *tname, const luaL_Reg *funcs);
 void unsetType(lua_State *L);
 

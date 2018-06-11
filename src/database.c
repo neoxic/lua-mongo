@@ -32,6 +32,17 @@ static int m_addUser(lua_State *L) {
 	return commandStatus(L, mongoc_database_add_user(database, username, password, roles, extra, &error), &error);
 }
 
+static int m_createCollection(lua_State *L) {
+	mongoc_database_t *database = checkDatabase(L, 1);
+	const char *collname = luaL_checkstring(L, 2);
+	bson_t *options = toBSON(L, 3);
+	bson_error_t error;
+	mongoc_collection_t *collection = mongoc_database_create_collection(database, collname, options, &error);
+	if (!collection) return commandError(L, &error);
+	pushCollection(L, collection, false, 1);
+	return 1;
+}
+
 static int m_drop(lua_State *L) {
 	mongoc_database_t *database = checkDatabase(L, 1);
 	bson_t *options = toBSON(L, 2);
@@ -86,6 +97,7 @@ static int m__gc(lua_State *L) {
 
 static const luaL_Reg funcs[] = {
 	{ "addUser", m_addUser },
+	{ "createCollection", m_createCollection },
 	{ "drop", m_drop },
 	{ "getCollection", m_getCollection },
 	{ "getCollectionNames", m_getCollectionNames },

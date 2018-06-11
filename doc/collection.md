@@ -5,7 +5,11 @@ Methods
 -------
 
 ### collection:aggregate(pipeline, [options])
-Executes an aggregation `pipeline` on `collection` and returns a [Cursor] object.
+Executes an aggregation `pipeline` on `collection` and returns a [Cursor] handle.
+
+### collection:count([query], [options])
+Executes a count `query` on `collection` and returns the result. On error, returns `nil` and the
+error message.
 
 ### collection:createBulkOperation([options])
 Returns a new [Bulk operation]. By default, the operation is _ordered_ (see below). To denote the
@@ -17,15 +21,11 @@ execution. The processing aborts when the first error is encountered.
 _Unordered_ bulk operations are batched and sent to the server in arbitrary order where they may
 be executed in parallel with any errors reported after all operations are attempted.
 
-### collection:count([query], [options])
-Executes a count `query` on `collection` and returns the result. On error, returns `nil` and the
-error message.
-
 ### collection:drop([options])
 Drops `collection` and returns `true`. On error, returns `nil` and the error message.
 
 ### collection:find(query, [options])
-Executes a find `query` on `collection` and returns a [Cursor] object.
+Executes a find `query` on `collection` and returns a [Cursor] handle.
 
 ### collection:findAndModify(query, options)
 Executes a find-and-modify `query` on `collection` and returns a [BSON document] or `nil` if nothing
@@ -47,7 +47,7 @@ function collection:findOne(query, options)
 end
 ```
 
-except that it avoids creating a temporary [Cursor] object.
+except that it avoids creating a temporary [Cursor] handle.
 
 ### collection:getName()
 Returns the name of `collection`.
@@ -68,17 +68,9 @@ and the error message. See also [Flags for remove] for information on `flags`.
 Renames `collection` on the server using new database name `dbname` and collection name `collname`.
 If `force` is `true`, an existing collection with the same name will be dropped first.
 
-### collection:stats([options])
-Retrieves statistics about `collection` and returns the result as a [BSON document]. On error,
-returns `nil` and the error message.
-
 ### collection:update(query, document, [flags])
 Updates documents in `collection` that match `query` with `document` and returns `true`. On error,
 returns `nil` and the error message. See also [Flags for update] for information on `flags`.
-
-### collection:validate([options])
-Validates `collection` and returns the result as a [BSON document]. On error, returns `nil` and
-the error message.
 
 
 [BSON document]: bson.md

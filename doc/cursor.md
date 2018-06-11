@@ -4,9 +4,6 @@ Cursor
 Methods
 -------
 
-### cursor:isAlive()
-Checks if `cursor` allows for more documents to be acquired (useful for tailable cursors).
-
 ### cursor:iterator([handler])
 Returns an iterator function and `cursor` itself so that the statement
 
@@ -26,6 +23,9 @@ function cursor:iterator(handler)
     cursor
 end
 ```
+
+### cursor:more()
+Checks if `cursor` allows for more documents to be acquired (useful for tailable cursors).
 
 ### cursor:next()
 Iterates `cursor` and returns the next [BSON document] from it or `nil` if there are no more

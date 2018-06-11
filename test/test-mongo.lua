@@ -70,9 +70,6 @@ assert(collection:findAndModify({ _id = 'abc' }, { remove = true }) == nil) -- N
 
 assert(collection:aggregate('[ { "$group" : { "_id" : "$a", "count" : { "$sum" : 1 } } } ]'):value().count == 1)
 
-assert(collection:stats():find('ok'))
-assert(collection:validate({ full = true }):find('valid'))
-
 -- Bulk operation
 local function bulkInsert(ordered, n)
 	collection:drop()
@@ -128,6 +125,12 @@ test.error(database:removeUser(test.dbname))
 
 test.value(assert(database:getCollectionNames()), test.collname)
 assert(database:hasCollection(test.collname))
+
+test.error(database:createCollection(test.collname)) -- Collection already exists
+collection = database:getCollection(test.collname)
+collection:drop()
+collection = assert(database:createCollection(test.collname, { capped = true, size = 1024 })) -- Create collection explicitly
+collection = nil
 
 database = nil
 collectgarbage()

@@ -30,14 +30,14 @@
 
 EXPORT int luaopen_mongo(lua_State *L);
 
-static int m_type(lua_State *L) {
+static int f_type(lua_State *L) {
 	luaL_checkany(L, 1);
 	if (!luaL_getmetafield(L, 1, "__name")) lua_pushnil(L);
 	return 1;
 }
 
 static const luaL_Reg funcs[] = {
-	{ "type", m_type },
+	{ "type", f_type },
 	{ "Binary", newBinary },
 	{ "BSON", newBSON },
 	{ "Client", newClient },

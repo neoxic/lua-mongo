@@ -22,8 +22,8 @@
 
 #include "common.h"
 
-static int m_isAlive(lua_State *L) {
-	lua_pushboolean(L, mongoc_cursor_is_alive(checkCursor(L, 1)));
+static int m_more(lua_State *L) {
+	lua_pushboolean(L, mongoc_cursor_more(checkCursor(L, 1)));
 	return 1;
 }
 
@@ -42,10 +42,12 @@ static int m__gc(lua_State *L) {
 }
 
 static const luaL_Reg funcs[] = {
-	{ "isAlive", m_isAlive },
+	{ "more", m_more },
 	{ "next", m_next },
 	{ "value", m_value },
 	{ "__gc", m__gc },
+	/* TODO remove in version 2 */
+	{ "isAlive", m_more },
 	{ 0, 0 }
 };
 
@@ -66,7 +68,7 @@ static int m_iterator(lua_State *L) {
 
 void pushCursor(lua_State *L, mongoc_cursor_t *cursor, int pidx) {
 	pushHandle(L, cursor, -1, pidx);
-	if (pushType(L, TYPE_CURSOR, funcs)) {
+	if (newType(L, TYPE_CURSOR, funcs)) {
 		lua_pushcfunction(L, iterator); /* Default iterator ... */
 		lua_pushcclosure(L, m_iterator, 1); /* ... cached as upvalue 1 */
 		lua_setfield(L, -2, "iterator");
