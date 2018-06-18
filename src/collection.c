@@ -26,7 +26,8 @@ static int m_aggregate(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
 	bson_t *pipeline = castBSON(L, 2);
 	bson_t *options = toBSON(L, 3);
-	pushCursor(L, mongoc_collection_aggregate(collection, MONGOC_QUERY_NONE, pipeline, options, 0), 1);
+	mongoc_read_prefs_t *prefs = toReadPrefs(L, 4);
+	pushCursor(L, mongoc_collection_aggregate(collection, MONGOC_QUERY_NONE, pipeline, options, prefs), 1);
 	return 1;
 }
 
@@ -34,8 +35,9 @@ static int m_count(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
 	bson_t *query = toBSON(L, 2);
 	bson_t *options = toBSON(L, 3);
+	mongoc_read_prefs_t *prefs = toReadPrefs(L, 4);
 	bson_error_t error;
-	int64_t n = mongoc_collection_count_with_opts(collection, MONGOC_QUERY_NONE, query, 0, 0, options, 0, &error);
+	int64_t n = mongoc_collection_count_with_opts(collection, MONGOC_QUERY_NONE, query, 0, 0, options, prefs, &error);
 	if (n == -1) return commandError(L, &error);
 	pushInt64(L, n);
 	return 1;
@@ -64,7 +66,8 @@ static int m_find(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
 	bson_t *query = castBSON(L, 2);
 	bson_t *options = toBSON(L, 3);
-	pushCursor(L, mongoc_collection_find_with_opts(collection, query, options, 0), 1);
+	mongoc_read_prefs_t *prefs = toReadPrefs(L, 4);
+	pushCursor(L, mongoc_collection_find_with_opts(collection, query, options, prefs), 1);
 	return 1;
 }
 
@@ -88,6 +91,7 @@ static int m_findOne(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
 	bson_t *query = castBSON(L, 2);
 	bson_t *options = toBSON(L, 3);
+	mongoc_read_prefs_t *prefs = toReadPrefs(L, 4);
 	bson_t opts;
 	mongoc_cursor_t *cursor;
 	int nres;
@@ -95,7 +99,7 @@ static int m_findOne(lua_State *L) {
 	if (options) bson_copy_to_excluding_noinit(options, &opts, "limit", "singleBatch", (char *)0);
 	BSON_APPEND_INT32(&opts, "limit", 1);
 	BSON_APPEND_BOOL(&opts, "singleBatch", true);
-	cursor = mongoc_collection_find_with_opts(collection, query, &opts, 0);
+	cursor = mongoc_collection_find_with_opts(collection, query, &opts, prefs);
 	nres = iterateCursor(L, cursor, 0);
 	mongoc_cursor_destroy(cursor);
 	bson_destroy(&opts);
@@ -104,6 +108,11 @@ static int m_findOne(lua_State *L) {
 
 static int m_getName(lua_State *L) {
 	lua_pushstring(L, mongoc_collection_get_name(checkCollection(L, 1)));
+	return 1;
+}
+
+static int m_getReadPrefs(lua_State *L) {
+	pushReadPrefs(L, mongoc_collection_get_read_prefs(checkCollection(L, 1)));
 	return 1;
 }
 
@@ -131,6 +140,13 @@ static int m_rename(lua_State *L) {
 	bson_t *options = toBSON(L, 5);
 	bson_error_t error;
 	return commandStatus(L, mongoc_collection_rename_with_opts(collection, dbname, collname, force, options, &error), &error);
+}
+
+static int m_setReadPrefs(lua_State *L) {
+	mongoc_collection_t *collection = checkCollection(L, 1);
+	mongoc_read_prefs_t *prefs = checkReadPrefs(L, 2);
+	mongoc_collection_set_read_prefs(collection, prefs);
+	return 0;
 }
 
 static int m_update(lua_State *L) {
@@ -179,9 +195,11 @@ static const luaL_Reg funcs[] = {
 	{ "findAndModify", m_findAndModify },
 	{ "findOne", m_findOne },
 	{ "getName", m_getName },
+	{ "getReadPrefs", m_getReadPrefs },
 	{ "insert", m_insert },
 	{ "remove", m_remove },
 	{ "rename", m_rename },
+	{ "setReadPrefs", m_setReadPrefs },
 	{ "update", m_update },
 	{ "__gc", m__gc },
 	/* TODO remove in version 2 */

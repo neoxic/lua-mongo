@@ -54,6 +54,7 @@
 #define TYPE_MINKEY "mongo.MinKey"
 #define TYPE_NULL "mongo.Null"
 #define TYPE_OBJECTID "mongo.ObjectID"
+#define TYPE_READPREFS "mongo.ReadPrefs"
 #define TYPE_REGEX "mongo.Regex"
 #define TYPE_TIMESTAMP "mongo.Timestamp"
 
@@ -70,6 +71,7 @@ int newInt32(lua_State *L);
 int newInt64(lua_State *L);
 int newJavascript(lua_State *L);
 int newObjectID(lua_State *L);
+int newReadPrefs(lua_State *L);
 int newRegex(lua_State *L);
 int newTimestamp(lua_State *L);
 
@@ -88,6 +90,7 @@ void pushMaxKey(lua_State *L);
 void pushMinKey(lua_State *L);
 void pushNull(lua_State *L);
 void pushObjectID(lua_State *L, const bson_oid_t *oid);
+void pushReadPrefs(lua_State *L, const mongoc_read_prefs_t *prefs);
 
 int iterateCursor(lua_State *L, mongoc_cursor_t *cursor, int hidx);
 
@@ -109,6 +112,8 @@ mongoc_database_t *checkDatabase(lua_State *L, int idx);
 mongoc_gridfs_t *checkGridFS(lua_State *L, int idx);
 mongoc_gridfs_file_t *checkGridFSFile(lua_State *L, int idx);
 mongoc_gridfs_file_list_t *checkGridFSFileList(lua_State *L, int idx);
+mongoc_read_prefs_t *checkReadPrefs(lua_State *L, int idx);
+mongoc_read_prefs_t *toReadPrefs(lua_State *L, int idx);
 
 int toInsertFlags(lua_State *L, int idx);
 int toRemoveFlags(lua_State *L, int idx);
@@ -133,7 +138,7 @@ int commandStatus(lua_State *L, bool status, const bson_error_t *error);
 int commandReply(lua_State *L, bool status, bson_t *reply, const bson_error_t *error);
 int commandStrVec(lua_State *L, char **strv, const bson_error_t *error);
 
-#define check(L, cond) (void)((cond) || luaL_error(L, "precondition failed: %s at %s:%d", #cond, __FILE__, __LINE__))
+#define check(L, cond) (void)((cond) || luaL_error(L, "precondition '%s' failed at %s:%d", #cond, __FILE__, __LINE__))
 #define argferror(L, idx, ...) (lua_pushfstring(L, __VA_ARGS__), luaL_argerror(L, idx, lua_tostring(L, -1)))
 #define argfcheck(L, cond, idx, ...) (void)((cond) || argferror(L, idx, __VA_ARGS__))
 

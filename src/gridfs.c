@@ -142,7 +142,7 @@ static const luaL_Reg funcs[] = {
 };
 
 void pushGridFS(lua_State *L, mongoc_gridfs_t *gridfs, int pidx) {
-	pushHandle(L, gridfs, 0, pidx);
+	pushHandle(L, gridfs, 0, pidx); /* New environment due to dependants */
 	setType(L, TYPE_GRIDFS, funcs);
 }
 

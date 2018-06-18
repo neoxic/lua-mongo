@@ -69,6 +69,11 @@ static int m_getName(lua_State *L) {
 	return 1;
 }
 
+static int m_getReadPrefs(lua_State *L) {
+	pushReadPrefs(L, mongoc_database_get_read_prefs(checkDatabase(L, 1)));
+	return 1;
+}
+
 static int m_hasCollection(lua_State *L) {
 	mongoc_database_t *database = checkDatabase(L, 1);
 	const char *collname = luaL_checkstring(L, 2);
@@ -89,6 +94,13 @@ static int m_removeUser(lua_State *L) {
 	return commandStatus(L, mongoc_database_remove_user(database, username, &error), &error);
 }
 
+static int m_setReadPrefs(lua_State *L) {
+	mongoc_database_t *database = checkDatabase(L, 1);
+	mongoc_read_prefs_t *prefs = checkReadPrefs(L, 2);
+	mongoc_database_set_read_prefs(database, prefs);
+	return 0;
+}
+
 static int m__gc(lua_State *L) {
 	mongoc_database_destroy(checkDatabase(L, 1));
 	unsetType(L);
@@ -102,9 +114,11 @@ static const luaL_Reg funcs[] = {
 	{ "getCollection", m_getCollection },
 	{ "getCollectionNames", m_getCollectionNames },
 	{ "getName", m_getName },
+	{ "getReadPrefs", m_getReadPrefs },
 	{ "hasCollection", m_hasCollection },
 	{ "removeAllUsers", m_removeAllUsers },
 	{ "removeUser", m_removeUser },
+	{ "setReadPrefs", m_setReadPrefs },
 	{ "__gc", m__gc },
 	{ 0, 0 }
 };

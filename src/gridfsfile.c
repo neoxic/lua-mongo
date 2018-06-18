@@ -115,11 +115,11 @@ static int m_save(lua_State *L) {
 
 static int m_seek(lua_State *L) {
 	static const char *const whence[] = { "set", "cur", "end", 0 };
-	static const int mode[] = { SEEK_SET, SEEK_CUR, SEEK_END };
+	static const int modes[] = { SEEK_SET, SEEK_CUR, SEEK_END };
 	mongoc_gridfs_file_t *file = checkGridFSFile(L, 1);
 	int64_t offset = checkInt64(L, 2);
 	int i = luaL_checkoption(L, 3, whence[0], whence);
-	lua_pushboolean(L, !mongoc_gridfs_file_seek(file, offset, mode[i]));
+	lua_pushboolean(L, !mongoc_gridfs_file_seek(file, offset, modes[i]));
 	return 1;
 }
 

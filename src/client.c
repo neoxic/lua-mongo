@@ -27,9 +27,10 @@ static int m_command(lua_State *L) {
 	const char *dbname = luaL_checkstring(L, 2);
 	bson_t *command = castBSON(L, 3);
 	bson_t *options = toBSON(L, 4);
+	mongoc_read_prefs_t *prefs = toReadPrefs(L, 5);
 	bson_t reply;
 	bson_error_t error;
-	bool status = mongoc_client_command_with_opts(client, dbname, command, 0, options, &reply, &error);
+	bool status = mongoc_client_command_with_opts(client, dbname, command, prefs, options, &reply, &error);
 	if (!bson_has_field(&reply, "cursor")) return commandReply(L, status, &reply, &error);
 	pushCursor(L, mongoc_cursor_new_from_command_reply(client, &reply, 0), 1);
 	return 1;
@@ -75,6 +76,17 @@ static int m_getGridFS(lua_State *L) {
 	return 1;
 }
 
+static int m_getReadPrefs(lua_State *L) {
+	pushReadPrefs(L, mongoc_client_get_read_prefs(checkClient(L, 1)));
+	return 1;
+}
+static int m_setReadPrefs(lua_State *L) {
+	mongoc_client_t *client = checkClient(L, 1);
+	mongoc_read_prefs_t *prefs = checkReadPrefs(L, 2);
+	mongoc_client_set_read_prefs(client, prefs);
+	return 0;
+}
+
 static int m__gc(lua_State *L) {
 	mongoc_client_destroy(checkClient(L, 1));
 	unsetType(L);
@@ -88,6 +100,8 @@ static const luaL_Reg funcs[] = {
 	{ "getDatabaseNames", m_getDatabaseNames },
 	{ "getDefaultDatabase", m_getDefaultDatabase },
 	{ "getGridFS", m_getGridFS },
+	{ "getReadPrefs", m_getReadPrefs },
+	{ "setReadPrefs", m_setReadPrefs },
 	{ "__gc", m__gc },
 	{ 0, 0 }
 };

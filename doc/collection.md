@@ -4,10 +4,10 @@ Collection
 Methods
 -------
 
-### collection:aggregate(pipeline, [options])
+### collection:aggregate(pipeline, [options], [prefs])
 Executes an aggregation `pipeline` on `collection` and returns a [Cursor] handle.
 
-### collection:count([query], [options])
+### collection:count([query], [options], [prefs])
 Executes a count `query` on `collection` and returns the result. On error, returns `nil` and the
 error message.
 
@@ -24,14 +24,14 @@ be executed in parallel with any errors reported after all operations are attemp
 ### collection:drop([options])
 Drops `collection` and returns `true`. On error, returns `nil` and the error message.
 
-### collection:find(query, [options])
+### collection:find(query, [options], [prefs])
 Executes a find `query` on `collection` and returns a [Cursor] handle.
 
 ### collection:findAndModify(query, options)
 Executes a find-and-modify `query` on `collection` and returns a [BSON document] or `nil` if nothing
 was found. On error, returns `nil` and the error message.
 
-### collection:findOne(query, [options])
+### collection:findOne(query, [options], [prefs])
 Returns the first [BSON document] in `collection` that matches `query` or `nil` if nothing was found.
 On error, returns `nil` and the error message.
 
@@ -52,6 +52,9 @@ except that it avoids creating a temporary [Cursor] handle.
 ### collection:getName()
 Returns the name of `collection`.
 
+### collection:getReadPrefs()
+Returns the default read preferences.
+
 ### collection:insert(document, [flags])
 Inserts `document` into `collection` and returns `true`. On error, returns `nil` and the error
 message. See also [Flags for insert] for information on `flags`.
@@ -67,6 +70,9 @@ and the error message. See also [Flags for remove] for information on `flags`.
 ### collection:rename(dbname, collname, [force], [options])
 Renames `collection` on the server using new database name `dbname` and collection name `collname`.
 If `force` is `true`, an existing collection with the same name will be dropped first.
+
+### collection:setReadPrefs(prefs)
+Sets the default read preferences.
 
 ### collection:update(query, document, [flags])
 Updates documents in `collection` that match `query` with `document` and returns `true`. On error,

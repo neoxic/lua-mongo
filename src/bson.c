@@ -662,7 +662,7 @@ bson_t *castBSON(lua_State *L, int idx) {
 }
 
 bson_t *toBSON(lua_State *L, int idx) {
-	return lua_isnoneornil(L, idx) ? 0 : castBSON(L, idx);
+	return luaL_opt(L, castBSON, idx, 0);
 }
 
 void toBSONValue(lua_State *L, int idx, bson_value_t *val) {

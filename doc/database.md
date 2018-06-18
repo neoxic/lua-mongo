@@ -24,6 +24,9 @@ message.
 ### database:getName()
 Returns the name of `database`.
 
+### database:getReadPrefs()
+Returns the default read preferences.
+
 ### database:hasCollection(collname)
 Checks if a collection `collname` exists on the server within `database`. Returns `true` if the
 collection exists or `nil` if it does not exist. On error, returns `nil` and the error message.
@@ -33,6 +36,9 @@ Removes all users from `database` and returns `true`. On error, returns `nil` an
 
 ### database:removeUser(username)
 Removes a user from `database` and returns `true`. On error, returns `nil` and the error message.
+
+### database:setReadPrefs(prefs)
+Sets the default read preferences.
 
 
 [Collection]: collection.md

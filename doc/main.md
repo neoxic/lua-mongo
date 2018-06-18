@@ -104,6 +104,15 @@ Returns an instance of [BSON Javascript][BSON type] with `scope` (converted to a
 Returns an instance of [BSON ObjectID]. If hexadecimal string `value` is provided, it is used
 to initialize the instance. Otherwise, a new unique value is generated.
 
+### mongo.ReadPrefs(mode, [tags], [maxStalenessSeconds])
+Returns an instance of read preferences with `mode` (a string) that can be one of the following:
+- `primary`;
+- `primaryPreferred`;
+- `secondary`;
+- `secondaryPreferred`;
+- `nearest`.
+Refer to http://mongoc.org/libmongoc/current/mongoc_read_mode_t.html for more information.
+
 ### mongo.Regex(regex, [options])
 Returns an instance of [BSON Regex][BSON type].
 
