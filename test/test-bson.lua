@@ -1,3 +1,4 @@
+local mongo = require 'mongo'
 local test = require 'test'
 local BSON = mongo.BSON
 
