@@ -101,8 +101,8 @@ conversion where needed.
 Returns an instance of [BSON Javascript][BSON type] with `scope` (converted to a [BSON document]).
 
 ### mongo.ObjectID([value])
-Returns an instance of [BSON ObjectID]. If hexadecimal string `value` is provided, it is used
-to initialize the instance. Otherwise, a new unique value is generated.
+Returns an instance of [BSON ObjectID]. Optional hexadecimal string `value` is used to initialize
+the instance. Otherwise, a new unique value is generated.
 
 ### mongo.ReadPrefs(mode, [tags], [maxStalenessSeconds])
 Returns an instance of read preferences with `mode` (a string) that can be one of the following:

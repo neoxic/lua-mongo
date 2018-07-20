@@ -58,8 +58,8 @@ nil
 ```
 
 ### bson:value([handler])
-Converts `bson` into a table and returns it. If `handler` is provided, it is called for every
-nested document; the result of the call is then used as a substitute for the original value.
+Converts `bson` into a table and returns it. Optional `handler` is called for each new table (root
+or nested), and its return value is used instead of the original table.
 
 When an _array_ is restored, its length is stored in the `__array` field of the resulting table.
 
