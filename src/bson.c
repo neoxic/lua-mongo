@@ -87,16 +87,16 @@ static int m__gc(lua_State *L) {
 }
 
 static const luaL_Reg funcs[] = {
-	{ "append", m_append },
-	{ "concat", m_concat },
-	{ "data", m_data },
-	{ "find", m_find },
-	{ "value", m_value },
-	{ "__tostring", m__tostring },
-	{ "__len", m__len },
-	{ "__eq", m__eq },
-	{ "__gc", m__gc },
-	{ 0, 0 }
+	{"append", m_append},
+	{"concat", m_concat},
+	{"data", m_data},
+	{"find", m_find},
+	{"value", m_value},
+	{"__tostring", m__tostring},
+	{"__len", m__len},
+	{"__eq", m__eq},
+	{"__gc", m__gc},
+	{0, 0}
 };
 
 static bool error(lua_State *L, int *nerr, const char *fmt, ...) {

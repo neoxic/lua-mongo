@@ -66,14 +66,14 @@ Preparing the playground:
 
 ```Lua
 local mongo = require 'mongo'
-local client = mongo.Client 'mongodb://127.0.0.1'
+local client = mongo.Client('mongodb://127.0.0.1')
 local collection = client:getCollection('lua-mongo-test', 'test')
 collection:drop() -- Clear collection
 
 -- Common variables
 local id = mongo.ObjectID()
-local query1 = mongo.BSON '{ "age" : { "$gt" : 25 } }'
-local query2 = mongo.BSON { _id = id }
+local query1 = mongo.BSON('{ "age" : { "$gt" : 25 } }')
+local query2 = mongo.BSON{_id = id}
 ```
 
 
@@ -81,7 +81,7 @@ Basic features and operations:
 
 ```Lua
 -- Store document
-collection:insert { _id = id, name = 'John Smith', age = 50 }
+collection:insert{_id = id, name = 'John Smith', age = 50}
 
 -- Fetch document
 local document = collection:findOne(query1):value()
@@ -93,11 +93,11 @@ for document in collection:find(query1):iterator() do
 end
 
 -- Implicit Lua/JSON to BSON conversion where BSON is required
-collection:insert { integer = 123 }
-collection:insert '{ "string" : "abc" }'
+collection:insert{integer = 123}
+collection:insert('{ "string" : "abc" }')
 
 -- Use options in queries
-print(collection:count({}, { skip = 1, limit = 2 }))
+print(collection:count({}, {skip = 1, limit = 2}))
 
 -- Access to BSON where needed
 local bson = collection:findOne(query1)
@@ -108,7 +108,7 @@ local value = bson:value()
 print(value.name)
 
 -- Transparently include BSON documents in other documents
-collection:update(query2, { age = 60, backup = bson }) -- Update document
+collection:update(query2, {age = 60, backup = bson}) -- Update document
 collection:remove(query2) -- Remove document
 ```
 
@@ -121,14 +121,14 @@ write throughput.
 local bulk = collection:createBulkOperation()
 
 -- Multiple insertions
-bulk:insert { a = 1 }
-bulk:insert { b = 2 }
-bulk:insert { c = 3 }
+bulk:insert{a = 1}
+bulk:insert{b = 2}
+bulk:insert{c = 3}
 
 -- Multiple modifications
-bulk:replaceOne({ a = 1 }, { b = 1 })
+bulk:replaceOne({a = 1}, {b = 1})
 bulk:updateMany('{}', '{ "$inc" : { "b" : 2 } }')
-bulk:removeOne { c = 3 }
+bulk:removeOne{c = 3}
 
 -- Execute all the queued operations
 bulk:execute()

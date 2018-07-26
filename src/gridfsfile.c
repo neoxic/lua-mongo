@@ -114,8 +114,8 @@ static int m_save(lua_State *L) {
 }
 
 static int m_seek(lua_State *L) {
-	static const char *const whence[] = { "set", "cur", "end", 0 };
-	static const int modes[] = { SEEK_SET, SEEK_CUR, SEEK_END };
+	static const char *const whence[] = {"set", "cur", "end", 0};
+	static const int modes[] = {SEEK_SET, SEEK_CUR, SEEK_END};
 	mongoc_gridfs_file_t *file = checkGridFSFile(L, 1);
 	int64_t offset = checkInt64(L, 2);
 	int i = luaL_checkoption(L, 3, whence[0], whence);
@@ -196,30 +196,30 @@ static int m__gc(lua_State *L) {
 }
 
 static const luaL_Reg funcs[] = {
-	{ "getAliases", m_getAliases },
-	{ "getChunkSize", m_getChunkSize },
-	{ "getContentType", m_getContentType },
-	{ "getFilename", m_getFilename },
-	{ "getId", m_getId },
-	{ "getLength", m_getLength },
-	{ "getMD5", m_getMD5 },
-	{ "getMetadata", m_getMetadata },
-	{ "getUploadDate", m_getUploadDate },
-	{ "read", m_read },
-	{ "remove", m_remove },
-	{ "save", m_save },
-	{ "seek", m_seek },
-	{ "setAliases", m_setAliases },
-	{ "setContentType", m_setContentType },
-	{ "setFilename", m_setFilename },
-	{ "setId", m_setId },
-	{ "setMD5", m_setMD5 },
-	{ "setMetadata", m_setMetadata },
-	{ "tell", m_tell },
-	{ "write", m_write },
-	{ "__len", m_getLength },
-	{ "__gc", m__gc },
-	{ 0, 0 }
+	{"getAliases", m_getAliases},
+	{"getChunkSize", m_getChunkSize},
+	{"getContentType", m_getContentType},
+	{"getFilename", m_getFilename},
+	{"getId", m_getId},
+	{"getLength", m_getLength},
+	{"getMD5", m_getMD5},
+	{"getMetadata", m_getMetadata},
+	{"getUploadDate", m_getUploadDate},
+	{"read", m_read},
+	{"remove", m_remove},
+	{"save", m_save},
+	{"seek", m_seek},
+	{"setAliases", m_setAliases},
+	{"setContentType", m_setContentType},
+	{"setFilename", m_setFilename},
+	{"setId", m_setId},
+	{"setMD5", m_setMD5},
+	{"setMetadata", m_setMetadata},
+	{"tell", m_tell},
+	{"write", m_write},
+	{"__len", m_getLength},
+	{"__gc", m__gc},
+	{0, 0}
 };
 
 void pushGridFSFile(lua_State *L, mongoc_gridfs_file_t *file, int pidx) {

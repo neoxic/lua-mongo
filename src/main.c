@@ -37,21 +37,21 @@ static int f_type(lua_State *L) {
 }
 
 static const luaL_Reg funcs[] = {
-	{ "type", f_type },
-	{ "Binary", newBinary },
-	{ "BSON", newBSON },
-	{ "Client", newClient },
-	{ "DateTime", newDateTime },
-	{ "Decimal128", newDecimal128 },
-	{ "Double", newDouble },
-	{ "Int32", newInt32 },
-	{ "Int64", newInt64 },
-	{ "Javascript", newJavascript },
-	{ "ObjectID", newObjectID },
-	{ "ReadPrefs", newReadPrefs },
-	{ "Regex", newRegex },
-	{ "Timestamp", newTimestamp },
-	{ 0, 0 }
+	{"type", f_type},
+	{"Binary", newBinary},
+	{"BSON", newBSON},
+	{"Client", newClient},
+	{"DateTime", newDateTime},
+	{"Decimal128", newDecimal128},
+	{"Double", newDouble},
+	{"Int32", newInt32},
+	{"Int64", newInt64},
+	{"Javascript", newJavascript},
+	{"ObjectID", newObjectID},
+	{"ReadPrefs", newReadPrefs},
+	{"Regex", newRegex},
+	{"Timestamp", newTimestamp},
+	{0, 0}
 };
 
 char NEW_BINARY, NEW_DATETIME, NEW_DECIMAL128, NEW_JAVASCRIPT, NEW_REGEX, NEW_TIMESTAMP;

@@ -187,25 +187,25 @@ static int m_validate(lua_State *L) {
 #pragma GCC diagnostic pop
 
 static const luaL_Reg funcs[] = {
-	{ "aggregate", m_aggregate },
-	{ "count", m_count },
-	{ "createBulkOperation", m_createBulkOperation },
-	{ "drop", m_drop },
-	{ "find", m_find },
-	{ "findAndModify", m_findAndModify },
-	{ "findOne", m_findOne },
-	{ "getName", m_getName },
-	{ "getReadPrefs", m_getReadPrefs },
-	{ "insert", m_insert },
-	{ "remove", m_remove },
-	{ "rename", m_rename },
-	{ "setReadPrefs", m_setReadPrefs },
-	{ "update", m_update },
-	{ "__gc", m__gc },
+	{"aggregate", m_aggregate},
+	{"count", m_count},
+	{"createBulkOperation", m_createBulkOperation},
+	{"drop", m_drop},
+	{"find", m_find},
+	{"findAndModify", m_findAndModify},
+	{"findOne", m_findOne},
+	{"getName", m_getName},
+	{"getReadPrefs", m_getReadPrefs},
+	{"insert", m_insert},
+	{"remove", m_remove},
+	{"rename", m_rename},
+	{"setReadPrefs", m_setReadPrefs},
+	{"update", m_update},
+	{"__gc", m__gc},
 	/* TODO remove in version 2 */
-	{ "stats", m_stats },
-	{ "validate", m_validate },
-	{ 0, 0 }
+	{"stats", m_stats},
+	{"validate", m_validate},
+	{0, 0}
 };
 
 void pushCollection(lua_State *L, mongoc_collection_t *collection, bool ref, int pidx) {

@@ -41,9 +41,9 @@ build = {
 				'src/objectid.c',
 				'src/util.c',
 			},
-			libraries = { 'mongoc-1.0', 'bson-1.0' },
-			incdirs = { '$(LIBMONGOC_INCDIR)/libmongoc-1.0', '$(LIBBSON_INCDIR)/libbson-1.0' },
-			libdirs = { '$(LIBMONGOC_LIBDIR)', '$(LIBBSON_LIBDIR)' },
+			libraries = {'mongoc-1.0', 'bson-1.0'},
+			incdirs = {'$(LIBMONGOC_INCDIR)/libmongoc-1.0', '$(LIBBSON_INCDIR)/libbson-1.0'},
+			libdirs = {'$(LIBMONGOC_LIBDIR)', '$(LIBBSON_LIBDIR)'},
 		},
 	},
 }

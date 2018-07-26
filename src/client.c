@@ -94,16 +94,16 @@ static int m__gc(lua_State *L) {
 }
 
 static const luaL_Reg funcs[] = {
-	{ "command", m_command },
-	{ "getCollection", m_getCollection },
-	{ "getDatabase", m_getDatabase },
-	{ "getDatabaseNames", m_getDatabaseNames },
-	{ "getDefaultDatabase", m_getDefaultDatabase },
-	{ "getGridFS", m_getGridFS },
-	{ "getReadPrefs", m_getReadPrefs },
-	{ "setReadPrefs", m_setReadPrefs },
-	{ "__gc", m__gc },
-	{ 0, 0 }
+	{"command", m_command},
+	{"getCollection", m_getCollection},
+	{"getDatabase", m_getDatabase},
+	{"getDatabaseNames", m_getDatabaseNames},
+	{"getDefaultDatabase", m_getDefaultDatabase},
+	{"getGridFS", m_getGridFS},
+	{"getReadPrefs", m_getReadPrefs},
+	{"setReadPrefs", m_setReadPrefs},
+	{"__gc", m__gc},
+	{0, 0}
 };
 
 int newClient(lua_State *L) {

@@ -28,21 +28,21 @@ typedef struct {
 } Flag;
 
 static const Flag insertFlags[] = {
-	{ "continueOnError", MONGOC_INSERT_CONTINUE_ON_ERROR },
-	{ "noValidate", MONGOC_INSERT_NO_VALIDATE },
-	{ 0, 0 }
+	{"continueOnError", MONGOC_INSERT_CONTINUE_ON_ERROR},
+	{"noValidate", MONGOC_INSERT_NO_VALIDATE},
+	{0, 0}
 };
 
 static const Flag removeFlags[] = {
-	{ "single", MONGOC_REMOVE_SINGLE_REMOVE },
-	{ 0, 0 }
+	{"single", MONGOC_REMOVE_SINGLE_REMOVE},
+	{0, 0}
 };
 
 static const Flag updateFlags[] = {
-	{ "upsert", MONGOC_UPDATE_UPSERT },
-	{ "multi", MONGOC_UPDATE_MULTI_UPDATE },
-	{ "noValidate", MONGOC_UPDATE_NO_VALIDATE },
-	{ 0, 0 }
+	{"upsert", MONGOC_UPDATE_UPSERT},
+	{"multi", MONGOC_UPDATE_MULTI_UPDATE},
+	{"noValidate", MONGOC_UPDATE_NO_VALIDATE},
+	{0, 0}
 };
 
 static int toFlags(lua_State *L, int idx, const Flag flags[]) {

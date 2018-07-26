@@ -45,9 +45,9 @@ static int m__gc(lua_State *L) {
 }
 
 static const luaL_Reg funcs[] = {
-	{ "next", m_next },
-	{ "__gc", m__gc },
-	{ 0, 0 }
+	{"next", m_next},
+	{"__gc", m__gc},
+	{0, 0}
 };
 
 static int m_iterator(lua_State *L) {

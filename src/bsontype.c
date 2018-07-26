@@ -48,9 +48,9 @@ static int m__tostring(lua_State *L) {
 }
 
 static const luaL_Reg funcs[] = {
-	{ "unpack", m_unpack },
-	{ "__tostring", m__tostring },
-	{ 0, 0 }
+	{"unpack", m_unpack},
+	{"__tostring", m__tostring},
+	{0, 0}
 };
 
 static void setBSONType(lua_State *L, const char *tname, bson_type_t type) {

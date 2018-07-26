@@ -128,17 +128,17 @@ static int m__gc(lua_State *L) {
 }
 
 static const luaL_Reg funcs[] = {
-	{ "createFile", m_createFile },
-	{ "createFileFrom", m_createFileFrom },
-	{ "drop", m_drop },
-	{ "find", m_find },
-	{ "findOne", m_findOne },
-	{ "findOneByFilename", m_findOneByFilename },
-	{ "getChunks", m_getChunks },
-	{ "getFiles", m_getFiles },
-	{ "removeByFilename", m_removeByFilename },
-	{ "__gc", m__gc },
-	{ 0, 0 }
+	{"createFile", m_createFile},
+	{"createFileFrom", m_createFileFrom},
+	{"drop", m_drop},
+	{"find", m_find},
+	{"findOne", m_findOne},
+	{"findOneByFilename", m_findOneByFilename},
+	{"getChunks", m_getChunks},
+	{"getFiles", m_getFiles},
+	{"removeByFilename", m_removeByFilename},
+	{"__gc", m__gc},
+	{0, 0}
 };
 
 void pushGridFS(lua_State *L, mongoc_gridfs_t *gridfs, int pidx) {

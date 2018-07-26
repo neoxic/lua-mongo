@@ -29,8 +29,8 @@ static int m__gc(lua_State *L) {
 }
 
 static const luaL_Reg funcs[] = {
-	{ "__gc", m__gc },
-	{ 0, 0 }
+	{"__gc", m__gc},
+	{0, 0}
 };
 
 static const char *const names[] = {

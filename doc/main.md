@@ -43,11 +43,11 @@ a specific order for fields in a [BSON document] constructed from a table. When 
 required, the following workaround can be used:
 
 ```Lua
-print(mongo.BSON { a = 1, b = 2, c = 3 }) -- From table (order is unspecified)
-print(mongo.BSON '{ "a" : 1, "b" : 2, "c" : 3 }') -- From JSON (order is preserved)
+print(mongo.BSON{a = 1, b = 2, c = 3}) -- From table (order is unspecified)
+print(mongo.BSON('{ "a" : 1, "b" : 2, "c" : 3 }')) -- From JSON (order is preserved)
 
 -- Add fields incrementally
-local bson = mongo.BSON '{}'
+local bson = mongo.BSON('{}')
 bson:append('a', 1)
 bson:append('b', 2)
 bson:append('c', 3)
@@ -65,9 +65,9 @@ neither `nil` nor `false`. The length of the resulting array can be adjusted by 
 value in the `__array` field. Otherwise, it is assumed to be equal to the raw length of the table.
 
 ```Lua
-print(mongo.BSON { a = { __array = true, 1, 2, 3 } })
-print(mongo.BSON { a = { __array = true, nil, 1, nil, 2, nil } })
-print(mongo.BSON { a = { __array = 3,    nil, 1, nil, 2, nil } })
+print(mongo.BSON{a = {__array = true, 1, 2, 3}})
+print(mongo.BSON{a = {__array = true, nil, 1, nil, 2, nil}})
+print(mongo.BSON{a = {__array = 3,    nil, 1, nil, 2, nil}})
 ```
 Output:
 ```

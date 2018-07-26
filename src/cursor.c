@@ -42,13 +42,13 @@ static int m__gc(lua_State *L) {
 }
 
 static const luaL_Reg funcs[] = {
-	{ "more", m_more },
-	{ "next", m_next },
-	{ "value", m_value },
-	{ "__gc", m__gc },
+	{"more", m_more},
+	{"next", m_next},
+	{"value", m_value},
+	{"__gc", m__gc},
 	/* TODO remove in version 2 */
-	{ "isAlive", m_more },
-	{ 0, 0 }
+	{"isAlive", m_more},
+	{0, 0}
 };
 
 static int iterator(lua_State *L) {

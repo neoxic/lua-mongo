@@ -46,11 +46,11 @@ static int m__eq(lua_State *L) {
 }
 
 static const luaL_Reg funcs[] = {
-	{ "data", m_data },
-	{ "hash", m_hash },
-	{ "__tostring", m__tostring },
-	{ "__eq", m__eq },
-	{ 0, 0 }
+	{"data", m_data},
+	{"hash", m_hash},
+	{"__tostring", m__tostring},
+	{"__eq", m__eq},
+	{0, 0}
 };
 
 int newObjectID(lua_State *L) {

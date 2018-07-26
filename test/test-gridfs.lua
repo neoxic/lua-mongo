@@ -27,12 +27,12 @@ assert(file:getMD5() == nil)
 assert(file:getMetadata() == nil)
 assert(file:getUploadDate() > 1486000000)
 
-file:setAliases '[ "a", "b" ]'
+file:setAliases('[ "a", "b" ]')
 file:setContentType('content-type1')
 file:setFilename('myfile1')
 file:setId(123)
 file:setMD5('abc')
-file:setMetadata '{ "a" : 1, "b" : 2 }'
+file:setMetadata('{ "a" : 1, "b" : 2 }')
 
 assert(file:save())
 
@@ -53,7 +53,7 @@ assert(file:tell() == #data)
 file = nil
 collectgarbage()
 
-file = assert(gridfs:createFile {
+file = assert(gridfs:createFile{
 	aliases = '[ "a", "b", "c" ]',
 	chunkSize = 10000,
 	contentType = 'content-type2',
@@ -107,7 +107,7 @@ assert(chunks:count() == 5)
 assert(files:count() == 2)
 
 -- list:next()
-local list = gridfs:find {} -- Find all
+local list = gridfs:find{} -- Find all
 assert(mongo.type(list:next()) == 'mongo.GridFSFile') -- #1
 assert(mongo.type(list:next()) == 'mongo.GridFSFile') -- #2
 local r, e = list:next()
@@ -117,7 +117,7 @@ assert(r == nil and type(e) == 'string') -- nil + error
 collectgarbage()
 
 -- list:iterator()
-local i, s = gridfs:find({}, { sort = { filename = 1 } }):iterator()
+local i, s = gridfs:find({}, {sort = {filename = 1}}):iterator()
 local f1 = assert(i(s))
 local f2 = assert(i(s))
 assert(f1:getFilename() == 'myfile1')
@@ -134,7 +134,7 @@ local f = io.open(test.filename, 'w')
 if f then
 	f:write(data)
 	f:close()
-	file = assert(gridfs:createFileFrom(test.filename, { filename = 'myfile3' }))
+	file = assert(gridfs:createFileFrom(test.filename, {filename = 'myfile3'}))
 	os.remove(test.filename)
 	assert(file:read(#data) == data)
 	assert(file:tell() == #data)
@@ -149,8 +149,8 @@ collectgarbage()
 
 -- GridFS
 
-assert(gridfs:findOne { _id = 123 })
-assert(gridfs:findOne { filename = 'myfile2' } == nil)
+assert(gridfs:findOne{_id = 123})
+assert(gridfs:findOne{filename = 'myfile2'} == nil)
 assert(gridfs:findOneByFilename('myfile1'))
 assert(gridfs:findOneByFilename('myfile2') == nil)
 assert(gridfs:removeByFilename('myfile1'))
@@ -159,5 +159,5 @@ assert(chunks:count() == 0)
 assert(files:count() == 0)
 assert(gridfs:drop())
 
-local c = mongo.Client 'mongodb://INVALID-URI'
+local c = mongo.Client('mongodb://INVALID-URI')
 test.error(c:getGridFS(test.dbname))

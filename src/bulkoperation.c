@@ -93,15 +93,15 @@ static int m__gc(lua_State *L) {
 }
 
 static const luaL_Reg funcs[] = {
-	{ "execute", m_execute },
-	{ "insert", m_insert },
-	{ "removeMany", m_removeMany },
-	{ "removeOne", m_removeOne },
-	{ "replaceOne", m_replaceOne },
-	{ "updateMany", m_updateMany },
-	{ "updateOne", m_updateOne },
-	{ "__gc", m__gc },
-	{ 0, 0 }
+	{"execute", m_execute},
+	{"insert", m_insert},
+	{"removeMany", m_removeMany},
+	{"removeOne", m_removeOne},
+	{"replaceOne", m_replaceOne},
+	{"updateMany", m_updateMany},
+	{"updateOne", m_updateOne},
+	{"__gc", m__gc},
+	{0, 0}
 };
 
 void pushBulkOperation(lua_State *L, mongoc_bulk_operation_t *bulk, int pidx) {

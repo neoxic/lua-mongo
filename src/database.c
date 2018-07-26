@@ -108,19 +108,19 @@ static int m__gc(lua_State *L) {
 }
 
 static const luaL_Reg funcs[] = {
-	{ "addUser", m_addUser },
-	{ "createCollection", m_createCollection },
-	{ "drop", m_drop },
-	{ "getCollection", m_getCollection },
-	{ "getCollectionNames", m_getCollectionNames },
-	{ "getName", m_getName },
-	{ "getReadPrefs", m_getReadPrefs },
-	{ "hasCollection", m_hasCollection },
-	{ "removeAllUsers", m_removeAllUsers },
-	{ "removeUser", m_removeUser },
-	{ "setReadPrefs", m_setReadPrefs },
-	{ "__gc", m__gc },
-	{ 0, 0 }
+	{"addUser", m_addUser},
+	{"createCollection", m_createCollection},
+	{"drop", m_drop},
+	{"getCollection", m_getCollection},
+	{"getCollectionNames", m_getCollectionNames},
+	{"getName", m_getName},
+	{"getReadPrefs", m_getReadPrefs},
+	{"hasCollection", m_hasCollection},
+	{"removeAllUsers", m_removeAllUsers},
+	{"removeUser", m_removeUser},
+	{"setReadPrefs", m_setReadPrefs},
+	{"__gc", m__gc},
+	{0, 0}
 };
 
 void pushDatabase(lua_State *L, mongoc_database_t *database, int pidx) {

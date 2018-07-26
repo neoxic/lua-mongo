@@ -8,7 +8,7 @@ Methods
 Appends a pair of `key` => `value` to `bson`.
 
 ```Lua
-local bson = mongo.BSON {}
+local bson = mongo.BSON{}
 bson:append('a', 1)
 print(bson)
 bson:append('b', bson)
@@ -24,8 +24,8 @@ Output:
 Appends the contents of `value` (converted to a BSON document) to `bson`.
 
 ```Lua
-local bson1 = mongo.BSON { a = 1 }
-local bson2 = mongo.BSON { b = 2 }
+local bson1 = mongo.BSON{a = 1}
+local bson2 = mongo.BSON{b = 2}
 bson1:concat(bson2)
 print(bson1)
 bson1:concat(bson2)
@@ -45,7 +45,7 @@ Returns the value matching `key` in `bson` or `nil` if nothing was found. A fiel
 dots to recurse into subdocuments.
 
 ```Lua
-local bson = mongo.BSON { a = { b = 1 } }
+local bson = mongo.BSON{a = {b = 1}}
 print(bson:find('a'))
 print(bson:find('a.b'))
 print(bson:find('a.b.c'))
@@ -64,7 +64,7 @@ or nested), and its return value is used instead of the original table.
 When an _array_ is restored, its length is stored in the `__array` field of the resulting table.
 
 ```Lua
-local bson = mongo.BSON { a = 1, b = { __array = true, 2, 3 } }
+local bson = mongo.BSON{a = 1, b = {__array = true, 2, 3}}
 local function sum(t)
     local r = 0
     local n = t.__array
