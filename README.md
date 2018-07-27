@@ -17,7 +17,7 @@ Dependencies
 ------------
 
 + lua >= 5.1 (or luajit)
-+ libmongoc >= 1.9
++ mongo-c-driver >= 1.11
 
 
 Building and installing with LuaRocks

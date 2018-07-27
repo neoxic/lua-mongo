@@ -7,7 +7,7 @@ Methods
 ### collection:aggregate(pipeline, [options], [prefs])
 Executes an aggregation `pipeline` on `collection` and returns a [Cursor] handle.
 
-### collection:count([query], [options], [prefs])
+### collection:count(query, [options], [prefs])
 Executes a count `query` on `collection` and returns the result. On error, returns `nil` and the
 error message.
 
@@ -63,7 +63,7 @@ If the document does not have an `_id` field, a new unique [BSON ObjectID][BSON 
 generated locally and added to the document. If you must know the inserted document's `_id`,
 generate it in your code and add to the document before calling this method.
 
-### collection:remove([query], [flags])
+### collection:remove(query, [flags])
 Removes documents in `collection` that match `query` and returns `true`. On error, returns `nil`
 and the error message. See also [Flags for remove] for information on `flags`.
 

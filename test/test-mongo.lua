@@ -24,20 +24,20 @@ test.error(collection:insert{_id = 123}) -- Duplicate key
 assert(collection:insert{_id = 456})
 assert(collection:insert{_id = 789})
 
-assert(collection:count() == 3)
+assert(collection:count{} == 3)
 assert(collection:count('{ "_id" : 123 }') == 1)
 assert(collection:count{_id = {['$gt'] = 123}} == 2)
 assert(collection:count({}, {skip = 1, limit = 2}) == 2) -- Options
 
 -- cursor:next()
 local cursor = collection:find{} -- Find all
-assert(cursor:isAlive())
+assert(cursor:more())
 assert(mongo.type(cursor:next()) == 'mongo.BSON') -- #1
 assert(mongo.type(cursor:next()) == 'mongo.BSON') -- #2
 assert(mongo.type(cursor:next()) == 'mongo.BSON') -- #3
 local r, e = cursor:next()
 assert(r == nil and e == nil) -- nil + no error
-assert(not cursor:isAlive())
+assert(not cursor:more())
 r, e = cursor:next()
 assert(r == nil and type(e) == 'string') -- nil + error
 collectgarbage()
@@ -64,7 +64,7 @@ assert(i(s).id == 123)
 collectgarbage()
 
 assert(collection:remove({}, {single = true})) -- Flags
-assert(collection:count() == 2)
+assert(collection:count{} == 2)
 assert(collection:remove{_id = 123})
 assert(collection:remove{_id = 123}) -- Remove reports 'true' even if not found
 assert(collection:findOne({_id = 123}) == nil) -- Not found
@@ -87,7 +87,7 @@ local function bulkInsert(ordered, n)
 		bulk:insert{_id = id}
 	end
 	test.error(bulk:execute()) -- Errors about duplicate keys
-	return collection:count()
+	return collection:count{}
 end
 assert(bulkInsert(false, 3) == 3) -- Unordered insert
 assert(bulkInsert(true, 3) == 1) -- Ordered insert
@@ -128,8 +128,8 @@ assert(mongo.type(database:getReadPrefs()) == 'mongo.ReadPrefs')
 database:setReadPrefs(prefs)
 
 assert(database:removeAllUsers())
-assert(database:addUser(test.dbname, ''))
-test.error(database:addUser(test.dbname, ''))
+assert(database:addUser(test.dbname, 'pwd'))
+test.error(database:addUser(test.dbname, 'pwd'))
 assert(database:removeUser(test.dbname))
 test.error(database:removeUser(test.dbname))
 

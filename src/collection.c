@@ -33,11 +33,11 @@ static int m_aggregate(lua_State *L) {
 
 static int m_count(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
-	bson_t *query = toBSON(L, 2);
+	bson_t *query = castBSON(L, 2);
 	bson_t *options = toBSON(L, 3);
 	mongoc_read_prefs_t *prefs = toReadPrefs(L, 4);
 	bson_error_t error;
-	int64_t n = mongoc_collection_count_with_opts(collection, MONGOC_QUERY_NONE, query, 0, 0, options, prefs, &error);
+	int64_t n = mongoc_collection_count_documents(collection, query, options, prefs, 0, &error);
 	if (n == -1) return commandError(L, &error);
 	pushInt64(L, n);
 	return 1;
@@ -45,12 +45,7 @@ static int m_count(lua_State *L) {
 
 static int m_createBulkOperation(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
-	bson_t *options;
-	if (lua_isboolean(L, 2)) { /* TODO remove in version 2 */
-		lua_pushfstring(L, "{\"ordered\":%s}", lua_toboolean(L, 2) ? "true" : "false");
-		lua_replace(L, 2);
-	}
-	options = toBSON(L, 2);
+	bson_t *options = toBSON(L, 2);
 	pushBulkOperation(L, mongoc_collection_create_bulk_operation_with_opts(collection, options), 1);
 	return 1;
 }
@@ -166,26 +161,6 @@ static int m__gc(lua_State *L) {
 	return 0;
 }
 
-/* TODO remove in version 2 */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-static int m_stats(lua_State *L) {
-	mongoc_collection_t *collection = checkCollection(L, 1);
-	bson_t *options = toBSON(L, 2);
-	bson_t reply;
-	bson_error_t error;
-	return commandReply(L, mongoc_collection_stats(collection, options, &reply, &error), &reply, &error);
-}
-
-static int m_validate(lua_State *L) {
-	mongoc_collection_t *collection = checkCollection(L, 1);
-	bson_t *options = toBSON(L, 2);
-	bson_t reply;
-	bson_error_t error;
-	return commandReply(L, mongoc_collection_validate(collection, options, &reply, &error), &reply, &error);
-}
-#pragma GCC diagnostic pop
-
 static const luaL_Reg funcs[] = {
 	{"aggregate", m_aggregate},
 	{"count", m_count},
@@ -202,9 +177,6 @@ static const luaL_Reg funcs[] = {
 	{"setReadPrefs", m_setReadPrefs},
 	{"update", m_update},
 	{"__gc", m__gc},
-	/* TODO remove in version 2 */
-	{"stats", m_stats},
-	{"validate", m_validate},
 	{0, 0}
 };
 

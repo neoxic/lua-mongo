@@ -32,7 +32,7 @@ static int m_command(lua_State *L) {
 	bson_error_t error;
 	bool status = mongoc_client_command_with_opts(client, dbname, command, prefs, options, &reply, &error);
 	if (!bson_has_field(&reply, "cursor")) return commandReply(L, status, &reply, &error);
-	pushCursor(L, mongoc_cursor_new_from_command_reply(client, &reply, 0), 1);
+	pushCursor(L, mongoc_cursor_new_from_command_reply_with_opts(client, &reply, options), 1);
 	return 1;
 }
 

@@ -46,8 +46,6 @@ static const luaL_Reg funcs[] = {
 	{"next", m_next},
 	{"value", m_value},
 	{"__gc", m__gc},
-	/* TODO remove in version 2 */
-	{"isAlive", m_more},
 	{0, 0}
 };
 

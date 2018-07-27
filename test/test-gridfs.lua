@@ -103,8 +103,8 @@ assert(file:tell() == #data + 20)
 assert(not file:seek(-10)) -- Invalid 'offset'
 test.failure(file.seek, file, 10, 'aaa') -- Invalid 'whence'
 
-assert(chunks:count() == 5)
-assert(files:count() == 2)
+assert(chunks:count{} == 5)
+assert(files:count{} == 2)
 
 -- list:next()
 local list = gridfs:find{} -- Find all
@@ -155,8 +155,8 @@ assert(gridfs:findOneByFilename('myfile1'))
 assert(gridfs:findOneByFilename('myfile2') == nil)
 assert(gridfs:removeByFilename('myfile1'))
 
-assert(chunks:count() == 0)
-assert(files:count() == 0)
+assert(chunks:count{} == 0)
+assert(files:count{} == 0)
 assert(gridfs:drop())
 
 local c = mongo.Client('mongodb://INVALID-URI')
