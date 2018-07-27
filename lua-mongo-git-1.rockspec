@@ -39,6 +39,7 @@ build = {
 				'src/gridfsfilelist.c',
 				'src/main.c',
 				'src/objectid.c',
+				'src/readprefs.c',
 				'src/util.c',
 			},
 			libraries = {'mongoc-1.0', 'bson-1.0'},
