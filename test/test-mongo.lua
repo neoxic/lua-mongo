@@ -2,11 +2,18 @@ local mongo = require 'mongo'
 local test = require 'test'
 local client = mongo.Client(test.uri)
 
+-- Read prefs
+local prefs = mongo.ReadPrefs('primary', nil, -1)
+test.failure(mongo.ReadPrefs, 'abc') -- Invalid mode
+test.failure(mongo.ReadPrefs, 'primary', {}, 90) -- 'primary' may not have 'maxStalenessSeconds'
+
 
 -- Collection
 
 local collection = client:getCollection(test.dbname, test.collname)
 assert(collection:getName() == test.collname)
+assert(mongo.type(collection:getReadPrefs()) == 'mongo.ReadPrefs')
+collection:setReadPrefs(prefs)
 collection:drop()
 
 test.error(collection:insert({['$a'] = 123})) -- Client-side error
@@ -117,6 +124,8 @@ collectgarbage()
 
 local database = client:getDatabase(test.dbname)
 assert(database:getName() == test.dbname)
+assert(mongo.type(database:getReadPrefs()) == 'mongo.ReadPrefs')
+database:setReadPrefs(prefs)
 
 assert(database:removeAllUsers())
 assert(database:addUser(test.dbname, ''))
@@ -147,8 +156,9 @@ local c2 = mongo.Client('mongodb://aaa/bbb')
 test.failure(c1.getDefaultDatabase, c1) -- No default database in URI
 assert(c2:getDefaultDatabase():getName() == 'bbb')
 
--- client:getDatabaseNames()
 test.value(assert(client:getDatabaseNames()), test.dbname)
+assert(mongo.type(client:getReadPrefs()) == 'mongo.ReadPrefs')
+client:setReadPrefs(prefs)
 
 -- client:command()
 assert(mongo.type(assert(client:command(test.dbname, {find = test.collname}))) == 'mongo.Cursor') -- client:command() returns cursor
