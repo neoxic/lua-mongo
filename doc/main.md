@@ -32,11 +32,11 @@ Constructors
 Returns an instance of [BSON Binary][BSON type].
 
 ### mongo.BSON(value)
-Returns an instance of [BSON document] constructed from `value` in one of the following forms:
+Returns an instance of [BSON document] constructed from `value` that can be one of the following:
 - a [BSON document] in which case this method does nothing;
 - a JSON string;
 - a table (without a metatable);
-- a table or userdata with a `__toBSON` metamethod that returns a value, [BSON type] or [BSON document].
+- a table or userdata with a `__toBSON` metamethod that returns a value, [BSON type] or [BSON document];
 
 Note that non-numeric keys are __unordered__ in Lua tables. As a result, it is impossible to ensure
 a specific order for fields in a [BSON document] constructed from a table. When a strict order is
@@ -60,9 +60,9 @@ Output:
 { "a" : 1, "b" : 2, "c" : 3 }
 ```
 
-A table (root or nested) is converted to an _array_ if it has an `__array` field whose value is
+A table (root or nested) is converted to an _array_ if it has a field `__array` whose value is
 neither `nil` nor `false`. The length of the resulting array can be adjusted by storing an integer
-value in the `__array` field. Otherwise, it is assumed to be equal to the raw length of the table.
+value in that field. Otherwise, it is assumed to be equal to the raw length of the table.
 
 ```Lua
 print(mongo.BSON{a = {__array = true, 1, 2, 3}})
@@ -106,11 +106,12 @@ the instance. Otherwise, a new unique value is generated.
 
 ### mongo.ReadPrefs(mode, [tags], [maxStalenessSeconds])
 Returns an instance of read preferences with `mode` (a string) that can be one of the following:
-- `primary`;
-- `primaryPreferred`;
-- `secondary`;
-- `secondaryPreferred`;
-- `nearest`.
+- `primary`
+- `primaryPreferred`
+- `secondary`
+- `secondaryPreferred`
+- `nearest`
+
 Refer to http://mongoc.org/libmongoc/current/mongoc_read_mode_t.html for more information.
 
 ### mongo.Regex(regex, [options])

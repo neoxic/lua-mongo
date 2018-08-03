@@ -41,7 +41,7 @@ To build and install, run:
     make
     make install
 
-To build against a specific Lua version, set the `USE_LUA_VERSION` variable. For example:
+To build against a specific Lua version, set `USE_LUA_VERSION`. For example:
 
     cmake -D USE_LUA_VERSION=5.1 .
 
@@ -171,11 +171,8 @@ local function handler(document)
     return TestObject(id, name)
 end
 
--- Anything callable can serve as a BSON handler. For instance, it can be a table or userdata
--- with a '__call' metamethod.
-
--- Note that the same handler will be called for each nested document. Thus, the handler should
--- be able to differentiate documents based on some internal criteria.
+-- Note that the same handler is called for each document. Thus, the handler should be able
+-- to differentiate documents based on some internal criteria.
 
 local object = TestObject(id, 'John Smith')
 print(object)

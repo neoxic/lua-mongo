@@ -13,7 +13,7 @@ error message.
 
 ### collection:createBulkOperation([options])
 Returns a new [Bulk operation]. By default, the operation is _ordered_ (see below). To denote the
-type of a new bulk operation, set the `ordered` field in `options` to either `true` or `false`.
+type of a new bulk operation, set `ordered` in `options` to either `true` or `false`.
 
 _Ordered_ bulk operations are batched and sent to the server in the order suitable for serial
 execution. The processing aborts when the first error is encountered.
@@ -59,7 +59,7 @@ Returns the default read preferences.
 Inserts `document` into `collection` and returns `true`. On error, returns `nil` and the error
 message. See also [Flags for insert] for information on `flags`.
 
-If the document does not have an `_id` field, a new unique [BSON ObjectID][BSON type] will be
+If no `_id` element is found in the document, a new unique [BSON ObjectID][BSON type] will be
 generated locally and added to the document. If you must know the inserted document's `_id`,
 generate it in your code and add to the document before calling this method.
 

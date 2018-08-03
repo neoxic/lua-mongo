@@ -45,9 +45,9 @@ error message.
 ### file:seek(offset, [whence])
 Sets the file position indicator for `file` to `offset` relative to `whence` (a string) that can be
 one of the following:
-- `set`: position 0 (beginning of the file, the default);
+- `set`: beginning of file (default);
 - `cur`: current position;
-- `end`: end of file.
+- `end`: end of file;
 
 Returns `true` on success or `false` on error.
 
