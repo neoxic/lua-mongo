@@ -1,9 +1,19 @@
-local test = {
+test = {
 	uri = 'mongodb://127.0.0.1',
 	dbname = 'lua-mongo-test',
 	collname = 'test',
 	filename = 'lua-mongo-test-file',
 }
+
+function test.error(s, e)
+	assert(not s, 'status is OK!')
+	assert(type(e) == 'string', 'error is not a string!')
+end
+
+function test.failure(f, ...)
+	assert(type(f) == 'function', 'not a function!')
+	assert(not pcall(f, ...), 'call succeeded!')
+end
 
 local function compare(v1, v2)
 	if type(v1) ~= 'table' or type(v2) ~= 'table' then
@@ -50,14 +60,4 @@ function test.value(t, x)
 	error 'value not found!'
 end
 
-function test.error(s, e)
-	assert(not s, 'status is ok!')
-	assert(type(e) == 'string', 'error is not string!')
-end
-
-function test.failure(f, ...)
-	assert(type(f) == 'function', 'not a function!')
-	assert(not pcall(f, ...), 'call succeeded!')
-end
-
-return test
+dofile(assert((...)))

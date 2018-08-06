@@ -1,5 +1,4 @@
 local mongo = require 'mongo'
-local test = require 'test'
 local BSON = mongo.BSON
 
 local testInt64 = math.maxinteger and math.maxinteger == 9223372036854775807

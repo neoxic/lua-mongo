@@ -1,7 +1,6 @@
 local mongo = require 'mongo'
-local test = require 'test'
 local client = mongo.Client(test.uri)
-local gridfs = client:getGridFS(test.dbname)
+local gridfs = assert(client:getGridFS(test.dbname))
 local chunks = gridfs:getChunks()
 local files = gridfs:getFiles()
 gridfs:drop()
