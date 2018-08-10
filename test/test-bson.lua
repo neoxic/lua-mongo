@@ -96,7 +96,7 @@ if testInt64 then
 	testV({a = 9223372036854775807}, '{ "a" : { "$numberLong" : "9223372036854775807" } }') -- Max Int64
 	testV({a = -9223372036854775808}, '{ "a" : { "$numberLong" : "-9223372036854775808" } }') -- Min Int64
 else
-	print 'Max Int64 testing skipped - no support on this system!'
+	print 'Max Int64 testing skipped - no support on this system'
 end
 
 

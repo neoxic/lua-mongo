@@ -6,13 +6,13 @@ test = {
 }
 
 function test.error(s, e)
-	assert(not s, 'status is OK!')
-	assert(type(e) == 'string', 'error is not a string!')
+	assert(not s, 'status is OK')
+	assert(type(e) == 'string', 'error is not a string')
 end
 
 function test.failure(f, ...)
-	assert(type(f) == 'function', 'not a function!')
-	assert(not pcall(f, ...), 'call succeeded!')
+	assert(type(f) == 'function', 'not a function')
+	assert(not pcall(f, ...), 'call succeeded')
 end
 
 local function compare(v1, v2)
@@ -39,7 +39,7 @@ local function compare(v1, v2)
 end
 
 function test.equal(v1, v2)
-	assert(compare(v1, v2), 'values differ!')
+	assert(compare(v1, v2), 'values differ')
 end
 
 function test.key(t, x)
@@ -48,7 +48,7 @@ function test.key(t, x)
 			return
 		end
 	end
-	error 'key not found!'
+	error 'key not found'
 end
 
 function test.value(t, x)
@@ -57,7 +57,7 @@ function test.value(t, x)
 			return
 		end
 	end
-	error 'value not found!'
+	error 'value not found'
 end
 
 dofile(assert((...)))

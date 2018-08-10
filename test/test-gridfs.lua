@@ -139,7 +139,7 @@ if f then
 	assert(file:tell() == #data)
 	assert(file:remove())
 else
-	print 'gridfs:createFileFrom() testing skipped - unable to create local file!'
+	print 'gridfs:createFileFrom() testing skipped - unable to create local file'
 end
 
 file = nil
