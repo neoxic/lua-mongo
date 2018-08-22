@@ -41,7 +41,7 @@ To build and install, run:
     make
     make install
 
-To build against a specific Lua version, set `USE_LUA_VERSION`. For example:
+To build for a specific Lua version, set `USE_LUA_VERSION`. For example:
 
     cmake -D USE_LUA_VERSION=5.1 .
 
@@ -80,35 +80,30 @@ local query2 = mongo.BSON{_id = id}
 Basic features and operations:
 
 ```Lua
--- Store document
+-- Implicit Lua/JSON to BSON conversion where BSON is required
 collection:insert{_id = id, name = 'John Smith', age = 50}
+collection:insert('{ "name" : "Bobby", "age" : 3 }')
 
--- Fetch document
-local document = collection:findOne(query1):value()
-print(document.name)
-
--- Iterate in a for-loop
-for document in collection:find(query1):iterator() do
-    print(document.name)
+-- Iterate documents in a for-loop
+local age_desc = mongo.BSON{sort = {age = -1}}
+for person in collection:find({}, age_desc):iterator() do
+    print(person.name, person.age)
 end
 
--- Implicit Lua/JSON to BSON conversion where BSON is required
-collection:insert{integer = 123}
-collection:insert('{ "string" : "abc" }')
-
--- Use options in queries
-print(collection:count({}, {skip = 1, limit = 2}))
+-- Fetch single document
+local person = collection:findOne(query1):value()
+print(person.name, person.age)
 
 -- Access to BSON where needed
 local bson = collection:findOne(query1)
 print(bson) -- BSON is converted to JSON using tostring()
 
 -- Explicit BSON to Lua conversion
-local value = bson:value()
-print(value.name)
+local person = bson:value()
+print(person.name, person.age)
 
 -- Transparently include BSON documents in other documents
-collection:update(query2, {age = 60, backup = bson}) -- Update document
+collection:update(query2, {age = 60, old = bson}) -- Update document
 collection:remove(query2) -- Remove document
 ```
 
@@ -174,7 +169,7 @@ end
 -- Note that the same handler is called for each document. Thus, the handler should be able
 -- to differentiate documents based on some internal criteria.
 
-local object = TestObject(id, 'John Smith')
+local object = TestObject(id, 'abc')
 print(object)
 
 -- Explicit BSON <-> Lua conversion
