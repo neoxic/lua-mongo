@@ -60,4 +60,4 @@ function test.value(t, x)
 	error 'value not found'
 end
 
-dofile(assert(...))
+dofile(assert(..., 'test script is missing'))
