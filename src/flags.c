@@ -52,7 +52,7 @@ static int toFlags(lua_State *L, int idx, const Flag flags[]) {
 	if (lua_isnoneornil(L, idx)) return 0;
 	luaL_argcheck(L, lua_istable(L, idx), idx, "nil or table expected");
 	for (lua_pushnil(L); lua_next(L, idx); lua_pop(L, 1)) {
-		argfcheck(L, lua_type(L, -2) == LUA_TSTRING, idx, "table index must be a string, got %s", luaL_typename(L, -2));
+		argfcheck(L, lua_type(L, -2) == LUA_TSTRING, idx, "string index expected, got %s", luaL_typename(L, -2));
 		key = lua_tostring(L, -2);
 		for (flag = flags; (name = flag->name); ++flag) {
 			if (!strcmp(key, name)) {

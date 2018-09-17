@@ -361,7 +361,7 @@ static bool appendTable(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson
 		}
 	} else { /* As document */
 		for (lua_pushnil(L); lua_next(L, idx); lua_pop(L, 1)) {
-			if (lua_type(L, top + 1) != LUA_TSTRING) return error(L, nerr, "table index must be a string, got %s", luaL_typename(L, top + 1));
+			if (lua_type(L, top + 1) != LUA_TSTRING) return error(L, nerr, "string index expected, got %s", luaL_typename(L, top + 1));
 			key = lua_tolstring(L, top + 1, &klen);
 			if (!appendValue(L, top + 2, ridx, nerr, bson, key, klen)) return error(L, nerr, "[\"%s\"] => ", key);
 		}
