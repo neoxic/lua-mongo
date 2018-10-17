@@ -50,9 +50,9 @@ static int toFlags(lua_State *L, int idx, const Flag flags[]) {
 	const char *key, *name;
 	int val = 0;
 	if (lua_isnoneornil(L, idx)) return 0;
-	luaL_argcheck(L, lua_istable(L, idx), idx, "nil or table expected");
+	if (!lua_istable(L, idx)) typeError(L, idx, "table");
 	for (lua_pushnil(L); lua_next(L, idx); lua_pop(L, 1)) {
-		argfcheck(L, lua_type(L, -2) == LUA_TSTRING, idx, "string index expected, got %s", luaL_typename(L, -2));
+		argCheck(L, lua_type(L, -2) == LUA_TSTRING, idx, "string index expected, got %s", typeName(L, -2));
 		key = lua_tostring(L, -2);
 		for (flag = flags; (name = flag->name); ++flag) {
 			if (!strcmp(key, name)) {
@@ -61,7 +61,7 @@ static int toFlags(lua_State *L, int idx, const Flag flags[]) {
 				break;
 			}
 		}
-		argfcheck(L, name, idx, "invalid flag '%s'", key);
+		argCheck(L, name, idx, "invalid flag '%s'", key);
 	}
 	return val;
 }

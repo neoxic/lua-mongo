@@ -6,6 +6,11 @@ local prefs = mongo.ReadPrefs('primary', nil, -1)
 test.failure(mongo.ReadPrefs, 'abc') -- Invalid mode
 test.failure(mongo.ReadPrefs, 'primary', {}, 90) -- 'primary' may not have 'maxStalenessSeconds'
 
+-- Regular types
+assert(mongo.type(nil) == 'nil')
+assert(mongo.type('abc') == 'string')
+test.failure(mongo.type)
+
 
 -- Collection
 

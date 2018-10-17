@@ -23,16 +23,15 @@
 #include "common.h"
 
 static int m__tostring(lua_State *L) {
-	luaL_argcheck(L, luaL_getmetafield(L, 1, "__name"), 1, "invalid object");
-	lua_pushfstring(L, "%s: %p", lua_tostring(L, -1), lua_topointer(L, 1));
+	lua_pushfstring(L, "%s: %p", typeName(L, 1), lua_topointer(L, 1));
 	return 1;
 }
 
-bool newType(lua_State *L, const char *tname, const luaL_Reg *funcs) {
-	if (!luaL_newmetatable(L, tname)) return false;
+bool newType(lua_State *L, const char *name, const luaL_Reg *funcs) {
+	if (!luaL_newmetatable(L, name)) return false;
 	lua_pushvalue(L, -1);
 	lua_setfield(L, -2, "__index"); /* metatable.__index = metatable */
-	lua_pushstring(L, tname);
+	lua_pushstring(L, name);
 	lua_setfield(L, -2, "__name");
 	lua_pushcfunction(L, m__tostring);
 	lua_setfield(L, -2, "__tostring");
@@ -44,14 +43,27 @@ bool newType(lua_State *L, const char *tname, const luaL_Reg *funcs) {
 	return true;
 }
 
-void setType(lua_State *L, const char *tname, const luaL_Reg *funcs) {
-	newType(L, tname, funcs);
+void setType(lua_State *L, const char *name, const luaL_Reg *funcs) {
+	newType(L, name, funcs);
 	lua_setmetatable(L, -2);
 }
 
 void unsetType(lua_State *L) {
 	lua_pushnil(L);
 	lua_setmetatable(L, -2);
+}
+
+const char *typeName(lua_State *L, int idx) {
+	if (luaL_getmetafield(L, idx, "__name")) { /* Use object's typename */
+		const char *name = lua_type(L, -1) == LUA_TSTRING ? lua_tostring(L, -1) : 0;
+		lua_pop(L, 1);
+		if (name) return name; /* Valid until object is GC'ed */
+	}
+	return luaL_typename(L, idx);
+}
+
+int typeError(lua_State *L, int idx, const char *name) {
+	return argError(L, idx, "%s expected, got %s", name, typeName(L, idx));
 }
 
 void pushHandle(lua_State *L, void *ptr, int mode, int pidx) {
@@ -139,10 +151,10 @@ int commandStrVec(lua_State *L, char **strv, const bson_error_t *error) {
 }
 
 #if LUA_VERSION_NUM < 502
-void *luaL_testudata(lua_State* L, int idx, const char *tname) {
+void *luaL_testudata(lua_State* L, int idx, const char *name) {
 	void *ptr = lua_touserdata(L, idx);
 	if (!ptr || !lua_getmetatable(L, idx)) return 0;
-	luaL_getmetatable(L, tname);
+	luaL_getmetatable(L, name);
 	if (!lua_rawequal(L, -1, -2)) ptr = 0;
 	lua_pop(L, 2);
 	return ptr;

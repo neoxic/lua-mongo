@@ -5,7 +5,7 @@ source = {
 }
 description = {
 	summary = 'MongoDB Driver for Lua',
-	detailed = 'lua-mongo is a binding to the MongoDB C Driver (http://mongoc.org) for Lua.',
+	detailed = 'lua-mongo is a binding to MongoDB C Driver 1.13 or higher.',
 	license = 'MIT',
 	homepage = 'https://github.com/neoxic/lua-mongo',
 	maintainer = 'Arseny Vakhrushev <arseny.vakhrushev@gmail.com>',
@@ -15,10 +15,10 @@ dependencies = {
 }
 external_dependencies = {
 	LIBMONGOC = {
-		header = 'libmongoc-1.0/mongoc.h'
+		header = 'libmongoc-1.0/mongoc/mongoc.h'
 	},
 	LIBBSON = {
-		header = 'libbson-1.0/bson.h'
+		header = 'libbson-1.0/bson/bson.h'
 	},
 }
 build = {

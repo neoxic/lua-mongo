@@ -23,15 +23,15 @@
 #pragma once
 
 #include <lauxlib.h>
-#include <mongoc.h>
-#include <bson.h>
+#include <mongoc/mongoc.h>
+#include <bson/bson.h>
 
 #ifndef _WIN32
 #pragma GCC visibility push(hidden)
 #endif
 
 #define MODNAME "lua-mongo"
-#define VERSION "1.2.0"
+#define VERSION "1.2.1"
 
 #define TYPE_BINARY "mongo.Binary"
 #define TYPE_BSON "mongo.BSON"
@@ -120,9 +120,12 @@ int toUpdateFlags(lua_State *L, int idx);
 
 /* Utilities */
 
-bool newType(lua_State *L, const char *tname, const luaL_Reg *funcs);
-void setType(lua_State *L, const char *tname, const luaL_Reg *funcs);
+bool newType(lua_State *L, const char *name, const luaL_Reg *funcs);
+void setType(lua_State *L, const char *name, const luaL_Reg *funcs);
 void unsetType(lua_State *L);
+
+const char *typeName(lua_State *L, int idx);
+int typeError(lua_State *L, int idx, const char *name);
 
 void pushHandle(lua_State *L, void *ptr, int mode, int pidx);
 int getHandleMode(lua_State *L, int idx);
@@ -138,8 +141,8 @@ int commandReply(lua_State *L, bool status, bson_t *reply, const bson_error_t *e
 int commandStrVec(lua_State *L, char **strv, const bson_error_t *error);
 
 #define check(L, cond) (void)((cond) || luaL_error(L, "precondition '%s' failed at %s:%d", #cond, __FILE__, __LINE__))
-#define argferror(L, idx, ...) (lua_pushfstring(L, __VA_ARGS__), luaL_argerror(L, idx, lua_tostring(L, -1)))
-#define argfcheck(L, cond, idx, ...) (void)((cond) || argferror(L, idx, __VA_ARGS__))
+#define argError(L, idx, ...) (lua_pushfstring(L, __VA_ARGS__), luaL_argerror(L, idx, lua_tostring(L, -1)))
+#define argCheck(L, cond, idx, ...) (void)((cond) || argError(L, idx, __VA_ARGS__))
 
 #if LUA_VERSION_NUM >= 503 && LUA_MAXINTEGER >= INT64_MAX
 #define pushInt64(L, n) lua_pushinteger(L, n)
@@ -167,7 +170,7 @@ int commandStrVec(lua_State *L, char **strv, const bson_error_t *error);
 #define lua_setuservalue(L, idx) lua_setfenv(L, idx)
 #define lua_rawgetp(L, idx, ptr) (lua_pushlightuserdata(L, ptr), lua_rawget(L, idx))
 #define lua_rawsetp(L, idx, ptr) (lua_pushlightuserdata(L, ptr), lua_insert(L, -2), lua_rawset(L, idx))
-void *luaL_testudata(lua_State* L, int idx, const char *tname);
+void *luaL_testudata(lua_State* L, int idx, const char *name);
 #endif
 
 #ifndef _WIN32

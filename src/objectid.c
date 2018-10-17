@@ -60,7 +60,7 @@ int newObjectID(lua_State *L) {
 		luaL_argcheck(L, bson_oid_is_valid(str, len), 1, "invalid format");
 		bson_oid_init_from_string(lua_newuserdata(L, sizeof(bson_oid_t)), str);
 	} else {
-		luaL_argcheck(L, lua_isnoneornil(L, 1), 1, "nil or string expected");
+		if (!lua_isnoneornil(L, 1)) return typeError(L, 1, "string");
 		bson_oid_init(lua_newuserdata(L, sizeof(bson_oid_t)), 0);
 	}
 	setType(L, TYPE_OBJECTID, funcs);

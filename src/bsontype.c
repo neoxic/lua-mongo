@@ -53,8 +53,8 @@ static const luaL_Reg funcs[] = {
 	{0, 0}
 };
 
-static void setBSONType(lua_State *L, const char *tname, bson_type_t type) {
-	if (newType(L, tname, funcs)) {
+static void setBSONType(lua_State *L, const char *name, bson_type_t type) {
+	if (newType(L, name, funcs)) {
 		lua_pushinteger(L, type);
 		lua_setfield(L, -2, "__type");
 	}

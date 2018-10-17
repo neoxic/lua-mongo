@@ -10,18 +10,18 @@ Functions
 ---------
 
 ### mongo.type(value)
-Returns the type of `value` as a string or `nil` if the object is not recognized.
+Returns the type of `value` as a string.
 
 ```Lua
 print(mongo.type(mongo.Int32(123)))
 print(mongo.type(mongo.Null))
-print(mongo.type(123))
+print(mongo.type('abc'))
 ```
 Output:
 ```
 mongo.Int32
 mongo.Null
-nil
+string
 ```
 
 

@@ -26,7 +26,7 @@ static void setFileOpts(lua_State *L, int idx, mongoc_gridfs_file_opt_t *opts) {
 	int top = lua_gettop(L);
 	memset(opts, 0, sizeof *opts);
 	if (lua_isnoneornil(L, idx)) return;
-	luaL_argcheck(L, lua_istable(L, idx), idx, "nil or table expected");
+	if (!lua_istable(L, idx)) typeError(L, idx, "table");
 	/* Optional arguments are left on the stack to remain valid */
 	lua_getfield(L, idx, "aliases");
 	opts->aliases = toBSON(L, ++top);

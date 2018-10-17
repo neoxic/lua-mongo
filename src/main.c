@@ -32,7 +32,7 @@ EXPORT int luaopen_mongo(lua_State *L);
 
 static int f_type(lua_State *L) {
 	luaL_checkany(L, 1);
-	if (!luaL_getmetafield(L, 1, "__name")) lua_pushnil(L);
+	lua_pushstring(L, typeName(L, 1));
 	return 1;
 }
 

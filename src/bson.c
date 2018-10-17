@@ -228,7 +228,7 @@ static void toBSONType(lua_State *L, bson_type_t type, int idx, bson_value_t *va
 			break;
 		default:
 		error:
-			argferror(L, idx, "invalid parameters for BSON type %d", type);
+			argError(L, idx, "invalid parameters for BSON type %d", type);
 	}
 	lua_settop(L, top);
 }
@@ -331,7 +331,7 @@ static bool appendValue(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson
 			}
 		} /* Fall through */
 		default:
-			return error(L, nerr, "%s unexpected", luaL_typename(L, idx));
+			return error(L, nerr, "%s unexpected", typeName(L, idx));
 	}
 	return true;
 }
@@ -361,7 +361,7 @@ static bool appendTable(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson
 		}
 	} else { /* As document */
 		for (lua_pushnil(L); lua_next(L, idx); lua_pop(L, 1)) {
-			if (lua_type(L, top + 1) != LUA_TSTRING) return error(L, nerr, "string index expected, got %s", luaL_typename(L, top + 1));
+			if (lua_type(L, top + 1) != LUA_TSTRING) return error(L, nerr, "string index expected, got %s", typeName(L, top + 1));
 			key = lua_tolstring(L, top + 1, &klen);
 			if (!appendValue(L, top + 2, ridx, nerr, bson, key, klen)) return error(L, nerr, "[\"%s\"] => ", key);
 		}
@@ -488,7 +488,7 @@ static void unpackTable(lua_State *L, bson_iter_t *iter, int hidx, bool array) {
 	luaL_checkstack(L, LUA_MINSTACK, "too many nested values");
 	while (bson_iter_next(iter)) {
 		if (array) lua_pushinteger(L, ++len);
-		else lua_pushstring(L, bson_iter_key(iter));
+		else lua_pushlstring(L, bson_iter_key(iter), bson_iter_key_len(iter));
 		unpackValue(L, iter, hidx);
 		lua_rawset(L, -3);
 	}
@@ -642,7 +642,7 @@ bson_t *castBSON(lua_State *L, int idx) {
 		int nerr = 0;
 		if (luaL_callmeta(L, idx, "__toBSON")) lua_replace(L, idx); /* Transform value */
 		if ((bson = testBSON(L, idx))) return bson; /* Nothing to do */
-		luaL_argcheck(L, lua_istable(L, idx), idx, "string, table or " TYPE_BSON " expected");
+		if (!lua_istable(L, idx)) typeError(L, idx, "string, table or " TYPE_BSON);
 		bson = lua_newuserdata(L, sizeof *bson);
 		bson_init(bson);
 		lua_newtable(L);
@@ -736,6 +736,6 @@ void toBSONValue(lua_State *L, int idx, bson_value_t *val) {
 			}
 		} /* Fall through */
 		default:
-			argferror(L, idx, "%s unexpected", luaL_typename(L, idx));
+			argError(L, idx, "%s unexpected", typeName(L, idx));
 	}
 }
