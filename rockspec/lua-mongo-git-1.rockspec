@@ -5,7 +5,7 @@ source = {
 }
 description = {
 	summary = 'MongoDB Driver for Lua',
-	detailed = 'lua-mongo is a binding to MongoDB C Driver 1.13 or higher.',
+	detailed = 'lua-mongo is a binding to MongoDB C Driver 1.13 or higher for Lua.',
 	license = 'MIT',
 	homepage = 'https://github.com/neoxic/lua-mongo',
 	maintainer = 'Arseny Vakhrushev <arseny.vakhrushev@gmail.com>',
