@@ -60,6 +60,7 @@ static int m_createFileFrom(lua_State *L) {
 	stream = mongoc_stream_file_new_for_path(filename, O_RDONLY, 0);
 	if (!stream) goto error;
 	file = mongoc_gridfs_create_file_from_stream(gridfs, stream, &opts);
+	mongoc_stream_destroy(stream);
 	if (!file) goto error;
 	pushGridFSFile(L, file, 1);
 	return 1;
