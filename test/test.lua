@@ -8,11 +8,14 @@ test = {
 function test.error(s, e)
 	assert(not s, 'status is OK')
 	assert(type(e) == 'string', 'error is not a string')
+	print('test passed', e)
 end
 
 function test.failure(f, ...)
 	assert(type(f) == 'function', 'not a function')
-	assert(not pcall(f, ...), 'call succeeded')
+	local s, e = pcall(f, ...)
+	assert(not s, 'call succeeded')
+	print('test passed', e)
 end
 
 local function compare(v1, v2)
@@ -60,4 +63,4 @@ function test.value(t, x)
 	error 'value not found'
 end
 
-dofile(assert(..., 'test script is missing'))
+dofile(assert((...), 'test script is missing'))

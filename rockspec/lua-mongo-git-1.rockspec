@@ -5,7 +5,14 @@ source = {
 }
 description = {
 	summary = 'MongoDB Driver for Lua',
-	detailed = 'lua-mongo is a binding to MongoDB C Driver 1.13 or higher for Lua.',
+	detailed = [[
+		lua-mongo is a binding to MongoDB C Driver 1.13 or higher for Lua:
+		- Unified API for MongoDB commands, CRUD operations and GridFS in MongoDB C Driver.
+		- Support for data transformation metamethods/handlers when converting to/from BSON documents.
+		- Transparent conversion from Lua/JSON to BSON for convenience.
+		- Automatic conversion of Lua numbers to/from BSON Int32, Int64 and Double types depending on their
+		  capacity without precision loss (when Lua allows it). Manual conversion is also available.
+	]],
 	license = 'MIT',
 	homepage = 'https://github.com/neoxic/lua-mongo',
 	maintainer = 'Arseny Vakhrushev <arseny.vakhrushev@gmail.com>',

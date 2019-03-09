@@ -61,8 +61,8 @@ Output:
 ```
 
 A table (root or nested) is converted to an _array_ if it has a field `__array` whose value is
-neither `nil` nor `false`. The length of the resulting array can be adjusted by storing an integer
-value in that field. Otherwise, it is assumed to be equal to the raw length of the table.
+_true_. The length of the resulting array can be adjusted by storing an integer value in that field.
+Otherwise, it is assumed to be equal to the raw length of the table.
 
 ```Lua
 print(mongo.BSON{a = {__array = true, 1, 2, 3}})

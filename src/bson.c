@@ -1,5 +1,5 @@
 /*
-** Copyright (C) 2016-2018 Arseny Vakhrushev <arseny.vakhrushev@gmail.com>
+** Copyright (C) 2016-2019 Arseny Vakhrushev <arseny.vakhrushev@gmail.com>
 **
 ** Permission is hereby granted, free of charge, to any person obtaining a copy
 ** of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,6 @@
 #include "common.h"
 
 #define MAXSTACK 1000 /* Arbitrary stack size limit to check for recursion */
-#define isInt32(i) ((i) >= INT32_MIN && (i) <= INT32_MAX)
 
 static int m_append(lua_State *L) {
 	bson_t *bson = checkBSON(L, 1);
@@ -250,6 +249,8 @@ static bool isInteger(lua_State *L, int idx, lua_Integer *val) {
 	return true;
 }
 
+#define isInt32(i) ((i) >= INT32_MIN && (i) <= INT32_MAX)
+
 static bool isArray(const bson_t *bson) {
 	bson_iter_t iter;
 	return bson_iter_init(&iter, bson) && bson_iter_next(&iter) && !strcmp(bson_iter_key(&iter), "0");
@@ -260,7 +261,7 @@ static lua_Integer getArrayLength(lua_State *L, int idx) {
 	lua_getfield(L, idx, "__array");
 	if (lua_toboolean(L, -1)) {
 		if (!isInteger(L, -1, &len)) len = lua_rawlen(L, idx);
-		else if (len < 0) len = 0;
+		if (len < 0) len = 0;
 	}
 	lua_pop(L, 1);
 	return len;
