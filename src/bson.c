@@ -637,15 +637,13 @@ bson_t *castBSON(lua_State *L, int idx) {
 	const char *str = lua_tolstring(L, idx, &len);
 	if (str) { /* From string */
 		bson_error_t error;
-		bson = lua_newuserdata(L, sizeof *bson);
-		checkStatus(L, bson_init_from_json(bson, str, len, &error), &error);
+		checkStatus(L, bson_init_from_json((bson = lua_newuserdata(L, sizeof *bson)), str, len, &error), &error);
 	} else { /* From value */
 		int nerr = 0;
 		if (luaL_callmeta(L, idx, "__toBSON")) lua_replace(L, idx); /* Transform value */
 		if ((bson = testBSON(L, idx))) return bson; /* Nothing to do */
 		if (!lua_istable(L, idx)) typeError(L, idx, "string, table or " TYPE_BSON);
-		bson = lua_newuserdata(L, sizeof *bson);
-		bson_init(bson);
+		bson_init((bson = lua_newuserdata(L, sizeof *bson)));
 		lua_newtable(L);
 		if (!appendTable(L, idx, lua_gettop(L), &nerr, bson, getArrayLength(L, idx))) {
 			bson_destroy(bson);

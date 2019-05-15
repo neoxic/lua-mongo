@@ -39,7 +39,7 @@ Returns an instance of [BSON document] constructed from `value` that can be one 
 - a table or userdata with a `__toBSON` metamethod that returns a value, [BSON type] or [BSON document];
 
 Note that non-numeric keys are __unordered__ in Lua tables. As a result, it is impossible to ensure
-a specific order for fields in a [BSON document] constructed from a table. When a strict order is
+a specific order for fields in a [BSON document] constructed from a table. When strict order is
 required, the following workaround can be used:
 
 ```Lua

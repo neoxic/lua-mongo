@@ -121,7 +121,7 @@ bulk:replaceOne({a = 1}, {b = 1})
 bulk:updateMany('{}', '{ "$inc" : { "b" : 2 } }')
 bulk:removeOne{c = 3}
 
--- Execute all the queued operations
+-- Execute queued operations
 bulk:execute()
 ```
 
