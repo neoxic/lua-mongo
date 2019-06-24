@@ -22,10 +22,12 @@ dependencies = {
 }
 external_dependencies = {
 	LIBMONGOC = {
-		header = 'libmongoc-1.0/mongoc/mongoc.h'
+		header = 'libmongoc-1.0/mongoc/mongoc.h',
+		library = 'mongoc-1.0',
 	},
 	LIBBSON = {
-		header = 'libbson-1.0/bson/bson.h'
+		header = 'libbson-1.0/bson/bson.h',
+		library = 'bson-1.0',
 	},
 }
 build = {
@@ -49,9 +51,9 @@ build = {
 				'src/readprefs.c',
 				'src/util.c',
 			},
-			libraries = {'mongoc-1.0', 'bson-1.0'},
 			incdirs = {'$(LIBMONGOC_INCDIR)/libmongoc-1.0', '$(LIBBSON_INCDIR)/libbson-1.0'},
 			libdirs = {'$(LIBMONGOC_LIBDIR)', '$(LIBBSON_LIBDIR)'},
+			libraries = {'mongoc-1.0', 'bson-1.0'},
 		},
 	},
 }

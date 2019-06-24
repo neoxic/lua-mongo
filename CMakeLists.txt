@@ -14,7 +14,7 @@ else()
 	message(FATAL_ERROR "Unrecognized Lua version '${USE_LUA_VERSION}'")
 endif()
 
-find_package(libmongoc-1.0 1.13 REQUIRED)
+find_package(libmongoc-1.0 REQUIRED)
 find_package(PkgConfig)
 pkg_search_module(LUA REQUIRED ${lua})
 
