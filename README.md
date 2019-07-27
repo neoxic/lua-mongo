@@ -81,8 +81,7 @@ collection:insert{_id = id, name = 'John Smith', age = 50}
 collection:insert('{ "name" : "Bobby", "age" : 3 }')
 
 -- Iterate documents in a for-loop
-local age_desc = mongo.BSON{sort = {age = -1}}
-for person in collection:find({}, age_desc):iterator() do
+for person in collection:find({}, {sort = {age = -1}}):iterator() do
     print(person.name, person.age)
 end
 
