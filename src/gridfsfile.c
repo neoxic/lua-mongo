@@ -147,8 +147,8 @@ static int m_setFilename(lua_State *L) {
 static int m_setId(lua_State *L) {
 	mongoc_gridfs_file_t *file = checkGridFSFile(L, 1);
 	bson_value_t value;
-	bool status;
 	bson_error_t error;
+	bool status;
 	toBSONValue(L, 2, &value);
 	status = mongoc_gridfs_file_set_id(file, &value, &error);
 	bson_value_destroy(&value);

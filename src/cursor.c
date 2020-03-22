@@ -22,6 +22,21 @@
 
 #include "common.h"
 
+static int iterator(lua_State *L) {
+	return iterateCursor(L, checkCursor(L, 1), lua_upvalueindex(1));
+}
+
+static int m_iterator(lua_State *L) {
+	checkCursor(L, 1);
+	if (lua_isnoneornil(L, 2)) lua_pushvalue(L, lua_upvalueindex(1)); /* Default iterator */
+	else {
+		lua_pushvalue(L, 2);
+		lua_pushcclosure(L, iterator, 1); /* Iterator with handler */
+	}
+	lua_pushvalue(L, 1); /* State */
+	return 2;
+}
+
 static int m_more(lua_State *L) {
 	lua_pushboolean(L, mongoc_cursor_more(checkCursor(L, 1)));
 	return 1;
@@ -48,21 +63,6 @@ static const luaL_Reg funcs[] = {
 	{"__gc", m__gc},
 	{0, 0}
 };
-
-static int iterator(lua_State *L) {
-	return iterateCursor(L, checkCursor(L, 1), lua_upvalueindex(1));
-}
-
-static int m_iterator(lua_State *L) {
-	checkCursor(L, 1);
-	if (lua_isnoneornil(L, 2)) lua_pushvalue(L, lua_upvalueindex(1)); /* Default iterator */
-	else {
-		lua_pushvalue(L, 2);
-		lua_pushcclosure(L, iterator, 1); /* Iterator with handler */
-	}
-	lua_pushvalue(L, 1); /* State */
-	return 2;
-}
 
 void pushCursor(lua_State *L, mongoc_cursor_t *cursor, int pidx) {
 	pushHandle(L, cursor, -1, pidx);

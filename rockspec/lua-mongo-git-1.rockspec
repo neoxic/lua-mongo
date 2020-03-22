@@ -6,7 +6,7 @@ source = {
 description = {
 	summary = 'MongoDB Driver for Lua',
 	detailed = [[
-		lua-mongo is a binding to MongoDB C Driver 1.13 or higher for Lua:
+		lua-mongo is a binding to MongoDB C Driver 1.16 or higher for Lua:
 		- Unified API for MongoDB commands, CRUD operations and GridFS in MongoDB C Driver.
 		- Support for data transformation metamethods/handlers when converting to/from BSON documents.
 		- Transparent conversion from Lua/JSON to BSON for convenience.

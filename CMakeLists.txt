@@ -18,7 +18,7 @@ else()
 	message(FATAL_ERROR "Unrecognized Lua version '${USE_LUA_VERSION}'")
 endif()
 
-find_package(libmongoc-1.0 REQUIRED)
+find_package(mongoc-1.0 1.16 REQUIRED)
 find_package(PkgConfig)
 pkg_search_module(LUA REQUIRED ${lua})
 
@@ -40,7 +40,7 @@ link_directories(${MONGOC_LIBRARY_DIRS})
 
 file(GLOB srcs src/*.c)
 add_library(mongo SHARED ${srcs})
-target_link_libraries(mongo ${MONGOC_LIBRARIES})
+target_link_libraries(mongo PRIVATE mongo::mongoc_shared)
 set_target_properties(mongo PROPERTIES PREFIX "")
 if(APPLE)
 	target_link_libraries(mongo "-undefined dynamic_lookup")

@@ -107,6 +107,44 @@ static bool error(lua_State *L, int *nerr, const char *fmt, ...) {
 	return false;
 }
 
+static bool isInteger(lua_State *L, int idx, lua_Integer *val) {
+	lua_Integer i;
+#if LUA_VERSION_NUM < 503
+	lua_Number n;
+	if (!lua_isnumber(L, idx)) return false;
+	n = lua_tonumber(L, idx);
+	i = (lua_Integer)n;
+	if (i != n) return false;
+#else
+	int res;
+	i = lua_tointegerx(L, idx, &res);
+	if (!res) return false;
+#endif
+	*val = i;
+	return true;
+}
+
+#define isInt32(i) ((i) >= INT32_MIN && (i) <= INT32_MAX)
+
+static bool isArray(const bson_t *bson) {
+	bson_iter_t iter;
+	return bson_iter_init(&iter, bson) && bson_iter_next(&iter) && !strcmp(bson_iter_key(&iter), "0");
+}
+
+static bool isBSON(const char *str, size_t len) {
+	uint32_t pfx;
+	if (len < 5 || len > INT_MAX || str[len - 1]) return false;
+	memcpy (&pfx, str, 4);
+	return len == (size_t)BSON_UINT32_FROM_LE(pfx);
+}
+
+static bool initBSON(const char *str, size_t len, bson_t *bson, bson_error_t *error) {
+	if (!isBSON(str, len)) return bson_init_from_json(bson, str, len, error);
+	bson_init(bson);
+	memcpy(bson_reserve_buffer(bson, len), str, len);
+	return bson_validate_with_error(bson, BSON_VALIDATE_NONE, error);
+}
+
 static bool appendBSONType(lua_State *L, bson_type_t type, int idx, int *nerr, bson_t *bson, const char *key, size_t klen) {
 	int top = lua_gettop(L);
 	unpackParams(L, idx);
@@ -230,30 +268,6 @@ static void toBSONType(lua_State *L, bson_type_t type, int idx, bson_value_t *va
 			argError(L, idx, "invalid parameters for BSON type %d", type);
 	}
 	lua_settop(L, top);
-}
-
-static bool isInteger(lua_State *L, int idx, lua_Integer *val) {
-	lua_Integer i;
-#if LUA_VERSION_NUM < 503
-	lua_Number n;
-	if (!lua_isnumber(L, idx)) return false;
-	n = lua_tonumber(L, idx);
-	i = (lua_Integer)n;
-	if (i != n) return false;
-#else
-	int res;
-	i = lua_tointegerx(L, idx, &res);
-	if (!res) return false;
-#endif
-	*val = i;
-	return true;
-}
-
-#define isInt32(i) ((i) >= INT32_MIN && (i) <= INT32_MAX)
-
-static bool isArray(const bson_t *bson) {
-	bson_iter_t iter;
-	return bson_iter_init(&iter, bson) && bson_iter_next(&iter) && !strcmp(bson_iter_key(&iter), "0");
 }
 
 static lua_Integer getArrayLength(lua_State *L, int idx) {
@@ -637,7 +651,7 @@ bson_t *castBSON(lua_State *L, int idx) {
 	const char *str = lua_tolstring(L, idx, &len);
 	if (str) { /* From string */
 		bson_error_t error;
-		checkStatus(L, bson_init_from_json(bson = lua_newuserdata(L, sizeof *bson), str, len, &error), &error);
+		checkStatus(L, initBSON(str, len, bson = lua_newuserdata(L, sizeof *bson), &error), &error);
 	} else { /* From value */
 		int nerr = 0;
 		if (luaL_callmeta(L, idx, "__toBSON")) lua_replace(L, idx); /* Transform value */

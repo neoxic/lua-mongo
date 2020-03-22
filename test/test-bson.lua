@@ -34,6 +34,11 @@ local function testF(v)
 end
 
 
+-- BSON()
+local b1 = BSON{a = 1, b = {__array = true, 1, 2, 3}}
+local b2 = BSON(b1:data())
+assert(b1 == b2)
+
 -- bson:concat()
 local b1 = BSON{a = 1}
 local b2 = BSON{b = 2}
@@ -152,8 +157,8 @@ testF(t) -- Circular reference
 local f = function () end
 testF{a = f} -- Invalid value
 testF{[f] = 1} -- Invalid key
-testF('') -- Empty JSON
-testF('abc') -- Invalid JSON
+testF('') -- Empty data
+testF('abc') -- Invalid BSON/JSON
 testF{__array = false, 1, 2, 3} -- Not an array
 
 local function newBSONType(n, ...)

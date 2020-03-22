@@ -34,7 +34,7 @@ Returns an instance of [BSON Binary][BSON type].
 ### mongo.BSON(value)
 Returns an instance of [BSON document] constructed from `value` that can be one of the following:
 - a [BSON document] in which case this method does nothing;
-- a JSON string;
+- a string in BSON or JSON format;
 - a table (without a metatable);
 - a table or userdata with a `__toBSON` metamethod that returns a value, [BSON type] or [BSON document];
 

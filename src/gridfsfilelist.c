@@ -22,6 +22,13 @@
 
 #include "common.h"
 
+static int m_iterator(lua_State *L) {
+	checkGridFSFileList(L, 1);
+	lua_pushvalue(L, lua_upvalueindex(1)); /* Iterator */
+	lua_pushvalue(L, 1); /* State */
+	return 2;
+}
+
 static int m_next(lua_State *L) {
 	mongoc_gridfs_file_list_t *list = checkGridFSFileList(L, 1);
 	mongoc_gridfs_file_t *file;
@@ -49,13 +56,6 @@ static const luaL_Reg funcs[] = {
 	{"__gc", m__gc},
 	{0, 0}
 };
-
-static int m_iterator(lua_State *L) {
-	checkGridFSFileList(L, 1);
-	lua_pushvalue(L, lua_upvalueindex(1)); /* Iterator */
-	lua_pushvalue(L, 1); /* State */
-	return 2;
-}
 
 void pushGridFSFileList(lua_State *L, mongoc_gridfs_file_list_t *list, int pidx) {
 	pushHandle(L, list, -1, pidx);

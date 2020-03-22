@@ -1,7 +1,7 @@
 MongoDB Driver for Lua
 ======================
 
-[lua-mongo] is a binding to [MongoDB C Driver] 1.13 or higher for Lua:
+[lua-mongo] is a binding to [MongoDB C Driver] 1.16 or higher for Lua:
 - Unified API for MongoDB commands, CRUD operations and GridFS in [MongoDB C Driver].
 - Support for data transformation metamethods/handlers when converting to/from BSON documents.
 - Transparent conversion from Lua/JSON to BSON for convenience.
@@ -13,7 +13,7 @@ Dependencies
 ------------
 
 + lua >= 5.1 (or luajit)
-+ mongo-c-driver >= 1.13
++ mongo-c-driver >= 1.16
 
 
 Building and installing with LuaRocks
