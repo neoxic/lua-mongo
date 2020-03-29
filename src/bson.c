@@ -142,7 +142,9 @@ static bool initBSON(const char *str, size_t len, bson_t *bson, bson_error_t *er
 	if (!isBSON(str, len)) return bson_init_from_json(bson, str, len, error);
 	bson_init(bson);
 	memcpy(bson_reserve_buffer(bson, len), str, len);
-	return bson_validate_with_error(bson, BSON_VALIDATE_NONE, error);
+	if (bson_validate_with_error(bson, BSON_VALIDATE_NONE, error)) return true;
+	bson_destroy(bson);
+	return false;
 }
 
 static bool appendBSONType(lua_State *L, bson_type_t type, int idx, int *nerr, bson_t *bson, const char *key, size_t klen) {
