@@ -63,13 +63,33 @@ If no `_id` element is found in the document, a new unique [BSON ObjectID][BSON 
 generated locally and added to the document. If you must know the inserted document's `_id`,
 generate it in your code and add to the document before calling this method.
 
+### collection:insertMany(document1, document2, ...)
+Inserts `document1`, `document2`, etc. into `collection` and returns `true`. On error, returns `nil`
+and the error message.
+
+### collection:insertOne(document, [options])
+Inserts `document` into `collection` and returns `true`. On error, returns `nil` and the error
+message.
+
 ### collection:remove(query, [flags])
 Removes documents in `collection` that match `query` and returns `true`. On error, returns `nil`
 and the error message. See also [Flags for remove] for information on `flags`.
 
+### collection:removeMany(query, [options])
+Removes all documents in `collection` that match `query` and returns `true`. On error, returns `nil`
+and the error message.
+
+### collection:removeOne(query, [options])
+Removes at most one document in `collection` that matches `query` and returns `true`. On error,
+returns `nil` and the error message.
+
 ### collection:rename(dbname, collname, [force], [options])
 Renames `collection` on the server using new database name `dbname` and collection name `collname`.
 If `force` is `true`, an existing collection with the same name will be dropped first.
+
+### collection:replaceOne(query, document, [options])
+Replaces at most one document in `collection` that matches `query` with `document` and returns `true`.
+On error, returns `nil` and the error message.
 
 ### collection:setReadPrefs(prefs)
 Sets the default read preferences.
@@ -77,6 +97,14 @@ Sets the default read preferences.
 ### collection:update(query, document, [flags])
 Updates documents in `collection` that match `query` with `document` and returns `true`. On error,
 returns `nil` and the error message. See also [Flags for update] for information on `flags`.
+
+### collection:updateMany(query, document, [options])
+Updates all documents in `collection` that match `query` with `document` and returns `true`.
+On error, returns `nil` and the error message.
+
+### collection:updateOne(query, document, [options])
+Updates at most one document in `collection` that matches `query` with `document` and returns `true`.
+On error, returns `nil` and the error message.
 
 
 [BSON document]: bson.md

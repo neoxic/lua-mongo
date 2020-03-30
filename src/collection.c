@@ -119,12 +119,45 @@ static int m_insert(lua_State *L) {
 	return commandStatus(L, mongoc_collection_insert(collection, flags, document, 0, &error), &error);
 }
 
+static int m_insertMany(lua_State *L) {
+	mongoc_collection_t *collection = checkCollection(L, 1);
+	int i, n = lua_gettop(L) - 1;
+	const bson_t *documents[n];
+	bson_error_t error;
+	for (i = 0; i < n; ++i) documents[i] = castBSON(L, i + 2);
+	return commandStatus(L, mongoc_collection_insert_many(collection, documents, n, 0, 0, &error), &error);
+}
+
+static int m_insertOne(lua_State *L) {
+	mongoc_collection_t *collection = checkCollection(L, 1);
+	bson_t *document = castBSON(L, 2);
+	bson_t *options = toBSON(L, 3);
+	bson_error_t error;
+	return commandStatus(L, mongoc_collection_insert_one(collection, document, options, 0, &error), &error);
+}
+
 static int m_remove(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
 	bson_t *query = castBSON(L, 2);
 	int flags = toRemoveFlags(L, 3);
 	bson_error_t error;
 	return commandStatus(L, mongoc_collection_remove(collection, flags, query, 0, &error), &error);
+}
+
+static int m_removeMany(lua_State *L) {
+	mongoc_collection_t *collection = checkCollection(L, 1);
+	bson_t *query = castBSON(L, 2);
+	bson_t *options = toBSON(L, 3);
+	bson_error_t error;
+	return commandStatus(L, mongoc_collection_delete_many(collection, query, options, 0, &error), &error);
+}
+
+static int m_removeOne(lua_State *L) {
+	mongoc_collection_t *collection = checkCollection(L, 1);
+	bson_t *query = castBSON(L, 2);
+	bson_t *options = toBSON(L, 3);
+	bson_error_t error;
+	return commandStatus(L, mongoc_collection_delete_one(collection, query, options, 0, &error), &error);
 }
 
 static int m_rename(lua_State *L) {
@@ -137,6 +170,15 @@ static int m_rename(lua_State *L) {
 	return commandStatus(L, mongoc_collection_rename_with_opts(collection, dbname, collname, force, options, &error), &error);
 }
 
+static int m_replaceOne(lua_State *L) {
+	mongoc_collection_t *collection = checkCollection(L, 1);
+	bson_t *query = castBSON(L, 2);
+	bson_t *document = castBSON(L, 3);
+	bson_t *options = toBSON(L, 4);
+	bson_error_t error;
+	return commandStatus(L, mongoc_collection_replace_one(collection, query, document, options, 0, &error), &error);
+}
+
 static int m_setReadPrefs(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
 	mongoc_read_prefs_t *prefs = checkReadPrefs(L, 2);
@@ -147,10 +189,28 @@ static int m_setReadPrefs(lua_State *L) {
 static int m_update(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
 	bson_t *query = castBSON(L, 2);
-	bson_t *update = castBSON(L, 3);
+	bson_t *document = castBSON(L, 3);
 	int flags = toUpdateFlags(L, 4);
 	bson_error_t error;
-	return commandStatus(L, mongoc_collection_update(collection, flags, query, update, 0, &error), &error);
+	return commandStatus(L, mongoc_collection_update(collection, flags, query, document, 0, &error), &error);
+}
+
+static int m_updateMany(lua_State *L) {
+	mongoc_collection_t *collection = checkCollection(L, 1);
+	bson_t *query = castBSON(L, 2);
+	bson_t *document = castBSON(L, 3);
+	bson_t *options = toBSON(L, 4);
+	bson_error_t error;
+	return commandStatus(L, mongoc_collection_update_many(collection, query, document, options, 0, &error), &error);
+}
+
+static int m_updateOne(lua_State *L) {
+	mongoc_collection_t *collection = checkCollection(L, 1);
+	bson_t *query = castBSON(L, 2);
+	bson_t *document = castBSON(L, 3);
+	bson_t *options = toBSON(L, 4);
+	bson_error_t error;
+	return commandStatus(L, mongoc_collection_update_one(collection, query, document, options, 0, &error), &error);
 }
 
 static int m__gc(lua_State *L) {
@@ -172,10 +232,17 @@ static const luaL_Reg funcs[] = {
 	{"getName", m_getName},
 	{"getReadPrefs", m_getReadPrefs},
 	{"insert", m_insert},
+	{"insertMany", m_insertMany},
+	{"insertOne", m_insertOne},
 	{"remove", m_remove},
+	{"removeMany", m_removeMany},
+	{"removeOne", m_removeOne},
 	{"rename", m_rename},
+	{"replaceOne", m_replaceOne},
 	{"setReadPrefs", m_setReadPrefs},
 	{"update", m_update},
+	{"updateMany", m_updateMany},
+	{"updateOne", m_updateOne},
 	{"__gc", m__gc},
 	{0, 0}
 };
