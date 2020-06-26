@@ -82,6 +82,26 @@ assert(collection:findAndModify({_id = 'abc'}, {remove = true}) == nil) -- Not f
 
 assert(collection:aggregate('[ { "$group" : { "_id" : "$a", "count" : { "$sum" : 1 } } } ]'):value().count == 1)
 
+-- *One/*Many operations
+test.error(collection:insertMany()) -- Empty insert
+test.error(collection:insertMany({_id = 123}, {_id = 456})) -- Duplicate key
+collection:drop()
+for a = 1, 3 do
+	assert(collection:insertOne{a = a})
+end
+assert(collection:insertMany({a = 4}, {a = 5}, {a = 6}))
+assert(collection:count{} == 6)
+assert(collection:removeMany('{ "a" : { "$gt" : 4 } }'))
+assert(collection:removeOne{})
+assert(collection:replaceOne({}, {b = 1}))
+assert(collection:updateMany({}, '{ "$inc" : { "b" : 1 } }'))
+assert(collection:updateOne({}, '{ "$inc" : { "b" : 1 } }'))
+local cursor = collection:find{}
+assert(cursor:value().b == 3)
+assert(cursor:value().b == 1)
+assert(cursor:value().b == 1)
+assert(cursor:value() == nil)
+
 -- Bulk operation
 local function bulkInsert(ordered, n)
 	collection:drop()
@@ -111,6 +131,7 @@ local cursor = collection:find{}
 assert(cursor:value().b == 3)
 assert(cursor:value().b == 1)
 assert(cursor:value().b == 1)
+assert(cursor:value() == nil)
 
 -- Rename collection
 assert(collection:rename(test.dbname, tostring(mongo.ObjectID()))) -- Rename with arbitrary name
