@@ -83,6 +83,11 @@ assert(collection:findAndModify({_id = 'abc'}, {remove = true}) == nil) -- Not f
 assert(collection:aggregate('[ { "$group" : { "_id" : "$a", "count" : { "$sum" : 1 } } } ]'):value().count == 1)
 
 -- *One/*Many operations
+local t = {}
+for i = 1, 100 do
+	t[#t + 1] = {a = 1}
+end
+test.failure(collection.insertMany, collection, (table.unpack or unpack)(t)) -- Too many documents
 test.error(collection:insertMany()) -- Empty insert
 test.error(collection:insertMany({_id = 123}, {_id = 456})) -- Duplicate key
 collection:drop()

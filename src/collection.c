@@ -122,8 +122,9 @@ static int m_insert(lua_State *L) {
 static int m_insertMany(lua_State *L) {
 	mongoc_collection_t *collection = checkCollection(L, 1);
 	int i, n = lua_gettop(L) - 1;
-	const bson_t *documents[n];
+	const bson_t *documents[LUA_MINSTACK];
 	bson_error_t error;
+	if (n > LUA_MINSTACK) return luaL_error(L, "too many documents");
 	for (i = 0; i < n; ++i) documents[i] = castBSON(L, i + 2);
 	return commandStatus(L, mongoc_collection_insert_many(collection, documents, n, 0, 0, &error), &error);
 }
