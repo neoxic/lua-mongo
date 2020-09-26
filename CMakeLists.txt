@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 project(lua-mongo)
 
-set(USE_LUA_VERSION "" CACHE STRING "Build for Lua version 'X.Y' ('jit' for LuaJIT, 'ujit' for LuaVela).")
+set(USE_LUA_VERSION "" CACHE STRING "Build for Lua version 'X.Y' ('jit' for LuaJIT).")
 
 set(ver 5.1)
 if(USE_LUA_VERSION MATCHES "^[0-9]\\.[0-9]$")
@@ -10,8 +10,6 @@ if(USE_LUA_VERSION MATCHES "^[0-9]\\.[0-9]$")
 	set(lua lua-${ver} lua${ver} lua${ver_})
 elseif(USE_LUA_VERSION STREQUAL "jit")
 	set(lua luajit)
-elseif(USE_LUA_VERSION STREQUAL "ujit")
-	set(lua ujit)
 elseif(USE_LUA_VERSION STREQUAL "")
 	set(lua lua)
 else()
