@@ -68,9 +68,9 @@ int typeError(lua_State *L, int idx, const char *name) {
 	return argError(L, idx, "%s expected, got %s", name, typeName(L, idx));
 }
 
-void pushHandle(lua_State *L, void *ptr, int mode, int pidx) {
-	check(L, ptr);
-	*(void **)lua_newuserdata(L, sizeof ptr) = ptr;
+void pushHandle(lua_State *L, void *obj, int mode, int pidx) {
+	check(L, obj);
+	*(void **)lua_newuserdata(L, sizeof obj) = obj;
 	if (mode < 0) lua_getuservalue(L, pidx); /* Inherit environment */
 	else { /* New environment */
 		lua_createtable(L, 3, 0);
@@ -154,11 +154,11 @@ int commandStrVec(lua_State *L, char **strv, const bson_error_t *error) {
 
 #if LUA_VERSION_NUM < 502
 void *luaL_testudata(lua_State* L, int idx, const char *name) {
-	void *ptr = lua_touserdata(L, idx);
-	if (!ptr || !lua_getmetatable(L, idx)) return 0;
+	void *obj = lua_touserdata(L, idx);
+	if (!obj || !lua_getmetatable(L, idx)) return 0;
 	luaL_getmetatable(L, name);
-	if (!lua_rawequal(L, -1, -2)) ptr = 0;
+	if (!lua_rawequal(L, -1, -2)) obj = 0;
 	lua_pop(L, 2);
-	return ptr;
+	return obj;
 }
 #endif

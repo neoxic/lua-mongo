@@ -127,7 +127,7 @@ void unsetType(lua_State *L);
 const char *typeName(lua_State *L, int idx);
 int typeError(lua_State *L, int idx, const char *name);
 
-void pushHandle(lua_State *L, void *ptr, int mode, int pidx);
+void pushHandle(lua_State *L, void *obj, int mode, int pidx);
 int getHandleMode(lua_State *L, int idx);
 
 void packParams(lua_State *L, int n);
@@ -168,8 +168,8 @@ int commandStrVec(lua_State *L, char **strv, const bson_error_t *error);
 #define lua_rawlen(L, idx) lua_objlen(L, idx)
 #define lua_getuservalue(L, idx) lua_getfenv(L, idx)
 #define lua_setuservalue(L, idx) lua_setfenv(L, idx)
-#define lua_rawgetp(L, idx, ptr) (lua_pushlightuserdata(L, ptr), lua_rawget(L, idx))
-#define lua_rawsetp(L, idx, ptr) (lua_pushlightuserdata(L, ptr), lua_insert(L, -2), lua_rawset(L, idx))
+#define lua_rawgetp(L, idx, key) (lua_pushlightuserdata(L, key), lua_rawget(L, idx))
+#define lua_rawsetp(L, idx, key) (lua_pushlightuserdata(L, key), lua_insert(L, -2), lua_rawset(L, idx))
 void *luaL_testudata(lua_State* L, int idx, const char *name);
 #endif
 
