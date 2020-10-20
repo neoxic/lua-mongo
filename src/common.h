@@ -26,10 +26,6 @@
 #include <mongoc/mongoc.h>
 #include <bson/bson.h>
 
-#ifndef _WIN32
-#pragma GCC visibility push(hidden)
-#endif
-
 #define MODNAME "lua-mongo"
 #define VERSION "1.2.2"
 
@@ -56,6 +52,18 @@
 #define TYPE_READPREFS "mongo.ReadPrefs"
 #define TYPE_REGEX "mongo.Regex"
 #define TYPE_TIMESTAMP "mongo.Timestamp"
+
+#ifdef _WIN32
+#define EXPORT __declspec(dllexport)
+#else
+#define EXPORT __attribute__((visibility("default")))
+#endif
+
+EXPORT int luaopen_mongo(lua_State *L);
+
+#ifndef _WIN32
+#pragma GCC visibility push(hidden)
+#endif
 
 extern char NEW_BINARY, NEW_DATETIME, NEW_DECIMAL128, NEW_JAVASCRIPT, NEW_REGEX, NEW_TIMESTAMP;
 extern char GLOBAL_MAXKEY, GLOBAL_MINKEY, GLOBAL_NULL;
@@ -120,26 +128,6 @@ int toUpdateFlags(lua_State *L, int idx);
 
 /* Utilities */
 
-bool newType(lua_State *L, const char *name, const luaL_Reg *funcs);
-void setType(lua_State *L, const char *name, const luaL_Reg *funcs);
-void unsetType(lua_State *L);
-
-const char *typeName(lua_State *L, int idx);
-int typeError(lua_State *L, int idx, const char *name);
-
-void pushHandle(lua_State *L, void *obj, int mode, int pidx);
-int getHandleMode(lua_State *L, int idx);
-
-void packParams(lua_State *L, int n);
-int unpackParams(lua_State *L, int idx);
-
-void checkStatus(lua_State *L, bool status, const bson_error_t *error);
-
-int commandError(lua_State *L, const bson_error_t *error);
-int commandStatus(lua_State *L, bool status, const bson_error_t *error);
-int commandReply(lua_State *L, bool status, bson_t *reply, const bson_error_t *error);
-int commandStrVec(lua_State *L, char **strv, const bson_error_t *error);
-
 #define check(L, cond) (void)((cond) || luaL_error(L, "precondition '%s' failed at %s:%d", #cond, __FILE__, __LINE__))
 #define argError(L, idx, ...) (lua_pushfstring(L, __VA_ARGS__), luaL_argerror(L, idx, lua_tostring(L, -1)))
 #define argCheck(L, cond, idx, ...) (void)((cond) || argError(L, idx, __VA_ARGS__))
@@ -172,6 +160,26 @@ int commandStrVec(lua_State *L, char **strv, const bson_error_t *error);
 #define lua_rawsetp(L, idx, key) (lua_pushlightuserdata(L, key), lua_insert(L, -2), lua_rawset(L, idx))
 void *luaL_testudata(lua_State* L, int idx, const char *name);
 #endif
+
+bool newType(lua_State *L, const char *name, const luaL_Reg *funcs);
+void setType(lua_State *L, const char *name, const luaL_Reg *funcs);
+void unsetType(lua_State *L);
+
+const char *typeName(lua_State *L, int idx);
+int typeError(lua_State *L, int idx, const char *name);
+
+void pushHandle(lua_State *L, void *obj, int mode, int pidx);
+int getHandleMode(lua_State *L, int idx);
+
+void packParams(lua_State *L, int n);
+int unpackParams(lua_State *L, int idx);
+
+void checkStatus(lua_State *L, bool status, const bson_error_t *error);
+
+int commandError(lua_State *L, const bson_error_t *error);
+int commandStatus(lua_State *L, bool status, const bson_error_t *error);
+int commandReply(lua_State *L, bool status, bson_t *reply, const bson_error_t *error);
+int commandStrVec(lua_State *L, char **strv, const bson_error_t *error);
 
 #ifndef _WIN32
 #pragma GCC visibility pop

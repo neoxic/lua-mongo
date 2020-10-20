@@ -22,6 +22,17 @@
 
 #include "common.h"
 
+#if LUA_VERSION_NUM < 502
+void *luaL_testudata(lua_State* L, int idx, const char *name) {
+	void *obj = lua_touserdata(L, idx);
+	if (!obj || !lua_getmetatable(L, idx)) return 0;
+	luaL_getmetatable(L, name);
+	if (!lua_rawequal(L, -1, -2)) obj = 0;
+	lua_pop(L, 2);
+	return obj;
+}
+#endif
+
 static int m__tostring(lua_State *L) {
 	lua_pushfstring(L, "%s: %p", typeName(L, 1), lua_topointer(L, 1));
 	return 1;
@@ -151,14 +162,3 @@ int commandStrVec(lua_State *L, char **strv, const bson_error_t *error) {
 	bson_strfreev(strv);
 	return 1;
 }
-
-#if LUA_VERSION_NUM < 502
-void *luaL_testudata(lua_State* L, int idx, const char *name) {
-	void *obj = lua_touserdata(L, idx);
-	if (!obj || !lua_getmetatable(L, idx)) return 0;
-	luaL_getmetatable(L, name);
-	if (!lua_rawequal(L, -1, -2)) obj = 0;
-	lua_pop(L, 2);
-	return obj;
-}
-#endif

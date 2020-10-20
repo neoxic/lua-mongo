@@ -22,14 +22,6 @@
 
 #include "common.h"
 
-#ifdef _WIN32
-#define EXPORT __declspec(dllexport)
-#else
-#define EXPORT __attribute__((visibility("default")))
-#endif
-
-EXPORT int luaopen_mongo(lua_State *L);
-
 static int f_type(lua_State *L) {
 	luaL_checkany(L, 1);
 	lua_pushstring(L, typeName(L, 1));
@@ -59,7 +51,7 @@ char GLOBAL_MAXKEY, GLOBAL_MINKEY, GLOBAL_NULL;
 
 int luaopen_mongo(lua_State *L) {
 #if LUA_VERSION_NUM < 502
-	luaL_register(L, lua_tostring(L, 1), funcs);
+	luaL_register(L, "mongo", funcs);
 #else
 	luaL_newlib(L, funcs);
 #endif
