@@ -35,6 +35,8 @@ bool newType(lua_State *L, const char *name, const luaL_Reg *funcs) {
 	lua_setfield(L, -2, "__name");
 	lua_pushcfunction(L, m__tostring);
 	lua_setfield(L, -2, "__tostring");
+	lua_pushboolean(L, 0);
+	lua_setfield(L, -2, "__metatable");
 #if LUA_VERSION_NUM < 502
 	luaL_register(L, 0, funcs);
 #else
