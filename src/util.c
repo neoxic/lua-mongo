@@ -131,7 +131,7 @@ void checkStatus(lua_State *L, bool status, const bson_error_t *error) {
 
 int commandError(lua_State *L, const bson_error_t *error) {
 	lua_pushnil(L);
-	if (!error->domain || !error->code || !error->message[0]) return 1; /* No actual error */
+	if (!error->domain && !error->code) return 1; /* Convenience for 'mongoc_gridfs_find_one_*()' */
 	lua_pushstring(L, error->message);
 	return 2;
 }
