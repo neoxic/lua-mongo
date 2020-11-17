@@ -31,9 +31,9 @@ static int m_iterator(lua_State *L) {
 
 static int m_next(lua_State *L) {
 	mongoc_gridfs_file_list_t *list = checkGridFSFileList(L, 1);
-	mongoc_gridfs_file_t *file;
+	mongoc_gridfs_file_t *file = mongoc_gridfs_file_list_next(list);
 	bson_error_t error;
-	if ((file = mongoc_gridfs_file_list_next(list))) {
+	if (file) {
 		pushGridFSFile(L, file, 1);
 		return 1;
 	}
