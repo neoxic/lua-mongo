@@ -27,7 +27,7 @@
 #include <bson/bson.h>
 
 #define MODNAME "lua-mongo"
-#define VERSION "1.2.2"
+#define VERSION "1.2.3"
 
 #define TYPE_BINARY "mongo.Binary"
 #define TYPE_BSON "mongo.BSON"
