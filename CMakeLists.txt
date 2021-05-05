@@ -30,8 +30,8 @@ else()
 	message(STATUS "Using Lua '${USE_LUA_VERSION}', version ${LUA_VERSION}")
 endif()
 
-add_definitions(-Wall -Wextra -Wpedantic -Wundef -Wshadow -Wredundant-decls
-	-Wstrict-prototypes -Wmissing-prototypes -Wno-variadic-macros)
+add_definitions(-Wall -Wextra -Wpedantic -Wundef -Wshadow -Wredundant-decls -Wstrict-prototypes -Wmissing-prototypes
+	-Wno-variadic-macros -Wno-unused-result -Wno-unused-parameter)
 
 include_directories(${MONGOC_INCLUDE_DIRS} ${LUA_INCLUDE_DIRS})
 link_directories(${MONGOC_LIBRARY_DIRS})
