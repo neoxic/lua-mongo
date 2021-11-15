@@ -20,9 +20,6 @@ assert(mongo.type(collection:getReadPrefs()) == 'mongo.ReadPrefs')
 collection:setReadPrefs(prefs)
 collection:drop()
 
-test.error(collection:insert({['$a'] = 123})) -- Client-side error
-test.error(collection:insert({['$a'] = 123}, {noValidate = true})) -- Server-side error
-
 assert(collection:insert{_id = 123})
 test.error(collection:insert{_id = 123}) -- Duplicate key
 assert(collection:insert{_id = 456})
@@ -80,7 +77,7 @@ assert(collection:findOne({_id = 123}):value().a == 'def')
 assert(collection:findAndModify({_id = 123}, {update = {a = 'abc'}}):find('a') == 'def') -- Old value
 assert(collection:findAndModify({_id = 'abc'}, {remove = true}) == nil) -- Not found
 
-assert(collection:aggregate('[ { "$group" : { "_id" : "$a", "count" : { "$sum" : 1 } } } ]'):value().count == 1)
+assert(collection:aggregate('[ { "$group" : { "_id" : "$_id", "count" : { "$sum" : 1 } } } ]'):value().count == 1)
 
 -- *One/*Many operations
 local t = {}
