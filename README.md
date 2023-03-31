@@ -194,5 +194,5 @@ See also the [MongoDB Manual] for detailed information about MongoDB commands an
 [lua-mongo]: https://github.com/neoxic/lua-mongo
 [luarocks.org]: https://luarocks.org
 [MongoDB C Driver]: http://mongoc.org
-[MongoDB Manual]: https://docs.mongodb.com/manual/
+[MongoDB Manual]: https://docs.mongodb.com/manual
 [API Reference]: doc/main.md

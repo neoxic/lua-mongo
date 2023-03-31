@@ -23,6 +23,9 @@
 #pragma once
 
 #include <lauxlib.h>
+#ifdef LUA_LJDIR
+#include <luajit.h>
+#endif
 #include <mongoc/mongoc.h>
 #include <bson/bson.h>
 
@@ -158,7 +161,9 @@ int toUpdateFlags(lua_State *L, int idx);
 #define lua_setuservalue(L, idx) lua_setfenv(L, idx)
 #define lua_rawgetp(L, idx, key) (lua_pushlightuserdata(L, key), lua_rawget(L, idx))
 #define lua_rawsetp(L, idx, key) (lua_pushlightuserdata(L, key), lua_insert(L, -2), lua_rawset(L, idx))
+#if !defined LUAJIT_VERSION_NUM || LUAJIT_VERSION_NUM < 20100
 void *luaL_testudata(lua_State* L, int idx, const char *name);
+#endif
 #endif
 
 bool newType(lua_State *L, const char *name, const luaL_Reg *funcs);
